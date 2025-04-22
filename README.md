@@ -74,11 +74,11 @@ The following environment variables are required for deployment:
 ```env
 # NextAuth
 NEXTAUTH_URL=https://ikzienix.vercel.app
-NEXTAUTH_SECRET=fe7553d72231739ebd5ba07158f7ae57
+NEXTAUTH_SECRET=your_nextauth_secret_here
 
 # Google OAuth
-GOOGLE_CLIENT_ID=270645851820-44pfnfbg2eh0ifgc8ocg5o0d667725me.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 
 # Stripe
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_publishable_key_here
