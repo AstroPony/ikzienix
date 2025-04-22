@@ -5,9 +5,5 @@
       "src": "package.json",
       "use": "@vercel/next"
     }
-  ],
-  "env": {
-    "NEXTAUTH_URL": "https://ikzienix.vercel.app",
-    "NEXTAUTH_SECRET": "@nextauth_secret"
-  }
+  ]
 } 
