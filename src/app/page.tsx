@@ -15,6 +15,7 @@ export default function Home() {
         <p className="text-xl text-gray-600">
           Premium sunglasses that don't break the bank. Perfect for festivals and outdoor adventures.
         </p>
+        <p className="text-sm text-gray-500 mt-2">Now deployed on Vercel!</p>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
