@@ -1,11 +1,13 @@
-import { motion } from 'framer-motion'
+'use client'
+
+import { MotionDiv } from '@/components/MotionWrapper'
 import Link from 'next/link'
 import { CheckCircleIcon } from '@heroicons/react/24/outline'
 
 export default function SuccessPage() {
   return (
     <div className="container py-12">
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-2xl mx-auto text-center"
@@ -28,7 +30,7 @@ export default function SuccessPage() {
             Order confirmation has been sent to your email address.
           </p>
         </div>
-      </motion.div>
+      </MotionDiv>
     </div>
   )
 } 
