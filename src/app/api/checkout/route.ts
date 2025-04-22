@@ -11,20 +11,30 @@ export async function POST(request: Request) {
   try {
     const { items } = await request.json()
 
-    // Create a payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: calculateOrderAmount(items),
-      currency: 'usd',
-      automatic_payment_methods: {
-        enabled: true,
-      },
+    // Create a Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: items.map((item: any) => ({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.name,
+            images: [item.image],
+          },
+          unit_amount: Math.round(item.price * 100), // Convert to cents
+        },
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: `${process.env.NEXTAUTH_URL}/success`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
     })
 
-    return NextResponse.json({ clientSecret: paymentIntent.client_secret })
+    return NextResponse.json({ sessionId: session.id })
   } catch (error) {
-    console.error('Error creating payment intent:', error)
+    console.error('Error creating checkout session:', error)
     return NextResponse.json(
-      { error: 'Error creating payment intent' },
+      { error: 'Error creating checkout session' },
       { status: 500 }
     )
   }

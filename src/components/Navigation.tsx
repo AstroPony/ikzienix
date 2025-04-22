@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { ShoppingBagIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { useCart } from '@/lib/cart-context'
