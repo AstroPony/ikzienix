@@ -67,12 +67,23 @@ A modern e-commerce platform for affordable sunglasses, perfect for festivals an
 
 This project is deployed on Vercel at [ikzienix.vercel.app](https://ikzienix.vercel.app)
 
-## Environment Variables
+### Environment Variables
 
-- `NEXTAUTH_URL`: Your site's URL (automatically set by Vercel)
-- `NEXTAUTH_SECRET`: A secure random string for session encryption
-- `GOOGLE_CLIENT_ID`: Your Google OAuth client ID
-- `GOOGLE_CLIENT_SECRET`: Your Google OAuth client secret
+The following environment variables are required for deployment:
+
+```env
+# NextAuth
+NEXTAUTH_URL=https://ikzienix.vercel.app
+NEXTAUTH_SECRET=fe7553d72231739ebd5ba07158f7ae57
+
+# Google OAuth
+GOOGLE_CLIENT_ID=270645851820-44pfnfbg2eh0ifgc8ocg5o0d667725me.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_publishable_key_here
+STRIPE_SECRET_KEY=your_secret_key_here
+```
 
 ## Contributing
 
