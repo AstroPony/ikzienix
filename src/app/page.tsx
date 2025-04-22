@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { products } from '@/lib/products'
 
+// Deployment trigger - Vercel settings verified
 export default function Home() {
   return (
     <div className="container py-12">
