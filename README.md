@@ -65,7 +65,7 @@ A modern e-commerce platform for affordable sunglasses, perfect for festivals an
 
 ## Deployment
 
-The site is configured for deployment on Vercel. Simply push to your GitHub repository, and Vercel will handle the deployment automatically.
+This project is deployed on Vercel at [ikzienix.vercel.app](https://ikzienix.vercel.app)
 
 ## Environment Variables
 
@@ -81,3 +81,23 @@ The site is configured for deployment on Vercel. Simply push to your GitHub repo
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request 
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## License
+
+MIT 
