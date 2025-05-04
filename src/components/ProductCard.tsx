@@ -31,7 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.image}
               alt={product.name}
               className="card-img-top object-fit-cover"
-              fill
+              fill={true}
               sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
             />
           </div>

@@ -4,6 +4,11 @@ import ProductPage from '@/app/products/[id]/page'
 import { Product } from '@/types/product'
 import { act } from 'react'
 
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useParams: () => ({ id: '1' })
+}))
+
 const mockProduct: Product = {
   id: '1',
   name: 'Test Product',
@@ -13,6 +18,7 @@ const mockProduct: Product = {
   category: 'test',
   collection: 'test',
   inStock: true,
+  featured: false,
   rating: 5,
   reviews: 10,
   createdAt: new Date().toISOString(),
@@ -29,6 +35,7 @@ const mockRelatedProducts: Product[] = [
     category: 'test',
     collection: 'test',
     inStock: true,
+    featured: false,
     rating: 4,
     reviews: 8,
     createdAt: new Date().toISOString(),
@@ -43,6 +50,7 @@ const mockRelatedProducts: Product[] = [
     category: 'test',
     collection: 'test',
     inStock: true,
+    featured: false,
     rating: 4.5,
     reviews: 12,
     createdAt: new Date().toISOString(),
@@ -78,7 +86,7 @@ describe('ProductPage', () => {
 
     render(
       <CartProvider>
-        <ProductPage params={{ id: '1' }} />
+        <ProductPage />
       </CartProvider>
     )
 
@@ -119,7 +127,7 @@ describe('ProductPage', () => {
 
     render(
       <CartProvider>
-        <ProductPage params={{ id: '1' }} />
+        <ProductPage />
       </CartProvider>
     )
 
@@ -147,7 +155,7 @@ describe('ProductPage', () => {
 
     render(
       <CartProvider>
-        <ProductPage params={{ id: '1' }} />
+        <ProductPage />
       </CartProvider>
     )
 
@@ -178,7 +186,7 @@ describe('ProductPage', () => {
 
     render(
       <CartProvider>
-        <ProductPage params={{ id: '1' }} />
+        <ProductPage />
       </CartProvider>
     )
 
