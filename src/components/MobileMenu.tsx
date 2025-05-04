@@ -1,95 +1,84 @@
-import { motion, AnimatePresence } from 'framer-motion'
+'use client'
+
+import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { useCart } from '@/lib/cart-context'
+import Image from 'next/image'
 
-interface MobileMenuProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
-  const { state, dispatch } = useCart()
-  const totalItems = state.items.reduce((total, item) => total + item.quantity, 0)
+export default function MobileMenu() {
+  const { data: session } = useSession()
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 z-50"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25 }}
-            className="absolute left-0 top-0 h-full w-full max-w-sm bg-white shadow-xl"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold">Menu</h2>
-                <button
-                  onClick={onClose}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+    <div className="offcanvas offcanvas-start" tabIndex={-1} id="mobileMenu">
+      <div className="offcanvas-header border-bottom">
+        <h5 className="offcanvas-title">Menu</h5>
+        <button
+          type="button"
+          className="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div className="offcanvas-body">
+        <ul className="nav flex-column mb-4">
+          <li className="nav-item">
+            <Link href="/collections" className="nav-link">
+              Collections
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link href="/about" className="nav-link">
+              About
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link href="/contact" className="nav-link">
+              Contact
+            </Link>
+          </li>
+        </ul>
 
-              <nav className="space-y-4">
-                <Link
-                  href="/"
-                  className="block text-lg font-medium hover:text-gray-600"
-                  onClick={onClose}
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/collections"
-                  className="block text-lg font-medium hover:text-gray-600"
-                  onClick={onClose}
-                >
-                  Collections
-                </Link>
-                <Link
-                  href="/about"
-                  className="block text-lg font-medium hover:text-gray-600"
-                  onClick={onClose}
-                >
-                  About
-                </Link>
-                <Link
-                  href="/contact"
-                  className="block text-lg font-medium hover:text-gray-600"
-                  onClick={onClose}
-                >
-                  Contact
-                </Link>
-                <button
-                  onClick={() => {
-                    dispatch({ type: 'TOGGLE_CART' })
-                    onClose()
-                  }}
-                  className="flex items-center text-lg font-medium hover:text-gray-600"
-                >
-                  Cart
-                  {totalItems > 0 && (
-                    <span className="ml-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {totalItems}
-                    </span>
-                  )}
-                </button>
-              </nav>
+        <hr className="my-4" />
+
+        {session ? (
+          <div>
+            <div className="d-flex align-items-center mb-3">
+              {session.user?.image && (
+                <Image
+                  src={session.user.image}
+                  alt={session.user?.name || 'User'}
+                  width={40}
+                  height={40}
+                  className="rounded-circle me-2"
+                />
+              )}
+              <div>
+                <div className="fw-medium">{session.user?.name}</div>
+                <small className="text-muted">{session.user?.email}</small>
+              </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+
+            <ul className="nav flex-column">
+              <li className="nav-item">
+                <Link href="/orders" className="nav-link">
+                  Orders
+                </Link>
+              </li>
+              <li className="nav-item">
+                <button
+                  onClick={() => signOut()}
+                  className="nav-link text-danger border-0 bg-transparent w-100 text-start"
+                >
+                  Sign Out
+                </button>
+              </li>
+            </ul>
+          </div>
+        ) : (
+          <Link href="/auth/signin" className="btn btn-dark w-100">
+            Sign In
+          </Link>
+        )}
+      </div>
+    </div>
   )
 } 

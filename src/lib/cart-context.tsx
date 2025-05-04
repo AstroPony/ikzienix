@@ -1,186 +1,146 @@
 'use client'
 
-import { createContext, useContext, useReducer, ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
+import React, { createContext, useContext, useReducer, ReactNode } from 'react'
+import { Product } from '@/types/product'
 
-export interface CartItem {
-  id: string
-  name: string
-  price: number
-  image: string
+interface CartItem {
+  product: Product
   quantity: number
 }
 
 interface CartState {
   items: CartItem[]
   isOpen: boolean
+  isLoading: boolean
+  error: string | null
 }
 
 type CartAction =
-  | { type: 'ADD_ITEM'; payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: { id: string } }
+  | { type: 'ADD_ITEM'; payload: { product: Product } }
+  | { type: 'REMOVE_ITEM'; payload: { productId: string } }
+  | { type: 'UPDATE_QUANTITY'; payload: { productId: string; quantity: number } }
   | { type: 'TOGGLE_CART' }
+  | { type: 'CLEAR_CART' }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null }
 
-const CartContext = createContext<{
-  state: CartState
-  dispatch: React.Dispatch<CartAction>
-} | null>(null)
+const initialState: CartState = {
+  items: [],
+  isOpen: false,
+  isLoading: false,
+  error: null
+}
 
-const cartReducer = (state: CartState, action: CartAction): CartState => {
+function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingItem = state.items.find(item => item.id === action.payload.id)
+      if (!action.payload.product?.id) {
+        return state
+      }
+
+      const existingItem = state.items.find(
+        item => item.product?.id === action.payload.product.id
+      )
+
       if (existingItem) {
         return {
           ...state,
           items: state.items.map(item =>
-            item.id === action.payload.id
+            item.product.id === action.payload.product.id
               ? { ...item, quantity: item.quantity + 1 }
               : item
           ),
+          isOpen: true
         }
       }
+
       return {
         ...state,
-        items: [...state.items, action.payload],
+        items: [...state.items, { product: action.payload.product, quantity: 1 }],
+        isOpen: true
       }
     }
-    case 'REMOVE_ITEM':
+
+    case 'REMOVE_ITEM': {
+      if (!action.payload.productId) {
+        return state
+      }
+
       return {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload.id),
+        items: state.items.filter(item => item.product?.id !== action.payload.productId)
       }
+    }
+
+    case 'UPDATE_QUANTITY': {
+      if (!action.payload.productId) {
+        return state
+      }
+
+      if (action.payload.quantity <= 0) {
+        return {
+          ...state,
+          items: state.items.filter(item => item.product?.id !== action.payload.productId)
+        }
+      }
+
+      return {
+        ...state,
+        items: state.items.map(item =>
+          item.product?.id === action.payload.productId
+            ? { ...item, quantity: action.payload.quantity }
+            : item
+        )
+      }
+    }
+
     case 'TOGGLE_CART':
       return {
         ...state,
-        isOpen: !state.isOpen,
+        isOpen: !state.isOpen
       }
+
+    case 'CLEAR_CART':
+      return {
+        ...state,
+        items: []
+      }
+
+    case 'SET_LOADING':
+      return {
+        ...state,
+        isLoading: action.payload
+      }
+
+    case 'SET_ERROR':
+      return {
+        ...state,
+        error: action.payload
+      }
+
     default:
       return state
   }
 }
 
+const CartContext = createContext<{
+  state: CartState
+  dispatch: React.Dispatch<CartAction>
+} | undefined>(undefined)
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, {
-    items: [],
-    isOpen: false,
-  })
+  const [state, dispatch] = useReducer(cartReducer, initialState)
 
   return (
     <CartContext.Provider value={{ state, dispatch }}>
       {children}
-      <AnimatePresence>
-        {state.isOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'tween' }}
-            className="fixed inset-y-0 right-0 z-50 w-96 bg-white shadow-xl"
-          >
-            <div className="flex h-full flex-col">
-              <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-                <div className="flex items-start justify-between">
-                  <h2 className="text-lg font-medium text-gray-900">Shopping Cart</h2>
-                  <button
-                    onClick={() => dispatch({ type: 'TOGGLE_CART' })}
-                    className="text-gray-400 hover:text-gray-500"
-                  >
-                    <span className="sr-only">Close panel</span>
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="mt-8">
-                  <div className="flow-root">
-                    <ul className="-my-6 divide-y divide-gray-200">
-                      {state.items.map(item => (
-                        <li key={item.id} className="flex py-6">
-                          <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
-                            <Image
-                              src={item.image}
-                              alt={item.name}
-                              className="object-cover object-center"
-                              fill
-                              sizes="(max-width: 96px) 100vw, 96px"
-                            />
-                          </div>
-
-                          <div className="ml-4 flex flex-1 flex-col">
-                            <div>
-                              <div className="flex justify-between text-base font-medium text-gray-900">
-                                <h3>{item.name}</h3>
-                                <p className="ml-4">${item.price.toFixed(2)}</p>
-                              </div>
-                            </div>
-                            <div className="flex flex-1 items-end justify-between text-sm">
-                              <p className="text-gray-500">Qty {item.quantity}</p>
-                              <button
-                                onClick={() =>
-                                  dispatch({
-                                    type: 'REMOVE_ITEM',
-                                    payload: { id: item.id },
-                                  })
-                                }
-                                className="font-medium text-red-600 hover:text-red-500"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
-                <div className="flex justify-between text-base font-medium text-gray-900">
-                  <p>Subtotal</p>
-                  <p>
-                    $
-                    {state.items
-                      .reduce((total, item) => total + item.price * item.quantity, 0)
-                      .toFixed(2)}
-                  </p>
-                </div>
-                <p className="mt-0.5 text-sm text-gray-500">
-                  Shipping and taxes calculated at checkout.
-                </p>
-                <div className="mt-6">
-                  <a
-                    href="#"
-                    className="flex items-center justify-center rounded-md border border-transparent bg-black px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-gray-800"
-                  >
-                    Checkout
-                  </a>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </CartContext.Provider>
   )
 }
 
 export function useCart() {
   const context = useContext(CartContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider')
   }
   return context

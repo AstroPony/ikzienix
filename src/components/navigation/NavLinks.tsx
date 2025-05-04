@@ -1,0 +1,36 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+interface NavLinksProps {
+  onLinkClick: () => void
+}
+
+export default function NavLinks({ onLinkClick }: NavLinksProps) {
+  const pathname = usePathname()
+  const isActive = (path: string) => pathname === path
+
+  const links = [
+    { href: '/', label: 'Home' },
+    { href: '/collections', label: 'Collections' },
+    { href: '/about', label: 'About' },
+    { href: '/contact', label: 'Contact' },
+  ]
+
+  return (
+    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+      {links.map(({ href, label }) => (
+        <li key={href} className="nav-item">
+          <Link 
+            href={href} 
+            className={`nav-link ${isActive(href) ? 'active fw-bold' : 'text-dark'}`}
+            onClick={onLinkClick}
+          >
+            {label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  )
+} 

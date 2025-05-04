@@ -2,42 +2,53 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { MotionDiv } from './MotionWrapper'
+import { useCart } from '@/lib/cart-context'
+import { Product } from '@/types/product'
 
 interface ProductCardProps {
-  id: string
-  name: string
-  price: number
-  image: string
-  category: string
+  product: Product
 }
 
-export default function ProductCard({ id, name, price, image, category }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
+  const { dispatch } = useCart()
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    dispatch({
+      type: 'ADD_ITEM',
+      payload: {
+        product
+      }
+    })
+  }
+
   return (
-    <MotionDiv
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="group relative"
-    >
-      <Link href={`/products/${id}`}>
-        <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200">
-          <Image
-            src={image}
-            alt={name}
-            className="h-full w-full object-cover object-center group-hover:opacity-75"
-            width={500}
-            height={500}
-          />
-        </div>
-        <div className="mt-4 flex justify-between">
-          <div>
-            <h3 className="text-sm text-gray-700">{name}</h3>
-            <p className="mt-1 text-sm text-gray-500">{category}</p>
+    <div className="h-100">
+      <Link href={`/products/${product.id}`} className="text-decoration-none">
+        <div className="card h-100 border-0 shadow-sm">
+          <div className="position-relative" style={{ aspectRatio: '1/1' }}>
+            <Image
+              src={product.image}
+              alt={product.name}
+              className="card-img-top object-fit-cover"
+              fill
+              sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
+            />
           </div>
-          <p className="text-sm font-medium text-gray-900">${price.toFixed(2)}</p>
+          <div className="card-body">
+            <h3 className="h6 card-title mb-1">{product.name}</h3>
+            <p className="text-muted small mb-2">{product.category}</p>
+            <p className="h6 mb-0">${product.price.toFixed(2)}</p>
+            <button
+              onClick={handleAddToCart}
+              className="btn btn-dark w-100 mt-3"
+              disabled={!product.inStock}
+            >
+              {product.inStock ? 'Add to Cart' : 'Sold Out'}
+            </button>
+          </div>
         </div>
       </Link>
-    </MotionDiv>
+    </div>
   )
 } 

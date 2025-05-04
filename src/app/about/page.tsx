@@ -1,84 +1,84 @@
+'use client'
+
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { placeholderImages } from '@/lib/placeholder-images'
 
 export default function AboutPage() {
   return (
-    <div className="container py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto"
-      >
-        <h1 className="text-4xl font-bold mb-8 text-center">Our Story</h1>
-        
-        <div className="space-y-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="relative aspect-video mb-8"
-          >
-            <Image
-              src="/about/festival.jpg"
-              alt="Festival scene with people wearing sunglasses"
-              fill
-              className="object-cover rounded-lg"
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="prose prose-lg mx-auto"
-          >
-            <h2 className="text-2xl font-bold mb-4">The Birth of Ikzienix</h2>
-            <p>
-              It all started with a simple phrase: "Ik zien niets" - Dutch for "I don't see anything." 
-              But for us, it became so much more. It became a philosophy, a way of life, and eventually, 
-              a brand that celebrates carefree moments under the sun.
-            </p>
-
-            <h2 className="text-2xl font-bold mb-4 mt-8">Our Mission</h2>
-            <p>
-              We believe that protecting your eyes shouldn't come with anxiety. Whether you're at a festival, 
-              on a beach, or just enjoying a sunny day, your sunglasses should be your companions, not your 
-              worries. That's why we created Ikzienix - premium sunglasses that don't break the bank, so you 
-              can focus on the moment, not on your accessories.
-            </p>
-
-            <h2 className="text-2xl font-bold mb-4 mt-8">The Festival Spirit</h2>
-            <p>
-              Born from the festival scene, we understand that sometimes things get lost, broken, or 
-              "borrowed" in the excitement of the moment. Instead of stressing over expensive sunglasses, 
-              we want you to think, "Huh, guess I'll order my next pair Ikzienix!" and move on with your 
-              day. Because life's too short to worry about sunglasses.
-            </p>
-
-            <h2 className="text-2xl font-bold mb-4 mt-8">Quality Without the Price Tag</h2>
-            <p>
-              Don't let the affordable price fool you - our sunglasses are built to last. With UV400 
-              protection, durable frames, and stylish designs, they're perfect for everyday wear. But 
-              if they do get lost or broken, replacing them won't break the bank. That's the Ikzienix 
-              promise.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-gray-50 p-8 rounded-lg mt-12"
-          >
-            <h3 className="text-xl font-bold mb-4 text-center">Join the Movement</h3>
-            <p className="text-center">
-              Be part of a community that values experiences over possessions, moments over materials, 
-              and fun over fuss. Because at the end of the day, it's not about the sunglasses - it's 
-              about the memories you make while wearing them.
-            </p>
-          </motion.div>
+    <div className="container py-5">
+      <div className="row align-items-center">
+        <div className="col-md-6">
+          <h1 className="display-4 mb-4">About Us</h1>
+          <p className="lead mb-4">
+            Welcome to Ikzienix, your premier destination for high-quality sunglasses and eyewear.
+            We are passionate about providing stylish, durable, and affordable eyewear that helps
+            you express your unique style while protecting your eyes.
+          </p>
+          <p className="mb-4">
+            Our journey began with a simple mission: to make premium eyewear accessible to everyone.
+            We carefully curate our collection to include both timeless classics and cutting-edge
+            designs, ensuring there's something for every style and occasion.
+          </p>
+          <p>
+            At Ikzienix, we believe that quality eyewear is an investment in both style and eye health.
+            That's why we work directly with manufacturers to ensure the highest standards of quality
+            and craftsmanship in every pair of sunglasses we offer.
+          </p>
         </div>
-      </motion.div>
+        <div className="col-md-6">
+          <div className="position-relative" style={{ height: '400px' }}>
+            <Image
+              src={placeholderImages['classic-black']}
+              alt="About Ikzienix"
+              fill
+              className="rounded-3"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="row mt-5">
+        <div className="col-12">
+          <h2 className="text-center mb-4">Our Values</h2>
+        </div>
+        <div className="col-md-4">
+          <div className="card h-100 border-0 shadow-sm">
+            <div className="card-body text-center">
+              <i className="bi bi-award display-4 text-primary mb-3"></i>
+              <h3 className="h4 mb-3">Quality</h3>
+              <p className="text-muted">
+                We are committed to offering only the highest quality eyewear that meets
+                rigorous standards for durability and protection.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card h-100 border-0 shadow-sm">
+            <div className="card-body text-center">
+              <i className="bi bi-heart display-4 text-primary mb-3"></i>
+              <h3 className="h4 mb-3">Customer Satisfaction</h3>
+              <p className="text-muted">
+                Your satisfaction is our top priority. We strive to provide exceptional
+                service and support at every step of your shopping journey.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-4">
+          <div className="card h-100 border-0 shadow-sm">
+            <div className="card-body text-center">
+              <i className="bi bi-globe display-4 text-primary mb-3"></i>
+              <h3 className="h4 mb-3">Sustainability</h3>
+              <p className="text-muted">
+                We are committed to sustainable practices and reducing our environmental
+                impact through responsible manufacturing and packaging.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 } 

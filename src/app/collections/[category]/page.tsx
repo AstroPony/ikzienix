@@ -1,6 +1,7 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { products } from '@/lib/products'
 
 interface CollectionPageProps {
@@ -14,41 +15,35 @@ export default function CollectionPage({ params }: CollectionPageProps) {
   const categoryName = categoryProducts[0]?.category || 'Collection'
 
   return (
-    <div className="container py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-12"
-      >
-        <h1 className="text-4xl font-bold mb-4 capitalize">{categoryName} Collection</h1>
-        <p className="text-xl text-gray-600">
+    <div className="container py-5">
+      <div className="text-center mb-5">
+        <h1 className="display-4 mb-3 text-capitalize">{categoryName} Collection</h1>
+        <p className="lead text-muted">
           Browse our selection of {categoryName.toLowerCase()} sunglasses.
         </p>
-      </motion.div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {categoryProducts.map((product, index) => (
-          <motion.div
-            key={product.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Link href={`/products/${product.id}`}>
-              <div className="group relative aspect-square overflow-hidden rounded-lg">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <div className="mt-4">
-                <h3 className="text-lg font-semibold">{product.name}</h3>
-                <p className="text-gray-600">${product.price.toFixed(2)}</p>
+      <div className="row g-4">
+        {categoryProducts.map((product) => (
+          <div key={product.id} className="col-12 col-md-6 col-lg-4">
+            <Link href={`/products/${product.id}`} className="text-decoration-none">
+              <div className="card h-100 border-0 shadow-sm">
+                <div className="position-relative" style={{ aspectRatio: '1/1' }}>
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="card-img-top object-fit-cover"
+                    sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  />
+                </div>
+                <div className="card-body">
+                  <h3 className="h5 card-title mb-2">{product.name}</h3>
+                  <p className="card-text text-muted">${product.price.toFixed(2)}</p>
+                </div>
               </div>
             </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>

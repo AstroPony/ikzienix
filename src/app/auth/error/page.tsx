@@ -1,37 +1,46 @@
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+'use client'
 
-export default function AuthErrorPage() {
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+
+function ErrorContent() {
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
+
   return (
-    <div className="container py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md mx-auto text-center"
-      >
-        <div className="flex justify-center mb-8">
-          <ExclamationTriangleIcon className="h-16 w-16 text-yellow-500" />
+    <div className="card-body text-center">
+      <h1 className="display-4 mb-4">Authentication Error</h1>
+      
+      <p className="lead mb-4">
+        {error === 'AccessDenied'
+          ? 'You do not have permission to sign in.'
+          : 'An error occurred during authentication.'}
+      </p>
+
+      <Link href="/auth/signin" className="btn btn-dark">
+        Try Again
+      </Link>
+    </div>
+  )
+}
+
+export default function AuthError() {
+  return (
+    <div className="container py-5">
+      <div className="row justify-content-center">
+        <div className="col-12 col-md-8 col-lg-6">
+          <div className="card shadow">
+            <Suspense fallback={
+              <div className="card-body text-center">
+                <h1 className="display-4 mb-4">Loading...</h1>
+              </div>
+            }>
+              <ErrorContent />
+            </Suspense>
+          </div>
         </div>
-        <h1 className="text-4xl font-bold mb-4">Authentication Error</h1>
-        <p className="text-xl text-gray-600 mb-8">
-          There was a problem signing you in. Please try again or contact support if the problem persists.
-        </p>
-        <div className="space-y-4">
-          <Link
-            href="/auth/signin"
-            className="inline-block bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Try Again
-          </Link>
-          <Link
-            href="/contact"
-            className="inline-block text-black hover:text-gray-600"
-          >
-            Contact Support
-          </Link>
-        </div>
-      </motion.div>
+      </div>
     </div>
   )
 } 

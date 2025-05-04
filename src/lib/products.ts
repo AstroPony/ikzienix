@@ -1,3 +1,5 @@
+import { placeholderImages } from './placeholder-images'
+
 export interface Product {
   id: string
   name: string
@@ -13,7 +15,7 @@ export const products: Product[] = [
     name: 'Classic Black',
     description: 'Timeless black sunglasses with UV400 protection and lightweight frame.',
     price: 29.99,
-    image: '/products/classic-black.jpg',
+    image: placeholderImages['classic-black'],
     category: 'classic'
   },
   {
@@ -21,7 +23,7 @@ export const products: Product[] = [
     name: 'Retro Round',
     description: 'Vintage-inspired round sunglasses perfect for any occasion.',
     price: 34.99,
-    image: '/products/retro-round.jpg',
+    image: placeholderImages['retro-round'],
     category: 'retro'
   },
   {
@@ -29,7 +31,7 @@ export const products: Product[] = [
     name: 'Sport Shield',
     description: 'Performance sunglasses designed for active lifestyles.',
     price: 39.99,
-    image: '/products/sport-shield.jpg',
+    image: placeholderImages['sport-shield'],
     category: 'sport'
   },
   {
@@ -37,7 +39,7 @@ export const products: Product[] = [
     name: 'Aviator Gold',
     description: 'Classic aviator style with gold-tone frame and mirrored lenses.',
     price: 44.99,
-    image: '/products/aviator-gold.jpg',
+    image: placeholderImages['aviator-gold'],
     category: 'aviator'
   },
   {
@@ -45,7 +47,7 @@ export const products: Product[] = [
     name: 'Cat Eye',
     description: 'Feminine cat-eye sunglasses with a modern twist.',
     price: 32.99,
-    image: '/products/cat-eye.jpg',
+    image: placeholderImages['cat-eye'],
     category: 'cat-eye'
   },
   {
@@ -53,7 +55,7 @@ export const products: Product[] = [
     name: 'Wayfarer',
     description: 'Iconic wayfarer design with polarized lenses.',
     price: 37.99,
-    image: '/products/wayfarer.jpg',
+    image: placeholderImages['wayfarer'],
     category: 'wayfarer'
   }
 ] 

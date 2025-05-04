@@ -1,3 +1,5 @@
+import { placeholderImages } from './placeholder-images'
+
 export const mockProducts = [
   {
     id: '1',
@@ -60,36 +62,36 @@ export const mockCollections = [
     id: 'classic',
     name: 'Classic Collection',
     description: 'Timeless designs that never go out of style',
-    image: '/images/classic-collection.jpg'
+    image: placeholderImages['classic-black']
   },
   {
     id: 'retro',
     name: 'Retro Collection',
     description: 'Vintage-inspired frames with modern comfort',
-    image: '/images/retro-collection.jpg'
+    image: placeholderImages['retro-round']
   },
   {
     id: 'sport',
     name: 'Sport Collection',
     description: 'Durable and comfortable sunglasses for active lifestyles',
-    image: '/images/sport-collection.jpg'
+    image: placeholderImages['sport-shield']
   },
   {
     id: 'aviator',
     name: 'Aviator Collection',
     description: 'Classic aviator styles for a bold look',
-    image: '/images/aviator-collection.jpg'
+    image: placeholderImages['aviator-gold']
   },
   {
     id: 'round',
     name: 'Round Collection',
     description: 'Trendy round frames for a unique style',
-    image: '/images/round-collection.jpg'
+    image: placeholderImages['retro-round']
   },
   {
     id: 'cat-eye',
     name: 'Cat Eye Collection',
     description: 'Elegant cat eye frames for a sophisticated look',
-    image: '/images/cat-eye-collection.jpg'
+    image: placeholderImages['cat-eye']
   }
 ] 
