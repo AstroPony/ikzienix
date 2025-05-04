@@ -18,10 +18,19 @@ export default function ProductsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>('')
 
   useEffect(() => {
     fetchProducts()
   }, [])
+
+  useEffect(() => {
+    if (editingProduct) {
+      setImagePreview(editingProduct.image)
+    } else {
+      setImagePreview('')
+    }
+  }, [editingProduct])
 
   const fetchProducts = async () => {
     try {
@@ -142,11 +151,7 @@ export default function ProductsPage() {
                   <div className="col-md-5 d-flex flex-column align-items-center justify-content-center">
                     {/* Image Preview */}
                     <img
-                      src={
-                        (typeof window !== 'undefined' && document.getElementById('image-input')?.value) ||
-                        editingProduct?.image ||
-                        'https://via.placeholder.com/200x200?text=Preview'
-                      }
+                      src={imagePreview || 'https://via.placeholder.com/200x200?text=Preview'}
                       alt="Preview"
                       className="img-fluid rounded border mb-2"
                       style={{ maxHeight: 200, objectFit: 'cover' }}
@@ -192,13 +197,9 @@ export default function ProductsPage() {
                         type="url"
                         className="form-control"
                         name="image"
-                        id="image-input"
                         defaultValue={editingProduct?.image || ''}
                         required
-                        onInput={e => {
-                          const img = document.querySelector('.modal-body img');
-                          if (img) img.setAttribute('src', (e.target as HTMLInputElement).value || 'https://via.placeholder.com/200x200?text=Preview');
-                        }}
+                        onChange={e => setImagePreview(e.target.value)}
                       />
                     </div>
                     <div className="mb-3">
