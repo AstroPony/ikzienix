@@ -11,10 +11,11 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({ product, className = '' }: AddToCartButtonProps) {
   const { dispatch } = useCart()
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
     dispatch({
       type: 'ADD_ITEM',
-      payload: { product, quantity: 1 }
+      payload: { product }
     })
   }
 

@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 
 const prisma = new PrismaClient()
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== 'admin') {
+    if (!session?.user || (session.user as any).role !== 'admin') {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
@@ -36,7 +36,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== 'admin') {
+    if (!session?.user || (session.user as any).role !== 'admin') {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 

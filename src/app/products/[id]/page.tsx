@@ -7,16 +7,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ShoppingBagIcon } from '@heroicons/react/24/outline'
 import { products } from '@/lib/products'
-
-interface Product {
-  id: string
-  name: string
-  description: string
-  price: number
-  image: string
-  category: string
-  inStock?: boolean
-}
+import { Product } from '@/types/product'
 
 interface ProductPageProps {
   params: {
@@ -69,11 +60,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     dispatch({
       type: 'ADD_ITEM',
       payload: {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity,
+        product
       },
     })
     setShowSuccess(true)
