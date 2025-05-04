@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { useCart } from '@/lib/cart-context'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingBagIcon } from '@heroicons/react/24/outline'
 import { products } from '@/lib/products'
 import { Product } from '@/types/product'
 
