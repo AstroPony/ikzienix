@@ -6,7 +6,7 @@ export const mockProducts = [
     name: 'Classic Black',
     description: 'Timeless black sunglasses perfect for any occasion',
     price: 29.99,
-    image: '/images/classic-black.jpg',
+    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80',
     category: 'classic',
     stock: 100
   },
@@ -15,7 +15,7 @@ export const mockProducts = [
     name: 'Retro Gold',
     description: 'Vintage-inspired gold frame sunglasses',
     price: 34.99,
-    image: '/images/retro-gold.jpg',
+    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
     category: 'retro',
     stock: 75
   },
@@ -24,7 +24,7 @@ export const mockProducts = [
     name: 'Sport Red',
     description: 'Durable sports sunglasses with red frame',
     price: 39.99,
-    image: '/images/sport-red.jpg',
+    image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
     category: 'sport',
     stock: 50
   },
@@ -33,7 +33,7 @@ export const mockProducts = [
     name: 'Aviator Silver',
     description: 'Classic aviator style with silver metal frame',
     price: 44.99,
-    image: '/images/aviator-silver.jpg',
+    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
     category: 'aviator',
     stock: 60
   },
@@ -42,7 +42,7 @@ export const mockProducts = [
     name: 'Round Brown',
     description: 'Trendy round sunglasses with brown frame',
     price: 32.99,
-    image: '/images/round-brown.jpg',
+    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
     category: 'round',
     stock: 80
   },
@@ -51,7 +51,7 @@ export const mockProducts = [
     name: 'Cat Eye Black',
     description: 'Elegant cat eye sunglasses in black',
     price: 37.99,
-    image: '/images/cat-eye-black.jpg',
+    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
     category: 'cat-eye',
     stock: 45
   }

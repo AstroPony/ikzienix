@@ -1,29 +1,19 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient()
-
-interface Session {
-  user?: {
-    id: string
-    name?: string | null
-    email?: string | null
-    image?: string | null
-    role?: string
-  }
-}
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions) as Session
-    if (!session?.user || session.user.role !== 'admin') {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
-
+    // TODO: Add authentication and get user ID from session
     const orders = await prisma.order.findMany({
+      where: {
+        // userId: session.user.id, // Uncomment when auth is implemented
+      },
       include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
         user: {
           select: {
             name: true,
@@ -37,8 +27,68 @@ export async function GET() {
     })
 
     return NextResponse.json(orders)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching orders:', error)
-    return new NextResponse('Error fetching orders', { status: 500 })
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch orders' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { items, paymentIntentId } = await req.json()
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: 'No items provided' },
+        { status: 400 }
+      )
+    }
+
+    if (!paymentIntentId) {
+      return NextResponse.json(
+        { error: 'No payment intent ID provided' },
+        { status: 400 }
+      )
+    }
+
+    // Calculate total
+    const total = items.reduce((sum, item) => {
+      return sum + item.product.price * item.quantity
+    }, 0)
+
+    // Create order
+    const order = await prisma.order.create({
+      data: {
+        // userId: session.user.id, // Uncomment when auth is implemented
+        total,
+        status: 'pending',
+        paymentIntentId,
+        items: {
+          create: items.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+            price: item.product.price,
+          })),
+        },
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    })
+
+    return NextResponse.json(order)
+  } catch (error: any) {
+    console.error('Error creating order:', error)
+    return NextResponse.json(
+      { error: error.message || 'Failed to create order' },
+      { status: 500 }
+    )
   }
 } 

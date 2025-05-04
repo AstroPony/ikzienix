@@ -1,90 +1,82 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { products } from '@/lib/products'
-import { placeholderImages } from '@/lib/placeholder-images'
-
-const categories = [
-  {
-    id: 'classic',
-    name: 'Classic Collection',
-    description: 'Timeless designs that never go out of style.',
-    image: placeholderImages['classic-black']
-  },
-  {
-    id: 'retro',
-    name: 'Retro Collection',
-    description: 'Vintage-inspired sunglasses with a modern twist.',
-    image: placeholderImages['retro-round']
-  },
-  {
-    id: 'sport',
-    name: 'Sport Collection',
-    description: 'Performance sunglasses for active lifestyles.',
-    image: placeholderImages['sport-shield']
-  },
-  {
-    id: 'aviator',
-    name: 'Aviator Collection',
-    description: 'Classic aviator styles with premium finishes.',
-    image: placeholderImages['aviator-gold']
-  },
-  {
-    id: 'cat-eye',
-    name: 'Cat Eye Collection',
-    description: 'Feminine and stylish cat-eye sunglasses.',
-    image: placeholderImages['cat-eye']
-  },
-  {
-    id: 'wayfarer',
-    name: 'Wayfarer Collection',
-    description: 'Iconic wayfarer designs with modern features.',
-    image: placeholderImages['wayfarer']
-  },
-]
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { Product } from '@/types/product';
 
 export default function CollectionsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products');
+        if (!response.ok) throw new Error('Failed to fetch products');
+        const data: Product[] = await response.json();
+        setProducts(data);
+        setCategories(Array.from(new Set(data.map((p) => p.category))));
+      } catch (err) {
+        setError('Error loading collections');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="container py-5 text-center">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-3">Loading collections...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container py-5 text-center">
+        <h1 className="display-5 mb-4">Error</h1>
+        <p className="lead text-muted">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-5">
-      <div className="text-center mb-5">
-        <h1 className="display-4 mb-3">Collections</h1>
-        <p className="lead text-muted">
-          Browse our curated collections of premium sunglasses.
-        </p>
-      </div>
-
+      <h1 className="display-4 mb-5 text-center">Collections</h1>
       <div className="row g-4">
-        {categories.map((category) => {
-          const categoryProducts = products.filter(p => p.category === category.id)
-
+        {categories.map((cat) => {
+          const product = products.find((p) => p.category === cat);
           return (
-            <div key={category.id} className="col-12 col-md-6 col-lg-4">
-              <Link href={`/collections/${category.id}`} className="text-decoration-none">
-                <div className="position-relative overflow-hidden rounded" style={{ aspectRatio: '1/1' }}>
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    className="object-fit-cover"
-                    sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
-                  />
-                  <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-40"></div>
-                  <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-4">
-                    <div className="text-center text-white">
-                      <h3 className="h4 mb-2">{category.name}</h3>
-                      <p className="small mb-2">{category.description}</p>
-                      <p className="small">
-                        {categoryProducts.length} {categoryProducts.length === 1 ? 'style' : 'styles'}
-                      </p>
-                    </div>
+            <div key={cat} className="col-12 col-md-6 col-lg-4">
+              <Link href={`/collections/${cat}`} className="text-decoration-none">
+                <div className="card h-100 border-0 shadow-sm">
+                  <div className="position-relative" style={{ aspectRatio: '1/1' }}>
+                    <Image
+                      src={product?.image || 'https://source.unsplash.com/600x400/?sunglasses,collection'}
+                      alt={cat}
+                      fill
+                      className="card-img-top object-fit-cover"
+                      sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
+                    />
+                  </div>
+                  <div className="card-body">
+                    <h3 className="h5 card-title mb-2 text-capitalize">{cat} Collection</h3>
+                    <p className="card-text text-muted">Browse our selection of {cat.toLowerCase()} sunglasses.</p>
                   </div>
                 </div>
               </Link>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 } 

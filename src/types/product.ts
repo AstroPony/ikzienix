@@ -5,9 +5,9 @@ export interface Product {
   price: number
   image: string
   category: string
-  collection: string
+  collection?: string
   inStock: boolean
-  featured?: boolean
+  featured: boolean
   new?: boolean
   sale?: boolean
   salePrice?: number

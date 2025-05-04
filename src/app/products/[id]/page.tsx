@@ -5,16 +5,10 @@ import Image from 'next/image'
 import { useCart } from '@/lib/cart-context'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { products } from '@/lib/products'
 import { Product } from '@/types/product'
 
-interface ProductPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage() {
+  const params = useParams()
   const { dispatch } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [product, setProduct] = useState<Product | null>(null)
@@ -24,43 +18,33 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProduct = async () => {
       try {
-        const [productResponse, relatedResponse] = await Promise.all([
-          fetch(`/api/products/${params.id}`),
-          fetch(`/api/products/related/${params.id}`),
-        ])
-
+        setIsLoading(true)
+        const productResponse = await fetch(`/api/products/${params.id}`)
         if (!productResponse.ok) {
           throw new Error('Failed to fetch product')
         }
-
-        const productData = await productResponse.json()
-        setProduct(productData)
-
-        if (relatedResponse.ok) {
-          const relatedData = await relatedResponse.json()
-          setRelatedProducts(relatedData)
-        }
+        const data = await productResponse.json()
+        setProduct(data)
       } catch (err) {
+        console.error('Error fetching product:', err)
         setError('Error loading product')
-        console.error(err)
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchData()
+    if (params.id) {
+      fetchProduct()
+    }
   }, [params.id])
 
   const handleAddToCart = () => {
     if (!product) return
-
     dispatch({
       type: 'ADD_ITEM',
-      payload: {
-        product
-      },
+      payload: { product },
     })
     setShowSuccess(true)
     setTimeout(() => setShowSuccess(false), 2000)
@@ -128,37 +112,7 @@ export default function ProductPage({ params }: ProductPageProps) {
           )}
         </div>
       </div>
-
-      {relatedProducts.length > 0 && (
-        <div className="mt-5">
-          <h2 className="h3 mb-4">Related Products</h2>
-          <div className="row">
-            {relatedProducts.map((relatedProduct) => (
-              <div key={relatedProduct.id} className="col-md-4">
-                <div className="card h-100">
-                  <Image
-                    src={relatedProduct.image}
-                    alt={relatedProduct.name}
-                    width={300}
-                    height={300}
-                    className="card-img-top"
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">{relatedProduct.name}</h5>
-                    <p className="card-text">${relatedProduct.price.toFixed(2)}</p>
-                    <Link
-                      href={`/products/${relatedProduct.id}`}
-                      className="btn btn-outline-dark"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Optionally, render related products here if you implement that logic */}
     </div>
   )
 } 

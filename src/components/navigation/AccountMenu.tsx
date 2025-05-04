@@ -1,82 +1,131 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState, useRef, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
+import Link from 'next/link'
+import Image from 'next/image'
 
-export default function AccountMenu() {
+interface AccountMenuProps {
+  onMenuClick: () => void
+}
+
+export default function AccountMenu({ onMenuClick }: AccountMenuProps) {
   const { data: session } = useSession()
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   if (!session) {
     return (
-      <Link 
-        href="/login" 
-        className="btn btn-outline-dark"
-      >
-        Sign In
+      <Link href="/auth/signin" className="btn btn-link text-dark">
+        <i className="bi bi-person fs-5"></i>
       </Link>
     )
   }
 
+  const handleClick = () => {
+    setIsOpen(!isOpen)
+    onMenuClick()
+  }
+
   return (
-    <div className="dropdown">
-      <button 
-        className="btn btn-link text-dark dropdown-toggle d-flex align-items-center" 
-        type="button" 
-        data-bs-toggle="dropdown"
-        aria-expanded={isAccountMenuOpen}
+    <div className="position-relative" ref={menuRef}>
+      <button
+        className="btn btn-link text-dark p-0"
+        onClick={handleClick}
       >
-        <i className="bi bi-person-circle me-1"></i>
-        <span className="d-none d-sm-inline">{session.user?.name}</span>
+        {session.user?.image ? (
+          <Image
+            src={session.user.image}
+            alt={session.user.name || 'User'}
+            width={32}
+            height={32}
+            className="rounded-circle"
+          />
+        ) : (
+          <i className="bi bi-person fs-5"></i>
+        )}
       </button>
-      <ul className="dropdown-menu">
-        <li>
+
+      {/* Desktop Dropdown */}
+      <div className="dropdown-menu" style={{ 
+        right: 0, 
+        left: 'auto',
+        display: isOpen ? 'block' : 'none',
+        position: 'absolute',
+        top: '100%',
+        marginTop: '0.5rem',
+        minWidth: '200px',
+        zIndex: 1000
+      }}>
+        <div className="p-3 border-bottom">
+          <div className="d-flex align-items-center">
+            {session.user?.image && (
+              <Image
+                src={session.user.image}
+                alt={session.user?.name || 'User'}
+                width={40}
+                height={40}
+                className="rounded-circle me-2"
+              />
+            )}
+            <div>
+              <div className="fw-medium">{session.user?.name}</div>
+              <small className="text-muted">{session.user?.email}</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="py-2">
           <Link 
             href="/account" 
-            className="dropdown-item d-flex align-items-center"
-            onClick={() => setIsAccountMenuOpen(false)}
+            className="dropdown-item"
+            onClick={() => setIsOpen(false)}
           >
             <i className="bi bi-person me-2"></i>
             My Account
           </Link>
-        </li>
-        <li>
           <Link 
             href="/orders" 
-            className="dropdown-item d-flex align-items-center"
-            onClick={() => setIsAccountMenuOpen(false)}
+            className="dropdown-item"
+            onClick={() => setIsOpen(false)}
           >
             <i className="bi bi-bag me-2"></i>
             My Orders
           </Link>
-        </li>
-        {session.user?.email === 'admin@ikzienix.com' && (
-          <li>
+          {session.user?.email === 'admin@ikzienix.com' && (
             <Link 
               href="/admin" 
-              className="dropdown-item d-flex align-items-center"
-              onClick={() => setIsAccountMenuOpen(false)}
+              className="dropdown-item"
+              onClick={() => setIsOpen(false)}
             >
               <i className="bi bi-gear me-2"></i>
               Admin Panel
             </Link>
-          </li>
-        )}
-        <li><hr className="dropdown-divider" /></li>
-        <li>
+          )}
+          <hr className="my-2" />
           <button 
-            className="dropdown-item d-flex align-items-center text-danger"
+            className="dropdown-item text-danger"
             onClick={() => {
               signOut()
-              setIsAccountMenuOpen(false)
+              setIsOpen(false)
             }}
           >
             <i className="bi bi-box-arrow-right me-2"></i>
             Sign Out
           </button>
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
   )
 } 

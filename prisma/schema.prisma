@@ -6,18 +6,19 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id            String    @id @default(cuid())
-  name          String
+  name          String?
   email         String    @unique
-  password      String
+  password      String?
   role          String    @default("user")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -25,27 +26,38 @@ model User {
 }
 
 model Product {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   description String
   price       Float
+  salePrice   Float?
   image       String
   category    String
-  inStock     Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  inStock     Boolean     @default(true)
+  featured    Boolean     @default(false)
+  new         Boolean     @default(false)
+  sale        Boolean     @default(false)
+  quantity    Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
 }
 
 model Order {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  status      String    @default("pending")
-  total       Float
-  items       OrderItem[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id              String         @id @default(cuid())
+  userId          String
+  status          String         @default("pending")
+  total           Float
+  paymentIntentId String         @unique
+  items           OrderItem[]
+  user            User           @relation(fields: [userId], references: [id])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  shippingAddress StreetAddress?
+  shippingMethod  String?
+  shippingCost    Float          @default(0)
+  trackingNumber  String?
+  estimatedDelivery DateTime?
 }
 
 model OrderItem {
@@ -69,13 +81,30 @@ model Analytics {
 
 model Settings {
   id                      String    @id @default("1")
-  storeName              String
-  storeEmail             String
-  currency               String    @default("USD")
-  taxRate                Float     @default(0)
-  shippingFee            Float     @default(0)
-  orderEmailNotifications Boolean   @default(true)
-  lowStockThreshold      Int       @default(5)
-  maintenanceMode        Boolean   @default(false)
-  updatedAt              DateTime  @updatedAt
+  storeName               String
+  storeEmail              String
+  currency                String   @default("USD")
+  taxRate                 Float    @default(0)
+  shippingFee             Float    @default(0)
+  orderEmailNotifications Boolean  @default(true)
+  lowStockThreshold       Int      @default(5)
+  maintenanceMode         Boolean  @default(false)
+  updatedAt               DateTime @updatedAt
+}
+
+model StreetAddress {
+  id          String   @id @default(cuid())
+  name        String
+  line1       String
+  line2       String?
+  city        String
+  state       String
+  postalCode  String
+  country     String
+  phone       String
+  email       String
+  order       Order    @relation(fields: [orderId], references: [id])
+  orderId     String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -1,42 +1,42 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 // Initialize Stripe with your secret key
 // You'll need to replace this with your actual secret key from Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
 })
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { items } = await request.json()
+    const { items } = await req.json()
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: 'No items in cart' }, { status: 400 })
+    }
 
-    // Create a Stripe Checkout Session
+    const line_items = items.map((item: any) => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.product.name,
+          images: [item.product.image],
+        },
+        unit_amount: Math.round(item.product.price * 100),
+      },
+      quantity: item.quantity,
+    }))
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: items.map((item: any) => ({
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: item.name,
-            images: [item.image],
-          },
-          unit_amount: Math.round(item.price * 100), // Convert to cents
-        },
-        quantity: item.quantity,
-      })),
+      line_items,
       mode: 'payment',
-      success_url: `${process.env.NEXTAUTH_URL}/success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
+      success_url: `${req.nextUrl.origin}/success`,
+      cancel_url: `${req.nextUrl.origin}/cart`,
     })
 
-    return NextResponse.json({ sessionId: session.id })
-  } catch (error) {
-    console.error('Error creating checkout session:', error)
-    return NextResponse.json(
-      { error: 'Error creating checkout session' },
-      { status: 500 }
-    )
+    return NextResponse.json({ url: session.url })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 

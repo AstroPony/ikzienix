@@ -12,6 +12,12 @@
   --danger-color: #dc3545;
   --warning-color: #ffc107;
   --info-color: #17a2b8;
+  --bs-primary: #FFD700; /* Bright yellow */
+  --bs-primary-rgb: 255, 215, 0;
+  --bs-secondary: #C0C0C0; /* Silver */
+  --bs-secondary-rgb: 192, 192, 192;
+  --bs-dark: #2C2C2C; /* Dark titanium */
+  --bs-dark-rgb: 44, 44, 44;
 }
 
 body {
@@ -24,7 +30,7 @@ body {
 }
 
 .navbar {
-  background-color: var(--primary-color);
+  background-color: white !important;
   z-index: 1100;
 }
 
@@ -42,13 +48,27 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color);
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: var(--bs-dark);
 }
 
 .btn-primary:hover {
-  background-color: var(--secondary-color);
-  border-color: var(--secondary-color);
+  background-color: #E6C200;
+  border-color: #E6C200;
+  color: var(--bs-dark);
+}
+
+.btn-secondary {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  color: var(--bs-dark);
+}
+
+.btn-secondary:hover {
+  background-color: #A8A8A8;
+  border-color: #A8A8A8;
+  color: var(--bs-dark);
 }
 
 .card {
@@ -392,4 +412,64 @@ body {
   .admin-main-content {
     margin-left: 0;
   }
+}
+
+/* Override text colors */
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.text-secondary {
+  color: var(--bs-secondary) !important;
+}
+
+/* Override border colors */
+.border-primary {
+  border-color: var(--bs-primary) !important;
+}
+
+.border-secondary {
+  border-color: var(--bs-secondary) !important;
+}
+
+/* Override link colors */
+a {
+  color: var(--bs-primary);
+}
+
+a:hover {
+  color: #E6C200;
+}
+
+/* Override navbar colors */
+.navbar-dark .navbar-nav .nav-link {
+  color: var(--bs-dark);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: var(--bs-primary);
+}
+
+/* Override badge colors */
+.badge-primary {
+  background-color: var(--bs-primary);
+  color: var(--bs-dark);
+}
+
+.badge-secondary {
+  background-color: var(--bs-secondary);
+  color: var(--bs-dark);
+}
+
+/* Override alert colors */
+.alert-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: var(--bs-dark);
+}
+
+.alert-secondary {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  color: var(--bs-dark);
 } 

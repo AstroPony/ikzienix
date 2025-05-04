@@ -123,16 +123,23 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
-const CartContext = createContext<{
+interface CartContextType {
   state: CartState
   dispatch: React.Dispatch<CartAction>
-} | undefined>(undefined)
+  clearCart: () => void
+}
+
+const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState)
 
+  const clearCart = () => {
+    dispatch({ type: 'CLEAR_CART' })
+  }
+
   return (
-    <CartContext.Provider value={{ state, dispatch }}>
+    <CartContext.Provider value={{ state, dispatch, clearCart }}>
       {children}
     </CartContext.Provider>
   )

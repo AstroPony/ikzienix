@@ -1,93 +1,136 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import React from 'react'
+"use client";
 
-interface OrderItem {
-  id: string
-  product: { name: string }
-  quantity: number
-  price: number
-}
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Order {
-  id: string
-  createdAt: string
-  total: number
-  status: string
-  items: OrderItem[]
+  id: string;
+  createdAt: string;
+  status: string;
+  total: number;
+  items: {
+    product: {
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+    };
+    quantity: number;
+  }[];
 }
 
-async function fetchUserOrders(): Promise<Order[]> {
-  const res = await fetch(`${process.env.NEXTAUTH_URL || ''}/api/my-orders`, {
-    cache: 'no-store',
-    headers: {},
-  })
-  if (!res.ok) return []
-  return res.json()
-}
+export default function OrdersPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function OrdersPage() {
-  const session = await getServerSession(authOptions)
-  if (!session) redirect('/auth/signin')
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+      return;
+    }
 
-  const orders = await fetchUserOrders()
+    if (status === 'authenticated') {
+      const fetchOrders = async () => {
+        try {
+          const response = await fetch('/api/orders');
+          const data = await response.json();
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setOrders(data);
+          }
+        } catch (err: any) {
+          setError(err.message || 'Failed to fetch orders');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchOrders();
+    }
+  }, [status, router]);
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container py-5">
+        <div className="alert alert-danger">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-5">
-      <h1 className="display-5 mb-4">My Orders</h1>
-      <div className="card shadow-sm">
-        <div className="card-body p-0">
-          {orders.length === 0 ? (
-            <div className="text-center py-5 text-muted">
-              <i className="bi bi-bag-x fs-1 mb-3"></i>
-              <p className="mb-0">You have no orders yet.</p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table mb-0 align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>Order #</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map((order: Order, idx: number) => (
-                    <React.Fragment key={order.id}>
-                      <tr data-bs-toggle="collapse" data-bs-target={`#order-details-${idx}`} aria-expanded="false" style={{ cursor: 'pointer' }}>
-                        <td className="fw-medium">{order.id.slice(0, 8)}</td>
-                        <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td><span className={`badge bg-${order.status === 'delivered' ? 'success' : order.status === 'processing' ? 'info' : 'secondary'}`}>{order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span></td>
-                        <td>${order.total.toFixed(2)}</td>
-                        <td><i className="bi bi-chevron-down"></i></td>
-                      </tr>
-                      <tr className="collapse bg-light" id={`order-details-${idx}`}> 
-                        <td colSpan={5}>
-                          <div className="p-3">
-                            <h6>Order Items</h6>
-                            <ul className="list-group list-group-flush">
-                              {order.items.map((item: OrderItem, i: number) => (
-                                <li key={i} className="list-group-item d-flex justify-content-between align-items-center px-0">
-                                  <span>{item.product.name} <span className="text-muted small">x{item.quantity}</span></span>
-                                  <span>${(item.price * item.quantity).toFixed(2)}</span>
-                                </li>
-                              ))}
-                            </ul>
+      <h1 className="display-4 mb-4">Your Orders</h1>
+      {orders.length > 0 ? (
+        <div className="row g-4">
+          {orders.map((order) => (
+            <div key={order.id} className="col-12">
+              <div className="card">
+                <div className="card-header d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 className="mb-0">Order #{order.id}</h5>
+                    <small className="text-muted">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </small>
+                  </div>
+                  <span className={`badge bg-${order.status === 'completed' ? 'success' : 'warning'}`}>
+                    {order.status}
+                  </span>
+                </div>
+                <div className="card-body">
+                  <div className="row g-4">
+                    {order.items.map((item) => (
+                      <div key={item.product.id} className="col-md-6 col-lg-4">
+                        <div className="card h-100">
+                          <img
+                            src={item.product.image}
+                            alt={item.product.name}
+                            className="card-img-top"
+                            style={{ height: '200px', objectFit: 'cover' }}
+                          />
+                          <div className="card-body">
+                            <h6 className="card-title">{item.product.name}</h6>
+                            <p className="card-text">
+                              Quantity: {item.quantity}
+                              <br />
+                              Price: ${item.product.price.toFixed(2)}
+                            </p>
                           </div>
-                        </td>
-                      </tr>
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 text-end">
+                    <strong>Total: ${order.total.toFixed(2)}</strong>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="alert alert-info">
+          You haven't placed any orders yet.{' '}
+          <Link href="/products">Start shopping</Link>
+        </div>
+      )}
     </div>
-  )
+  );
 } 

@@ -1,0 +1,33 @@
+export const collectionImages: Record<string, string> = {
+  classic: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+  retro: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+  sport: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80',
+  aviator: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80',
+  'cat-eye': 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80',
+  wayfarer: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80',
+  round: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+  kids: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+  eco: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80',
+  fashion: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80',
+  festival: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80',
+  polarized: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+  urban: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+  extra: 'https://source.unsplash.com/1200x600/?sunglasses,collection',
+};
+
+export const collectionDescriptions: Record<string, string> = {
+  classic: 'Timeless designs that never go out of style.',
+  retro: 'Vintage-inspired frames with modern comfort.',
+  sport: 'Durable and comfortable sunglasses for active lifestyles.',
+  aviator: 'Classic aviator styles for a bold look.',
+  'cat-eye': 'Elegant cat eye frames for a sophisticated look.',
+  wayfarer: 'Iconic wayfarer design for everyday wear.',
+  round: 'Trendy round frames for a unique style.',
+  kids: 'Fun and colorful sunglasses for kids.',
+  eco: 'Eco-friendly sunglasses made from recycled materials.',
+  fashion: 'Fashion-forward frames for every occasion.',
+  festival: 'Bold and bright styles for festival season.',
+  polarized: 'Polarized lenses for extra clarity.',
+  urban: 'Sleek, city-ready looks.',
+  extra: 'Special collection of unique sunglasses.',
+}; 

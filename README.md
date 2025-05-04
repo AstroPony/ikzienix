@@ -18,14 +18,7 @@ A modern e-commerce platform for affordable sunglasses, perfect for festivals an
    ```bash
    npm install
    ```
-3. Create a `.env.local` file with your environment variables:
-   ```
-   NEXTAUTH_URL=http://localhost:3000
-   NEXTAUTH_SECRET=your_secret_here
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   ```
-4. Start the development server:
+3. Start the development server:
    ```bash
    npm run dev
    ```

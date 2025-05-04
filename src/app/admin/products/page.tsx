@@ -10,6 +10,7 @@ interface Product {
   image: string
   category: string
   inStock: boolean
+  featured: boolean
 }
 
 export default function ProductsPage() {
@@ -49,6 +50,20 @@ export default function ProductsPage() {
     }
   }
 
+  const handleToggleFeatured = async (productId: string, current: boolean) => {
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ featured: !current }),
+      })
+      if (!response.ok) throw new Error('Failed to update featured status')
+      await fetchProducts()
+    } catch (error) {
+      console.error('Error updating featured status:', error)
+    }
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
@@ -59,6 +74,7 @@ export default function ProductsPage() {
       image: formData.get('image'),
       category: formData.get('category'),
       inStock: formData.get('inStock') === 'true',
+      featured: formData.get('featured') === 'on',
     }
 
     try {
@@ -94,6 +110,147 @@ export default function ProductsPage() {
 
   return (
     <div className="container-fluid py-4">
+      {/* Modal Overlay */}
+      {isModalOpen && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"
+          style={{ zIndex: 1040 }}
+        ></div>
+      )}
+      {/* Modal */}
+      {isModalOpen && (
+        <div
+          className="modal d-block"
+          tabIndex={-1}
+          style={{ background: 'rgba(0,0,0,0.0)', zIndex: 1050 }}
+        >
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {editingProduct ? 'Edit Product' : 'Add Product'}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setIsModalOpen(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="modal-body row g-4">
+                  <div className="col-md-5 d-flex flex-column align-items-center justify-content-center">
+                    {/* Image Preview */}
+                    <img
+                      src={
+                        (typeof window !== 'undefined' && document.getElementById('image-input')?.value) ||
+                        editingProduct?.image ||
+                        'https://via.placeholder.com/200x200?text=Preview'
+                      }
+                      alt="Preview"
+                      className="img-fluid rounded border mb-2"
+                      style={{ maxHeight: 200, objectFit: 'cover' }}
+                      onError={e => (e.currentTarget.src = 'https://via.placeholder.com/200x200?text=Preview')}
+                    />
+                    <small className="text-muted">Image preview</small>
+                  </div>
+                  <div className="col-md-7">
+                    <div className="mb-3">
+                      <label className="form-label">Name</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="name"
+                        defaultValue={editingProduct?.name || ''}
+                        required
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Description</label>
+                      <textarea
+                        className="form-control"
+                        name="description"
+                        defaultValue={editingProduct?.description || ''}
+                        required
+                      ></textarea>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Price</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="price"
+                        defaultValue={editingProduct?.price || ''}
+                        min={0}
+                        step={0.01}
+                        required
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Image URL</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        name="image"
+                        id="image-input"
+                        defaultValue={editingProduct?.image || ''}
+                        required
+                        onInput={e => {
+                          const img = document.querySelector('.modal-body img');
+                          if (img) img.setAttribute('src', (e.target as HTMLInputElement).value || 'https://via.placeholder.com/200x200?text=Preview');
+                        }}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Category</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="category"
+                        defaultValue={editingProduct?.category || ''}
+                        required
+                      />
+                    </div>
+                    <div className="form-check mb-3">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        name="inStock"
+                        id="inStock"
+                        defaultChecked={editingProduct?.inStock ?? true}
+                        value="true"
+                      />
+                      <label className="form-check-label" htmlFor="inStock">
+                        In Stock
+                      </label>
+                    </div>
+                    <div className="form-check mb-3">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        name="featured"
+                        id="featured"
+                        defaultChecked={editingProduct?.featured ?? false}
+                      />
+                      <label className="form-check-label" htmlFor="featured">
+                        Featured
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    Save Product
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 className="h2 mb-2">Products</h1>
@@ -125,6 +282,7 @@ export default function ProductsPage() {
                   <th>Category</th>
                   <th>Price</th>
                   <th>Stock</th>
+                  <th>Featured</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -149,6 +307,16 @@ export default function ProductsPage() {
                       <span className={`badge bg-${product.inStock ? 'success' : 'danger'}`}>
                         {product.inStock ? 'In Stock' : 'Out of Stock'}
                       </span>
+                    </td>
+                    <td>
+                      <span className={`badge bg-${product.featured ? 'primary' : 'secondary'}`}>{product.featured ? 'Yes' : 'No'}</span>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ms-2 ${product.featured ? 'btn-outline-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => handleToggleFeatured(product.id, product.featured)}
+                      >
+                        {product.featured ? 'Unfeature' : 'Feature'}
+                      </button>
                     </td>
                     <td>
                       <div className="btn-group">
@@ -178,117 +346,6 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
-
-      {/* Add/Edit Modal */}
-      {isModalOpen && (
-        <div className="modal fade show d-block" tabIndex={-1}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {editingProduct ? 'Edit Product' : 'Add New Product'}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => {
-                    setIsModalOpen(false)
-                    setEditingProduct(null)
-                  }}
-                ></button>
-              </div>
-              <form onSubmit={handleSubmit}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label htmlFor="name" className="form-label">Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name"
-                      name="name"
-                      defaultValue={editingProduct?.name}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="description" className="form-label">Description</label>
-                    <textarea
-                      className="form-control"
-                      id="description"
-                      name="description"
-                      defaultValue={editingProduct?.description}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="price" className="form-label">Price</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      id="price"
-                      name="price"
-                      step="0.01"
-                      defaultValue={editingProduct?.price}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="image" className="form-label">Image URL</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="image"
-                      name="image"
-                      defaultValue={editingProduct?.image}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="category" className="form-label">Category</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="category"
-                      name="category"
-                      defaultValue={editingProduct?.category}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <div className="form-check">
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        id="inStock"
-                        name="inStock"
-                        defaultChecked={editingProduct?.inStock}
-                      />
-                      <label className="form-check-label" htmlFor="inStock">
-                        In Stock
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      setIsModalOpen(false)
-                      setEditingProduct(null)
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingProduct ? 'Save Changes' : 'Add Product'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 } 

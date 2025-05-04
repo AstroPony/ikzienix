@@ -2,77 +2,94 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { placeholderImages } from '@/lib/placeholder-images'
-
-// This would typically come from your database
-const featuredProducts = [
-  {
-    id: '1',
-    name: 'Classic Aviator',
-    price: 149.99,
-    image: placeholderImages['aviator-gold'],
-  },
-  {
-    id: '2',
-    name: 'Retro Wayfarer',
-    price: 129.99,
-    image: placeholderImages['wayfarer'],
-  },
-  {
-    id: '3',
-    name: 'Modern Round',
-    price: 139.99,
-    image: placeholderImages['retro-round'],
-  },
-]
+import { useEffect, useState } from 'react'
+import { Product } from '@/types/product'
 
 export default function Home() {
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const response = await fetch('/api/products')
+        if (!response.ok) throw new Error('Failed to fetch products')
+        const data: Product[] = await response.json()
+        console.log('Fetched products:', data)
+        const featured = data.filter(p => p.featured).slice(0, 3)
+        console.log('Featured products:', featured)
+        setFeaturedProducts(featured)
+      } catch (err) {
+        console.error('Error fetching featured products:', err)
+        setError('Error loading featured products')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchFeatured()
+  }, [])
+
   return (
     <>
-      {/* Hero Section */}
+      {/* Hero Section - Bootstrap Carousel */}
       <div className="bg-dark text-white py-5">
         <div className="container">
-          <div className="row align-items-center">
-            <div className="col-12 col-lg-6">
-              <div className="position-relative" style={{ height: '500px' }}>
-                <Image
-                  src={placeholderImages['classic-black']}
-                  alt="Hero"
-                  fill
-                  className="object-fit-cover"
-                  priority
-                />
-                <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-40"></div>
-                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
-                  <div className="text-center text-white">
-                    <h1 className="display-3 fw-bold mb-4">Premium Sunglasses</h1>
-                    <p className="lead mb-4">Discover our collection of high-quality sunglasses</p>
-                    <Link href="/products" className="btn btn-light btn-lg">
-                      Shop Now
-                    </Link>
+          <div className="row justify-content-center">
+            <div className="col-12">
+              <div id="heroCarousel" className="carousel slide carousel-fade" data-bs-ride="carousel">
+                <div className="carousel-inner rounded-4 overflow-hidden" style={{ height: '500px' }}>
+                  {/* Slide 1 */}
+                  <div className="carousel-item active position-relative w-100 h-100">
+                    <img
+                      src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80"
+                      className="d-block w-100 h-100 object-fit-cover"
+                      alt="Festival Sunglasses"
+                      style={{ objectFit: 'cover', height: '500px' }}
+                    />
+                    <div className="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                      <h1 className="display-3 fw-bold mb-4">Festival Ready</h1>
+                      <p className="lead mb-4">Stand out with our boldest sunglasses</p>
+                      <Link href="/products" className="btn btn-light btn-lg">Shop Now</Link>
+                    </div>
+                  </div>
+                  {/* Slide 2 */}
+                  <div className="carousel-item position-relative w-100 h-100">
+                    <img
+                      src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80"
+                      className="d-block w-100 h-100 object-fit-cover"
+                      alt="Outdoor Sunglasses"
+                      style={{ objectFit: 'cover', height: '500px' }}
+                    />
+                    <div className="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                      <h1 className="display-3 fw-bold mb-4">Adventure Awaits</h1>
+                      <p className="lead mb-4">Perfect shades for every outdoor journey</p>
+                      <Link href="/collections/new" className="btn btn-light btn-lg">View Collection</Link>
+                    </div>
+                  </div>
+                  {/* Slide 3 */}
+                  <div className="carousel-item position-relative w-100 h-100">
+                    <img
+                      src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"
+                      className="d-block w-100 h-100 object-fit-cover"
+                      alt="Classic Sunglasses"
+                      style={{ objectFit: 'cover', height: '500px' }}
+                    />
+                    <div className="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                      <h1 className="display-3 fw-bold mb-4">Classic Styles</h1>
+                      <p className="lead mb-4">Timeless looks for every occasion</p>
+                      <Link href="/products" className="btn btn-light btn-lg">Shop Classics</Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="col-12 col-lg-6 mt-5 mt-lg-0">
-              <div className="position-relative" style={{ height: '400px' }}>
-                <Image
-                  src={placeholderImages['sport-shield']}
-                  alt="Sunglasses collection"
-                  fill
-                  className="object-fit-cover"
-                  priority
-                />
-                <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-40"></div>
-                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
-                  <div className="text-center text-white">
-                    <h2 className="display-5 fw-bold mb-4">New Collection</h2>
-                    <p className="lead mb-4">Check out our latest arrivals</p>
-                    <Link href="/collections/new" className="btn btn-light btn-lg">
-                      View Collection
-                    </Link>
-                  </div>
-                </div>
+                <button className="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                  <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span className="visually-hidden">Previous</span>
+                </button>
+                <button className="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                  <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span className="visually-hidden">Next</span>
+                </button>
               </div>
             </div>
           </div>
@@ -82,28 +99,39 @@ export default function Home() {
       {/* Featured Products */}
       <div className="container py-5">
         <h2 className="display-5 text-center mb-5">Featured Products</h2>
-        <div className="row g-4">
-          {featuredProducts.map((product) => (
-            <div key={product.id} className="col-12 col-md-4">
-              <Link href={`/products/${product.id}`} className="text-decoration-none">
-                <div className="card h-100">
-                  <div className="position-relative" style={{ height: '300px' }}>
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-fit-cover"
-                    />
-                  </div>
-                  <div className="card-body">
-                    <h3 className="card-title h5 text-dark">{product.name}</h3>
-                    <p className="card-text text-muted">${product.price.toFixed(2)}</p>
-                  </div>
-                </div>
-              </Link>
+        {isLoading ? (
+          <div className="text-center">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
-          ))}
-        </div>
+            <p className="mt-3">Loading featured products...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center text-danger">{error}</div>
+        ) : (
+          <div className="row g-4">
+            {featuredProducts.map((product) => (
+              <div key={product.id} className="col-12 col-md-4">
+                <Link href={`/products/${product.id}`} className="text-decoration-none">
+                  <div className="card h-100">
+                    <div className="position-relative" style={{ height: '300px' }}>
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-fit-cover"
+                      />
+                    </div>
+                    <div className="card-body">
+                      <h3 className="card-title h5 text-dark">{product.name}</h3>
+                      <p className="card-text text-muted">${product.price.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Features */}

@@ -1,24 +1,51 @@
 import { NextResponse } from 'next/server'
-import { products } from '@/lib/products'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
-  return NextResponse.json(products)
+  try {
+    console.log('Fetching products...')
+    const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        image: true,
+        category: true,
+        inStock: true,
+        featured: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+    console.log(`Found ${products.length} products`)
+    return NextResponse.json(products)
+  } catch (error) {
+    console.error('Error fetching products:', error)
+    return new NextResponse(
+      JSON.stringify({ error: 'Failed to fetch products' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const product = await request.json()
-    
-    // In a real app, this would save to a database
-    // For now, we'll just add it to the in-memory array
-    const newProduct = {
-      ...product,
-      id: Math.random().toString(36).substr(2, 9),
-    }
-    products.push(newProduct)
-    
+    console.log('Creating new product:', product)
+    const newProduct = await prisma.product.create({
+      data: {
+        ...product,
+        featured: product.featured || false,
+      },
+    })
+    console.log('Product created:', newProduct)
     return NextResponse.json(newProduct, { status: 201 })
   } catch (error) {
-    return new NextResponse('Error creating product', { status: 400 })
+    console.error('Error creating product:', error)
+    return new NextResponse(
+      JSON.stringify({ error: 'Failed to create product' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    )
   }
 } 
