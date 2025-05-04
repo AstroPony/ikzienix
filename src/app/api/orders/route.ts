@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
   try {
-    // TODO: Add authentication and get user ID from session
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const orders = await prisma.order.findMany({
       where: {
-        // userId: session.user.id, // Uncomment when auth is implemented
+        userId: session.user.id,
       },
       include: {
         items: {
@@ -38,6 +47,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { items, paymentIntentId } = await req.json()
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -62,7 +79,7 @@ export async function POST(req: NextRequest) {
     // Create order
     const order = await prisma.order.create({
       data: {
-        // userId: session.user.id, // Uncomment when auth is implemented
+        userId: session.user.id,
         total,
         status: 'pending',
         paymentIntentId,
