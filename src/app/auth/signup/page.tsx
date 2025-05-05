@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
@@ -32,7 +32,7 @@ const initialAddressData: AddressData = {
   country: '',
 };
 
-export default function SignupPage() {
+function SignupPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -328,5 +328,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignupPageInner />
+    </Suspense>
   );
 } 
