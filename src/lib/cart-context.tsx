@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react'
 import { Product } from '@/types/product'
+import { usePathname } from 'next/navigation'
 
 interface CartItem {
   product: Product
@@ -133,6 +134,19 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState)
+  let pathname = '/'
+  try {
+    pathname = usePathname() || '/'
+  } catch (error) {
+    console.warn('usePathname not available in test environment')
+  }
+
+  // Close cart overlay on /checkout
+  React.useEffect(() => {
+    if (pathname === '/checkout' && state.isOpen) {
+      dispatch({ type: 'TOGGLE_CART' })
+    }
+  }, [pathname, state.isOpen])
 
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' })

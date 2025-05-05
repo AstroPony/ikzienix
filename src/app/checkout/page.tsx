@@ -12,10 +12,11 @@ import {
 } from '@stripe/react-stripe-js';
 import { useSession } from 'next-auth/react';
 import ShippingForm, { ShippingData } from '@/components/ShippingForm';
+import { db } from '@/lib/firebase-admin';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-function CheckoutForm({ shippingData }: { shippingData: ShippingData }) {
+function CheckoutForm({ shippingData, saveAddress, session }: { shippingData: ShippingData, saveAddress: boolean, session: any }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -47,6 +48,17 @@ function CheckoutForm({ shippingData }: { shippingData: ShippingData }) {
       } else {
         // Payment was successful, clear cart and redirect
         clearCart();
+        if (saveAddress && session?.user?.id) {
+          // Save address to Firestore
+          await fetch('/api/save-address', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: session.user.id,
+              address: shippingData,
+            }),
+          });
+        }
         router.push('/checkout/success');
       }
     } catch (err: any) {
@@ -84,6 +96,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shippingData, setShippingData] = useState<ShippingData | null>(null);
+  const [saveAddress, setSaveAddress] = useState(false);
 
   useEffect(() => {
     // Set loading to false once we have the session status
@@ -107,9 +120,10 @@ export default function CheckoutPage() {
     return null;
   }
 
-  const handleShippingSubmit = async (data: ShippingData) => {
+  const handleShippingSubmit = async (data: ShippingData, saveAddr: boolean) => {
     setLoading(true);
     setShippingData(data);
+    setSaveAddress(saveAddr);
     try {
       const response = await fetch('/api/create-payment-intent', {
         method: 'POST',
@@ -178,7 +192,7 @@ export default function CheckoutPage() {
       <div className="row">
         <div className="col-md-8">
           {!shippingData ? (
-            <ShippingForm onSubmit={handleShippingSubmit} />
+            <ShippingForm onSubmit={(data, saveAddr) => handleShippingSubmit(data, saveAddr)} />
           ) : clientSecret ? (
             <Elements
               stripe={stripePromise}
@@ -189,7 +203,7 @@ export default function CheckoutPage() {
                 },
               }}
             >
-              <CheckoutForm shippingData={shippingData} />
+              <CheckoutForm shippingData={shippingData} saveAddress={saveAddress} session={session} />
             </Elements>
           ) : (
             <div className="alert alert-info">

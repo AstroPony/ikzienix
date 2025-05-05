@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/firebase-admin'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
@@ -13,31 +13,35 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const orders = await prisma.order.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const ordersRef = db.collection('orders')
+      .where('userId', '==', session.user.id)
+      .orderBy('createdAt', 'desc')
+
+    const snapshot = await ordersRef.get()
+    const orders = await Promise.all(snapshot.docs.map(async doc => {
+      const orderData = doc.data()
+      
+      // Get product data for each item
+      const itemsWithProducts = await Promise.all(orderData.items.map(async (item: any) => {
+        const productDoc = await db.collection('products').doc(item.productId).get()
+        return {
+          ...item,
+          product: {
+            id: productDoc.id,
+            ...productDoc.data()
+          }
+        }
+      }))
+
+      return {
+        id: doc.id,
+        ...orderData,
+        items: itemsWithProducts
+      }
+    }))
 
     return NextResponse.json(orders)
   } catch (error: any) {
-    console.error('Error fetching orders:', error)
     return NextResponse.json(
       { error: error.message || 'Failed to fetch orders' },
       { status: 500 }
@@ -77,32 +81,48 @@ export async function POST(req: NextRequest) {
     }, 0)
 
     // Create order
-    const order = await prisma.order.create({
-      data: {
-        userId: session.user.id,
-        total,
-        status: 'pending',
-        paymentIntentId,
-        items: {
-          create: items.map((item) => ({
-            productId: item.product.id,
-            quantity: item.quantity,
-            price: item.product.price,
-          })),
-        },
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
+    const orderRef = await db.collection('orders').add({
+      userId: session.user.id,
+      total,
+      status: 'pending',
+      paymentIntentId,
+      items: items.map(item => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price
+      })),
+      createdAt: new Date(),
+      updatedAt: new Date()
     })
+
+    // Get the created order with all its data
+    const orderDoc = await orderRef.get()
+    const orderData = orderDoc.data()
+    
+    if (!orderData) {
+      throw new Error('Failed to create order')
+    }
+
+    // Get product data for each item
+    const itemsWithProducts = await Promise.all(orderData.items.map(async (item: any) => {
+      const productDoc = await db.collection('products').doc(item.productId).get()
+      return {
+        ...item,
+        product: {
+          id: productDoc.id,
+          ...productDoc.data()
+        }
+      }
+    }))
+
+    const order = {
+      id: orderDoc.id,
+      ...orderData,
+      items: itemsWithProducts
+    }
 
     return NextResponse.json(order)
   } catch (error: any) {
-    console.error('Error creating order:', error)
     return NextResponse.json(
       { error: error.message || 'Failed to create order' },
       { status: 500 }

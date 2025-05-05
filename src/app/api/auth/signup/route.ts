@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
+import { auth as clientAuth } from '@/lib/firebase';
+import { db } from '@/lib/firebase-admin';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,35 +14,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    // Create user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(
+      clientAuth,
+      email,
+      password
+    );
+
+    // Create user document in Firestore
+    await db.collection('users').doc(userCredential.user.uid).set({
+      name,
+      email,
+      role: 'user',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
-      );
-    }
+    // Return user data without sensitive information
+    const userData = {
+      id: userCredential.user.uid,
+      name,
+      email,
+      role: 'user',
+    };
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: 'user',
-      },
-    });
-
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
-
-    return NextResponse.json(userWithoutPassword);
+    return NextResponse.json(userData);
   } catch (error: any) {
     console.error('Error creating user:', error);
     return NextResponse.json(

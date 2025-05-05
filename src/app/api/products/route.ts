@@ -1,23 +1,16 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/firebase-admin'
+import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore'
 
 export async function GET() {
   try {
     console.log('Fetching products...')
-    const products = await prisma.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        price: true,
-        image: true,
-        category: true,
-        inStock: true,
-        featured: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    const productsRef = db.collection('products')
+    const snapshot = await productsRef.get()
+    const products = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
     console.log(`Found ${products.length} products`)
     return NextResponse.json(products)
   } catch (error) {
@@ -33,12 +26,19 @@ export async function POST(request: Request) {
   try {
     const product = await request.json()
     console.log('Creating new product:', product)
-    const newProduct = await prisma.product.create({
-      data: {
-        ...product,
-        featured: product.featured || false,
-      },
+    const docRef = await db.collection('products').add({
+      ...product,
+      featured: product.featured || false,
+      createdAt: new Date(),
+      updatedAt: new Date()
     })
+    const newProduct = {
+      id: docRef.id,
+      ...product,
+      featured: product.featured || false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
     console.log('Product created:', newProduct)
     return NextResponse.json(newProduct, { status: 201 })
   } catch (error) {

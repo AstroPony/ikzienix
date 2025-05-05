@@ -1,50 +1,52 @@
 import { NextAuthOptions } from 'next-auth'
-import { PrismaAdapter } from '@auth/prisma-adapter'
+import { auth as adminAuth } from '@/lib/firebase-admin'
+import { auth as clientAuth } from '@/lib/firebase'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { db } from '@/lib/firebase-admin'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      name: 'credentials',
+      id: 'firebase',
+      name: 'Firebase',
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          throw new Error('Please enter your email and password')
         }
 
         try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          })
-
-          if (!user || !user.password) {
-            return null
-          }
-
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
+          // Get user from Firebase Auth
+          const userCredential = await signInWithEmailAndPassword(
+            clientAuth,
+            credentials.email,
+            credentials.password
           )
 
-          if (!isPasswordValid) {
-            return null
+          // Get additional user data from Firestore
+          const userDoc = await db.collection('users').doc(userCredential.user.uid).get()
+          const userData = userDoc.data()
+
+          if (!userData) {
+            throw new Error('User data not found')
           }
 
           return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
+            id: userCredential.user.uid,
+            email: userCredential.user.email,
+            name: userData.name,
+            role: userData.role,
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Auth error:', error)
-          return null
+          if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            throw new Error('Invalid email or password')
+          }
+          throw new Error('An error occurred during authentication')
         }
       },
     }),
@@ -71,6 +73,8 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
+    error: '/auth/error',
   },
+  debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
 } 

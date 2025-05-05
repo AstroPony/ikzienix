@@ -11,11 +11,12 @@ const mockProduct = {
   category: 'test',
   collection: 'test',
   inStock: true,
+  featured: false,
   rating: 5,
   reviews: 10,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString()
-}
+} as const
 
 describe('ProductCard', () => {
   it('renders product information correctly', () => {
@@ -29,7 +30,8 @@ describe('ProductCard', () => {
     expect(screen.getByText(mockProduct.category)).toBeInTheDocument()
     expect(screen.getByText(`$${mockProduct.price}`)).toBeInTheDocument()
     expect(screen.getByRole('img')).toHaveAttribute('alt', mockProduct.name)
-    expect(screen.getByRole('button')).toHaveTextContent(/add to cart/i)
+    expect(screen.getByLabelText(`Quick add ${mockProduct.name} to cart`)).toBeInTheDocument()
+    expect(screen.getByLabelText(`Add ${mockProduct.name} to wishlist`)).toBeInTheDocument()
   })
 
   it('has a link to the product details', () => {
@@ -43,28 +45,26 @@ describe('ProductCard', () => {
     expect(link).toHaveAttribute('href', `/products/${mockProduct.id}`)
   })
 
-  it('has a functional add to cart button', () => {
+  it('has a functional quick add to cart button', () => {
     render(
       <CartProvider>
         <ProductCard product={mockProduct} />
       </CartProvider>
     )
 
-    const addButton = screen.getByRole('button')
+    const addButton = screen.getByLabelText(`Quick add ${mockProduct.name} to cart`)
     expect(addButton).toBeEnabled()
-    expect(addButton).toHaveTextContent(/add to cart/i)
   })
 
   it('handles out of stock products', () => {
-    const outOfStockProduct = { ...mockProduct, inStock: false }
+    const outOfStockProduct = { ...mockProduct, inStock: false, featured: false }
     render(
       <CartProvider>
         <ProductCard product={outOfStockProduct} />
       </CartProvider>
     )
 
-    const button = screen.getByRole('button')
-    expect(button).toHaveAttribute('disabled')
-    expect(button).toHaveTextContent(/sold out/i)
+    const addButton = screen.getByLabelText(`Quick add ${mockProduct.name} to cart`)
+    expect(addButton).toHaveAttribute('disabled')
   })
 }) 

@@ -1,157 +1,177 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import { NextRequest, NextResponse } from 'next/server'
+import { db, auth } from '@/lib/firebase-admin'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-
-const prismaClient = new PrismaClient()
 
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
-    const user = await prismaClient.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
 
-    if (!user) {
-      return new NextResponse('User not found', { status: 404 })
+    const userDoc = await db.collection('users').doc(params.id).get()
+    if (!userDoc.exists) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    const userData = userDoc.data()
+    if (!userData) {
+      return NextResponse.json(
+        { error: 'User data not found' },
+        { status: 404 }
+      )
+    }
+
+    const user = {
+      id: userDoc.id,
+      ...userData
     }
 
     return NextResponse.json(user)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching user:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to fetch user' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch user' },
+      { status: 500 }
     )
   }
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as any).role !== 'admin') {
-      return new NextResponse('Unauthorized', { status: 401 })
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    const data = await request.json()
-    const { name, email, role, password } = data
+    const { name, email, role } = await req.json()
 
-    // Validate required fields
-    if (!name || !email || !role) {
-      return new NextResponse('Missing required fields', { status: 400 })
+    if (!name || !email) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
     }
 
-    // Check if email is taken by another user
-    const existingUser = await prismaClient.user.findFirst({
-      where: {
-        email,
-        NOT: {
-          id: id,
-        },
-      },
-    })
+    // Check if email is already taken by another user
+    if (email) {
+      const existingUserQuery = await db.collection('users')
+        .where('email', '==', email)
+        .get()
 
-    if (existingUser) {
-      return new NextResponse('Email already taken', { status: 400 })
-    }
-
-    // Update user
-    const updateData: any = {
-      name,
-      email,
-      role,
-    }
-
-    // Only update password if provided
-    if (password) {
-      updateData.password = await bcrypt.hash(password, 10)
-    }
-
-    const user = await prismaClient.user.update({
-      where: { id },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
-
-    return NextResponse.json(user)
-  } catch (error) {
-    console.error('Error updating user:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to update user' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    )
-  }
-}
-
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as any).role !== 'admin') {
-      return new NextResponse('Unauthorized', { status: 401 })
-    }
-
-    // Check if user exists
-    const user = await prismaClient.user.findUnique({
-      where: { id },
-    })
-
-    if (!user) {
-      return new NextResponse('User not found', { status: 404 })
-    }
-
-    // Prevent deleting the last admin
-    if (user.role === 'admin') {
-      const adminCount = await prismaClient.user.count({
-        where: { role: 'admin' },
-      })
-
-      if (adminCount <= 1) {
-        return new NextResponse(
-          'Cannot delete the last admin user',
+      const existingUser = existingUserQuery.docs.find(doc => doc.id !== params.id)
+      if (existingUser) {
+        return NextResponse.json(
+          { error: 'Email already taken' },
           { status: 400 }
         )
       }
     }
 
-    // Delete user
-    await prismaClient.user.delete({
-      where: { id },
+    // Update user in Firebase Auth
+    await auth.updateUser(params.id, {
+      email,
+      displayName: name
     })
 
-    return new NextResponse(null, { status: 204 })
-  } catch (error) {
+    // Update user document in Firestore
+    await db.collection('users').doc(params.id).update({
+      name,
+      email,
+      role: role || 'user',
+      updatedAt: new Date()
+    })
+
+    const updatedUserDoc = await db.collection('users').doc(params.id).get()
+    const userData = updatedUserDoc.data()
+    if (!userData) {
+      return NextResponse.json(
+        { error: 'Failed to update user' },
+        { status: 500 }
+      )
+    }
+
+    const user = {
+      id: updatedUserDoc.id,
+      ...userData
+    }
+
+    return NextResponse.json(user)
+  } catch (error: any) {
+    console.error('Error updating user:', error)
+    return NextResponse.json(
+      { error: error.message || 'Failed to update user' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Check if user exists
+    const userDoc = await db.collection('users').doc(params.id).get()
+    if (!userDoc.exists) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if this is the last admin
+    const userData = userDoc.data()
+    if (userData?.role === 'admin') {
+      const adminCount = await db.collection('users')
+        .where('role', '==', 'admin')
+        .count()
+        .get()
+
+      if (adminCount.data().count <= 1) {
+        return NextResponse.json(
+          { error: 'Cannot delete the last admin user' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Delete user from Firebase Auth
+    await auth.deleteUser(params.id)
+
+    // Delete user document from Firestore
+    await db.collection('users').doc(params.id).delete()
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
     console.error('Error deleting user:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to delete user' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: error.message || 'Failed to delete user' },
+      { status: 500 }
     )
   }
 } 

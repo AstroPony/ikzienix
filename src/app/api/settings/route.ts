@@ -1,89 +1,86 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/firebase-admin'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-const prisma = new PrismaClient()
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as any).role !== 'admin') {
-      return new NextResponse('Unauthorized', { status: 401 })
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    const settings = await prisma.settings.findFirst()
-    return NextResponse.json(settings || {
-      storeName: '',
-      storeEmail: '',
-      currency: 'USD',
-      taxRate: 0,
-      shippingFee: 0,
-      orderEmailNotifications: true,
-      lowStockThreshold: 5,
-      maintenanceMode: false,
-    })
-  } catch (error) {
+    const settingsRef = db.collection('settings').doc('global')
+    const settingsDoc = await settingsRef.get()
+
+    if (!settingsDoc.exists) {
+      return NextResponse.json(
+        { error: 'Settings not found' },
+        { status: 404 }
+      )
+    }
+
+    const settings = {
+      id: settingsDoc.id,
+      ...settingsDoc.data()
+    }
+
+    return NextResponse.json(settings)
+  } catch (error: any) {
     console.error('Error fetching settings:', error)
-    return new NextResponse('Error fetching settings', { status: 500 })
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch settings' },
+      { status: 500 }
+    )
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as any).role !== 'admin') {
-      return new NextResponse('Unauthorized', { status: 401 })
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    const data = await request.json()
-    const {
-      storeName,
-      storeEmail,
-      currency,
-      taxRate,
-      shippingFee,
-      orderEmailNotifications,
-      lowStockThreshold,
-      maintenanceMode,
-    } = data
+    const data = await req.json()
+    const settingsRef = db.collection('settings').doc('global')
 
-    // Validate required fields
-    if (!storeName || !storeEmail || !currency) {
-      return new NextResponse('Missing required fields', { status: 400 })
+    // Check if settings exist
+    const settingsDoc = await settingsRef.get()
+    if (!settingsDoc.exists) {
+      // Create new settings
+      await settingsRef.set({
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+    } else {
+      // Update existing settings
+      await settingsRef.update({
+        ...data,
+        updatedAt: new Date()
+      })
     }
 
-    // Update or create settings
-    const settings = await prisma.settings.upsert({
-      where: {
-        id: '1', // We only have one settings record
-      },
-      update: {
-        storeName,
-        storeEmail,
-        currency,
-        taxRate,
-        shippingFee,
-        orderEmailNotifications,
-        lowStockThreshold,
-        maintenanceMode,
-      },
-      create: {
-        id: '1',
-        storeName,
-        storeEmail,
-        currency,
-        taxRate,
-        shippingFee,
-        orderEmailNotifications,
-        lowStockThreshold,
-        maintenanceMode,
-      },
-    })
+    // Get updated settings
+    const updatedDoc = await settingsRef.get()
+    const settings = {
+      id: updatedDoc.id,
+      ...updatedDoc.data()
+    }
 
     return NextResponse.json(settings)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating settings:', error)
-    return new NextResponse('Error updating settings', { status: 500 })
+    return NextResponse.json(
+      { error: error.message || 'Failed to update settings' },
+      { status: 500 }
+    )
   }
 } 

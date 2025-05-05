@@ -31,7 +31,7 @@ export default function Cart() {
   return (
     <>
       <CartOverlay />
-      <div className="cart position-fixed top-0 end-0 h-100 bg-white shadow-lg" style={{ width: '400px', zIndex: 1050 }}>
+      <div className="cart position-fixed top-0 end-0 h-100 bg-white shadow-lg" style={{ width: '400px', zIndex: 9999 }}>
         <div className="d-flex flex-column h-100">
           <CartHeader />
           <CartItemsList />

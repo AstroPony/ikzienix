@@ -1,85 +1,95 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
+import { NextRequest, NextResponse } from 'next/server'
+import { db, auth } from '@/lib/firebase-admin'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-const prisma = new PrismaClient()
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as any).role !== 'admin') {
-      return new NextResponse('Unauthorized', { status: 401 })
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const usersRef = db.collection('users')
+    const snapshot = await usersRef.get()
+    const users = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
 
     return NextResponse.json(users)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching users:', error)
-    return new NextResponse('Error fetching users', { status: 500 })
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch users' },
+      { status: 500 }
+    )
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as any).role !== 'admin') {
-      return new NextResponse('Unauthorized', { status: 401 })
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    const data = await request.json()
-    const { name, email, password, role } = data
+    const { name, email, password, role } = await req.json()
 
-    // Validate required fields
-    if (!name || !email || !password || !role) {
-      return new NextResponse('Missing required fields', { status: 400 })
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    })
+    const existingUserQuery = await db.collection('users')
+      .where('email', '==', email)
+      .get()
 
-    if (existingUser) {
-      return new NextResponse('User already exists', { status: 400 })
+    if (!existingUserQuery.empty) {
+      return NextResponse.json(
+        { error: 'User already exists' },
+        { status: 400 }
+      )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
+    // Create user in Firebase Auth
+    const userRecord = await auth.createUser({
+      email,
+      password,
+      displayName: name
     })
 
+    // Create user document in Firestore
+    await db.collection('users').doc(userRecord.uid).set({
+      name,
+      email,
+      role: role || 'user',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+
+    const user = {
+      id: userRecord.uid,
+      name,
+      email,
+      role: role || 'user'
+    }
+
     return NextResponse.json(user, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating user:', error)
-    return new NextResponse('Error creating user', { status: 500 })
+    return NextResponse.json(
+      { error: error.message || 'Failed to create user' },
+      { status: 500 }
+    )
   }
 } 

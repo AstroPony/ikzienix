@@ -14,7 +14,7 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="navbar navbar-expand-lg bg-white border-bottom">
+    <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm">
       <div className="container">
         <div className="d-flex align-items-center">
           <Link href="/" className="navbar-brand">

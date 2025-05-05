@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/types/product";
+import ProductCard from '@/components/ProductCard'
 
 const PAGE_SIZE = 20;
 
@@ -198,29 +199,7 @@ export default function ProductsPage() {
       <div className="row g-4">
         {displayed.map((product) => (
           <div key={product.id} className="col-12 col-md-6 col-lg-4">
-            <Link href={`/products/${product.id}`} className="text-decoration-none">
-              <div className="card h-100 shadow-sm border-0 product-card-hover">
-                <div className="position-relative" style={{ height: "300px" }}>
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-fit-cover rounded-top"
-                  />
-                  {product.featured && (
-                    <span className="badge bg-primary position-absolute top-0 end-0 m-2">Featured</span>
-                  )}
-                  {!product.inStock && (
-                    <span className="badge bg-danger position-absolute top-0 start-0 m-2">Out of Stock</span>
-                  )}
-                </div>
-                <div className="card-body">
-                  <h3 className="card-title h5 text-dark">{product.name}</h3>
-                  <p className="card-text text-muted">${product.price.toFixed(2)}</p>
-                  <p className="card-text small text-muted mb-0">{product.category}</p>
-                </div>
-              </div>
-            </Link>
+            <ProductCard product={product} />
           </div>
         ))}
         {displayed.length === 0 && (

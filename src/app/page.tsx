@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Product } from '@/types/product'
+import ProductCard from '@/components/ProductCard'
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
@@ -112,22 +113,7 @@ export default function Home() {
           <div className="row g-4">
             {featuredProducts.map((product) => (
               <div key={product.id} className="col-12 col-md-4">
-                <Link href={`/products/${product.id}`} className="text-decoration-none">
-                  <div className="card h-100">
-                    <div className="position-relative" style={{ height: '300px' }}>
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-fit-cover"
-                      />
-                    </div>
-                    <div className="card-body">
-                      <h3 className="card-title h5 text-dark">{product.name}</h3>
-                      <p className="card-text text-muted">${product.price.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </Link>
+                <ProductCard product={product} />
               </div>
             ))}
           </div>

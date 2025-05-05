@@ -87,11 +87,15 @@ export default function OrdersPage() {
                   <div>
                     <h5 className="mb-0">Order #{order.id}</h5>
                     <small className="text-muted">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {typeof order.createdAt === 'string'
+                        ? new Date(order.createdAt).toLocaleDateString()
+                        : (order.createdAt && typeof order.createdAt === 'object' && 'seconds' in order.createdAt)
+                        ? new Date((order.createdAt as { seconds: number }).seconds * 1000).toLocaleDateString()
+                        : ''}
                     </small>
                   </div>
-                  <span className={`badge bg-${order.status === 'completed' ? 'success' : 'warning'}`}>
-                    {order.status}
+                  <span className={`badge bg-${order.status === 'paid' ? 'success' : 'warning'}`}>
+                    {order.status === 'paid' ? 'completed' : order.status}
                   </span>
                 </div>
                 <div className="card-body">

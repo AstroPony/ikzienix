@@ -3,17 +3,18 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useCart } from '@/lib/cart-context';
 
 function PaymentStatus() {
   const [status, setStatus] = useState<'processing' | 'succeeded' | 'failed'>('processing');
   const searchParams = useSearchParams();
+  const { state, clearCart } = useCart();
 
   useEffect(() => {
     const payment_intent = searchParams.get('payment_intent');
     const payment_intent_client_secret = searchParams.get('payment_intent_client_secret');
 
     if (payment_intent && payment_intent_client_secret) {
-      // Verify the payment status with your backend
       fetch('/api/verify-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,9 +24,27 @@ function PaymentStatus() {
         }),
       })
         .then((res) => res.json())
-        .then((data) => {
+        .then(async (data) => {
           if (data.status === 'succeeded') {
-            setStatus('succeeded');
+            try {
+              const orderResponse = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  items: state.items,
+                  paymentIntentId: payment_intent,
+                }),
+              });
+
+              if (!orderResponse.ok) {
+                throw new Error('Failed to create order');
+              }
+
+              clearCart();
+              setStatus('succeeded');
+            } catch (error) {
+              setStatus('failed');
+            }
           } else {
             setStatus('failed');
           }
@@ -36,7 +55,7 @@ function PaymentStatus() {
     } else {
       setStatus('failed');
     }
-  }, [searchParams]);
+  }, [searchParams, state.items, clearCart]);
 
   return (
     <div className="text-center">

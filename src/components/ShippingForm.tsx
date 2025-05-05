@@ -16,7 +16,7 @@ export interface ShippingData {
 }
 
 interface ShippingFormProps {
-  onSubmit: (data: ShippingData) => void;
+  onSubmit: (data: ShippingData, saveAddress: boolean) => void;
 }
 
 export default function ShippingForm({ onSubmit }: ShippingFormProps) {
@@ -32,10 +32,11 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
     country: '',
     shippingMethod: 'standard',
   });
+  const [saveAddress, setSaveAddress] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(formData, saveAddress);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -199,6 +200,19 @@ export default function ShippingForm({ onSubmit }: ShippingFormProps) {
               </label>
             </div>
           </div>
+        </div>
+
+        <div className="mb-3 form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="saveAddress"
+            checked={saveAddress}
+            onChange={e => setSaveAddress(e.target.checked)}
+          />
+          <label className="form-check-label" htmlFor="saveAddress">
+            Save this address to my profile
+          </label>
         </div>
 
         <button type="submit" className="btn btn-primary btn-lg w-100">

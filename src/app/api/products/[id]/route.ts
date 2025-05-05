@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/firebase-admin'
 
 export async function GET(
   request: Request,
@@ -7,10 +7,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const product = await prisma.product.findUnique({ where: { id } })
+    const docRef = db.collection('products').doc(id)
+    const doc = await docRef.get()
 
-    if (!product) {
+    if (!doc.exists) {
       return new NextResponse('Product not found', { status: 404 })
+    }
+
+    const product = {
+      id: doc.id,
+      ...doc.data()
     }
 
     return NextResponse.json(product)
@@ -30,10 +36,19 @@ export async function PUT(
   try {
     const { id } = await params
     const data = await request.json()
-    const product = await prisma.product.update({
-      where: { id },
-      data,
+    
+    const docRef = db.collection('products').doc(id)
+    await docRef.update({
+      ...data,
+      updatedAt: new Date()
     })
+
+    const updatedDoc = await docRef.get()
+    const product = {
+      id: updatedDoc.id,
+      ...updatedDoc.data()
+    }
+
     return NextResponse.json(product)
   } catch (error) {
     console.error('Error updating product:', error)
@@ -50,7 +65,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    await prisma.product.delete({ where: { id } })
+    await db.collection('products').doc(id).delete()
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Error deleting product:', error)

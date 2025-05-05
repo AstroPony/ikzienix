@@ -1,219 +1,134 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/firebase-admin'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic'
 
-interface GroupedData {
+interface OrderItem {
   productId: string
-  _sum: {
-    quantity: number | null
-  }
+  quantity: number
+  price: number
 }
 
-interface DailyData {
-  createdAt: Date
-  _sum: {
-    total: number | null
-  }
+interface Order {
+  id: string
+  status: string
+  total: number
+  items: OrderItem[]
+  createdAt: { seconds: number }
 }
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const range = searchParams.get('range') || '7d'
-
-  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90
-  const startDate = new Date()
-  startDate.setDate(startDate.getDate() - days)
-
+export async function GET(req: NextRequest) {
   try {
-    // Get current period data
-    const [
-      currentRevenue,
-      currentOrders,
-      currentVisitors,
-      currentNewUsers,
-      salesByCategory,
-      topProducts,
-      dailyRevenue,
-    ] = await Promise.all([
-      prisma.order.aggregate({
-        where: {
-          createdAt: { gte: startDate },
-        },
-        _sum: {
-          total: true,
-        },
-      }),
-      prisma.order.count({
-        where: {
-          createdAt: { gte: startDate },
-        },
-      }),
-      prisma.analytics.aggregate({
-        where: {
-          date: { gte: startDate },
-        },
-        _sum: {
-          visitors: true,
-        },
-      }),
-      prisma.user.count({
-        where: {
-          createdAt: { gte: startDate },
-        },
-      }),
-      prisma.orderItem.groupBy({
-        by: ['productId'],
-        where: {
-          order: {
-            createdAt: { gte: startDate },
-          },
-        },
-        _sum: {
-          quantity: true,
-        },
-      }),
-      prisma.orderItem.groupBy({
-        by: ['productId'],
-        where: {
-          order: {
-            createdAt: { gte: startDate },
-          },
-        },
-        _sum: {
-          quantity: true,
-        },
-        orderBy: {
-          _sum: {
-            quantity: 'desc',
-          },
-        },
-        take: 5,
-      }),
-      prisma.order.groupBy({
-        by: ['createdAt'],
-        where: {
-          createdAt: { gte: startDate },
-        },
-        _sum: {
-          total: true,
-        },
-      }),
-    ])
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
 
-    // Get previous period data for comparison
-    const previousStartDate = new Date(startDate)
-    previousStartDate.setDate(previousStartDate.getDate() - days)
+    // Get all orders
+    const ordersRef = db.collection('orders')
+    const ordersSnapshot = await ordersRef.get()
+    const orders = ordersSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Order[]
 
-    const [
-      previousRevenue,
-      previousOrders,
-      previousVisitors,
-      previousNewUsers,
-    ] = await Promise.all([
-      prisma.order.aggregate({
-        where: {
-          createdAt: {
-            gte: previousStartDate,
-            lt: startDate,
-          },
-        },
-        _sum: {
-          total: true,
-        },
-      }),
-      prisma.order.count({
-        where: {
-          createdAt: {
-            gte: previousStartDate,
-            lt: startDate,
-          },
-        },
-      }),
-      prisma.analytics.aggregate({
-        where: {
-          date: {
-            gte: previousStartDate,
-            lt: startDate,
-          },
-        },
-        _sum: {
-          visitors: true,
-        },
-      }),
-      prisma.user.count({
-        where: {
-          createdAt: {
-            gte: previousStartDate,
-            lt: startDate,
-          },
-        },
-      }),
-    ])
+    // Get all users
+    const usersRef = db.collection('users')
+    const usersSnapshot = await usersRef.get()
+    const users = usersSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
 
-    // Calculate percentage changes
-    const calculateChange = (current: number, previous: number) =>
-      previous === 0 ? 100 : ((current - previous) / previous) * 100
+    // Calculate total revenue (including pending orders)
+    const totalRevenue = orders.reduce((sum, order: any) => {
+      return (order.status === 'paid' || order.status === 'pending') ? sum + order.total : sum
+    }, 0)
 
-    const revenue = currentRevenue._sum.total || 0
-    const previousRevenueValue = previousRevenue._sum.total || 0
-    const revenueChange = calculateChange(revenue, previousRevenueValue)
+    // Calculate total orders (including pending orders)
+    const totalOrders = orders.length
 
-    const orders = currentOrders
-    const ordersChange = calculateChange(orders, previousOrders)
+    // Calculate total users
+    const totalUsers = users.length
 
-    const visitors = currentVisitors._sum.visitors || 0
-    const previousVisitorsValue = previousVisitors._sum.visitors || 0
-    const visitorsChange = calculateChange(visitors, previousVisitorsValue)
+    // Group orders by product to find top selling products
+    const productSales: { [key: string]: number } = {}
+    const productRevenue: { [key: string]: number } = {}
 
-    const newUsers = currentNewUsers
-    const newUsersChange = calculateChange(newUsers, previousNewUsers)
-
-    // Format sales by category
-    const salesByCategoryFormatted = salesByCategory.reduce(
-      (acc: Record<string, number>, { productId, _sum }: GroupedData) => ({
-        ...acc,
-        [productId]: _sum.quantity || 0,
-      }),
-      {}
-    )
-
-    // Format top products
-    const topProductsFormatted = await Promise.all(
-      topProducts.map(async ({ productId, _sum }: GroupedData) => {
-        const product = await prisma.product.findUnique({
-          where: { id: productId },
-        })
-        return {
-          name: product?.name || 'Unknown',
-          sales: _sum.quantity || 0,
+    for (const order of orders) {
+      if (order.status === 'paid' || order.status === 'pending') {
+        for (const item of order.items) {
+          productSales[item.productId] = (productSales[item.productId] || 0) + item.quantity
+          productRevenue[item.productId] = (productRevenue[item.productId] || 0) + (item.price * item.quantity)
         }
-      })
+      }
+    }
+
+    // Get product details for top selling products
+    const topSellingProducts = await Promise.all(
+      Object.entries(productSales)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(async ([productId, quantity]) => {
+          const productDoc = await db.collection('products').doc(productId).get()
+          const productData = productDoc.data()
+          return {
+            name: productData?.name || 'Unknown Product',
+            sales: quantity
+          }
+        })
     )
 
-    // Format daily revenue
-    const dailyRevenueFormatted = dailyRevenue.map(
-      ({ createdAt, _sum }: DailyData) => ({
-        date: createdAt.toISOString().split('T')[0],
-        revenue: _sum.total || 0,
-      })
-    )
+    // Group orders by date to calculate daily sales
+    const dailySales = orders.reduce((acc: any, order: any) => {
+      if (order.status === 'paid' || order.status === 'pending') {
+        const date = new Date(order.createdAt.seconds * 1000).toISOString().split('T')[0]
+        acc[date] = (acc[date] || 0) + order.total
+      }
+      return acc
+    }, {})
+
+    // Convert daily sales to array and sort by date
+    const dailyRevenue = Object.entries(dailySales)
+      .map(([date, revenue]) => ({ date, revenue }))
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    // Calculate sales by category
+    const salesByCategory: Record<string, number> = {}
+    for (const order of orders) {
+      if (order.status === 'paid' || order.status === 'pending') {
+        for (const item of order.items) {
+          const productDoc = await db.collection('products').doc(item.productId).get()
+          const productData = productDoc.data()
+          const category = productData?.category || 'Uncategorized'
+          salesByCategory[category] = (salesByCategory[category] || 0) + (item.price * item.quantity)
+        }
+      }
+    }
 
     return NextResponse.json({
-      revenue,
-      orders,
-      visitors,
-      newUsers,
-      revenueChange,
-      ordersChange,
-      visitorsChange,
-      newUsersChange,
-      salesByCategory: salesByCategoryFormatted,
-      topProducts: topProductsFormatted,
-      dailyRevenue: dailyRevenueFormatted,
+      revenue: totalRevenue,
+      orders: totalOrders,
+      visitors: totalUsers,
+      newUsers: totalUsers,
+      revenueChange: 0, // You can implement this based on previous period
+      ordersChange: 0, // You can implement this based on previous period
+      visitorsChange: 0, // You can implement this based on previous period
+      newUsersChange: 0, // You can implement this based on previous period
+      salesByCategory,
+      topProducts: topSellingProducts,
+      dailyRevenue
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching analytics:', error)
-    return new NextResponse('Error fetching analytics', { status: 500 })
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch analytics' },
+      { status: 500 }
+    )
   }
 } 

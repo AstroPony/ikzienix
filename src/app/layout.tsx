@@ -5,7 +5,6 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import { CartProvider } from '@/lib/cart-context'
 import { AuthProvider } from '@/lib/auth-provider'
 import Navigation from '@/components/navigation/Navigation'
-import Cart from '@/components/Cart'
 import BootstrapClient from '@/components/BootstrapClient'
 
 export default function RootLayout({
@@ -64,7 +63,6 @@ export default function RootLayout({
                 </div>
               </footer>
             </div>
-            <Cart />
           </CartProvider>
         </AuthProvider>
       </body>

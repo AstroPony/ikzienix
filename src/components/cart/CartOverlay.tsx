@@ -1,11 +1,13 @@
 'use client'
 
 import { useCart } from '@/lib/cart-context'
+import { usePathname } from 'next/navigation'
 
 export default function CartOverlay() {
   const { state, dispatch } = useCart()
+  const pathname = usePathname();
 
-  if (!state.isOpen) return null
+  if (!state.isOpen || pathname === '/cart' || pathname === '/checkout') return null
 
   return (
     <div

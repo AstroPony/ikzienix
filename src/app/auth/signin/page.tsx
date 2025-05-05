@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +21,7 @@ export default function SignInPage() {
     const password = formData.get('password') as string;
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn('firebase', {
         email,
         password,
         redirect: false,
@@ -29,7 +30,8 @@ export default function SignInPage() {
       if (result?.error) {
         setError('Invalid email or password');
       } else {
-        router.push('/');
+        const callbackUrl = searchParams.get('callbackUrl') || '/';
+        router.push(callbackUrl);
         router.refresh();
       }
     } catch (err) {
@@ -42,10 +44,10 @@ export default function SignInPage() {
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-4">
-          <div className="card shadow-sm">
-            <div className="card-body p-4">
-              <h1 className="h3 mb-4 text-center">Sign In</h1>
+        <div className="col-12 col-md-8 col-lg-6">
+          <div className="card shadow">
+            <div className="card-body">
+              <h1 className="display-4 mb-4">Sign In</h1>
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
@@ -84,10 +86,12 @@ export default function SignInPage() {
                   {loading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
-              <div className="text-center mt-3">
+              <div className="mt-3 text-center">
                 <p className="mb-0">
                   Don't have an account?{' '}
-                  <Link href="/auth/signup">Sign up</Link>
+                  <Link href="/auth/signup" className="text-decoration-none">
+                    Sign up
+                  </Link>
                 </p>
               </div>
             </div>
@@ -95,5 +99,13 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInForm />
+    </Suspense>
   );
 } 
