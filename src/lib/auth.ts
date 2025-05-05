@@ -4,9 +4,22 @@ import { auth as clientAuth } from '@/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { db } from '@/lib/firebase-admin'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+          scope: "openid email profile"
+        }
+      }
+    }),
     CredentialsProvider({
       id: 'firebase',
       name: 'Firebase',
@@ -70,9 +83,36 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google') {
+        try {
+          const userRef = db.collection('users').doc(user.id)
+          const userDoc = await userRef.get()
+
+          if (!userDoc.exists) {
+            // Create new user document
+            await userRef.set({
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              role: 'user',
+              createdAt: new Date(),
+              profileCompleted: false
+            })
+          }
+          return true
+        } catch (error) {
+          console.error('Error in signIn callback:', error)
+          return false
+        }
+      }
+      return true
+    },
   },
   pages: {
     signIn: '/auth/signin',
+    signOut: '/auth/signout',
     error: '/auth/error',
   },
   debug: process.env.NODE_ENV === 'development',

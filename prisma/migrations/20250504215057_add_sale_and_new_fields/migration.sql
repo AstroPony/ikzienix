@@ -1,8 +1,0 @@
--- AlterTable
-ALTER TABLE "Product" ADD COLUMN     "new" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "sale" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "salePrice" DOUBLE PRECISION;
-
--- AlterTable
-ALTER TABLE "User" ALTER COLUMN "name" DROP NOT NULL,
-ALTER COLUMN "password" DROP NOT NULL;

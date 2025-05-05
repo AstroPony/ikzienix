@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/types/product';
 import { collectionImages, collectionDescriptions } from '@/lib/collections';
+import ProductCard from '@/components/ProductCard'
 
 export default function CollectionPage() {
   const params = useParams();
@@ -207,29 +208,7 @@ export default function CollectionPage() {
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {filteredProducts.map((product) => (
             <div key={product.id} className="col">
-              <div className="card h-100">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={400}
-                  height={400}
-                  className="card-img-top"
-                  style={{ objectFit: 'cover', height: '300px' }}
-                />
-                <div className="card-body">
-                  <h5 className="card-title">{product.name}</h5>
-                  <p className="card-text">{product.description}</p>
-                  <p className="card-text">
-                    <strong>${product.price.toFixed(2)}</strong>
-                  </p>
-                  <Link
-                    href={`/products/${product.id}`}
-                    className="btn btn-primary"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </div>
+              <ProductCard product={product} />
             </div>
           ))}
         </div>

@@ -18,6 +18,23 @@ export default function SharedMenu({ isOpen, type, onClose }: SharedMenuProps) {
 
   if (!isOpen) return null
 
+  if (type === 'account' && !session) {
+    return (
+      <div className="collapse navbar-collapse show position-absolute start-0 end-0 bg-white border-bottom" style={{ top: '100%', zIndex: 1000 }}>
+        <div className="container py-3">
+          <div className="d-flex flex-column gap-2">
+            <Link href="/auth/signin" className="btn btn-link text-dark" onClick={onClose}>
+              Sign In
+            </Link>
+            <Link href="/auth/signup" className="btn btn-outline-dark" onClick={onClose}>
+              Sign Up
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="collapse navbar-collapse show position-absolute start-0 end-0 bg-white border-bottom" style={{ top: '100%', zIndex: 1000 }}>
       <div className="container py-3">

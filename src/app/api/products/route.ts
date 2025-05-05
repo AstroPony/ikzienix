@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/firebase-admin'
-import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore'
 
 export async function GET() {
   try {

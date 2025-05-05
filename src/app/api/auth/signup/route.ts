@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth as clientAuth } from '@/lib/firebase';
+import { getAuth } from 'firebase-admin/auth';
 import { db } from '@/lib/firebase-admin';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,15 +13,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create user in Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(
-      clientAuth,
+    // Create user in Firebase Auth (Admin SDK)
+    const userRecord = await getAuth().createUser({
       email,
-      password
-    );
+      password,
+      displayName: name,
+    });
 
     // Create user document in Firestore
-    await db.collection('users').doc(userCredential.user.uid).set({
+    await db.collection('users').doc(userRecord.uid).set({
       name,
       email,
       role: 'user',
@@ -32,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // Return user data without sensitive information
     const userData = {
-      id: userCredential.user.uid,
+      id: userRecord.uid,
       name,
       email,
       role: 'user',

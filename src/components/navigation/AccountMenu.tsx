@@ -27,9 +27,11 @@ export default function AccountMenu({ onMenuClick }: AccountMenuProps) {
 
   if (!session) {
     return (
-      <Link href="/auth/signin" className="btn btn-link text-dark">
-        <i className="bi bi-person fs-5"></i>
-      </Link>
+      <div className="d-flex gap-2">
+        <Link href="/auth/signin" className="btn btn-link text-dark">
+          <i className="bi bi-person fs-5"></i>
+        </Link>
+      </div>
     )
   }
 

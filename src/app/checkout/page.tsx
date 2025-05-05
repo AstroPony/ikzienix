@@ -48,17 +48,6 @@ function CheckoutForm({ shippingData, saveAddress, session }: { shippingData: Sh
       } else {
         // Payment was successful, clear cart and redirect
         clearCart();
-        if (saveAddress && session?.user?.id) {
-          // Save address to Firestore
-          await fetch('/api/save-address', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: session.user.id,
-              address: shippingData,
-            }),
-          });
-        }
         router.push('/checkout/success');
       }
     } catch (err: any) {
@@ -124,7 +113,22 @@ export default function CheckoutPage() {
     setLoading(true);
     setShippingData(data);
     setSaveAddress(saveAddr);
+
     try {
+      // Save address first if user wants to save it
+      if (saveAddr && session?.user?.id) {
+        const saveAddressResponse = await fetch('/api/save-address', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: data }),
+        });
+
+        if (!saveAddressResponse.ok) {
+          throw new Error('Failed to save address');
+        }
+      }
+
+      // Create payment intent
       const response = await fetch('/api/create-payment-intent', {
         method: 'POST',
         headers: {
@@ -171,7 +175,7 @@ export default function CheckoutPage() {
           <h4 className="alert-heading">Error</h4>
           <p>{error}</p>
           <hr />
-          <p className="mb-0">
+          <div className="mb-0 d-flex gap-2">
             <button 
               className="btn btn-outline-danger"
               onClick={() => {
@@ -181,7 +185,13 @@ export default function CheckoutPage() {
             >
               Try Again
             </button>
-          </p>
+            <button
+              className="btn btn-secondary"
+              onClick={() => router.push('/cart')}
+            >
+              Return to Cart
+            </button>
+          </div>
         </div>
       </div>
     );

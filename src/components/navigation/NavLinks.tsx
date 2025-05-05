@@ -16,6 +16,7 @@ export default function NavLinks({ onLinkClick }: NavLinksProps) {
     { href: '/collections', label: 'Collections' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
+    { href: '/auth/signup', label: 'Sign Up' },
   ]
 
   return (

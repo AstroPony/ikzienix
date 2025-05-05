@@ -7,14 +7,15 @@ const mockProduct = {
   name: 'Test Product',
   price: 99.99,
   image: '/test.jpg',
-  description: 'A test product',
+  description: 'Test description',
   category: 'test',
   collection: 'test',
   inStock: true,
-  rating: 5,
+  rating: 4.5,
   reviews: 10,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
+  featured: false
 }
 
 function TestComponent({ children }: { children: React.ReactNode }) {

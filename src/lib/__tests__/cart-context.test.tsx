@@ -7,29 +7,31 @@ const mockProduct: Product = {
   name: 'Test Product',
   price: 99.99,
   image: '/test.jpg',
-  description: 'A test product',
+  description: 'Test description',
   category: 'test',
   collection: 'test',
   inStock: true,
-  rating: 5,
+  rating: 4.5,
   reviews: 10,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
+  featured: false
 }
 
 const mockProduct2: Product = {
   id: '2',
   name: 'Test Product 2',
-  price: 49.99,
+  price: 149.99,
   image: '/test2.jpg',
-  description: 'Another test product',
+  description: 'Test description 2',
   category: 'test',
   collection: 'test',
   inStock: true,
-  rating: 4,
+  rating: 4.0,
   reviews: 5,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
+  featured: true
 }
 
 // Test component that uses the cart context

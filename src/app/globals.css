@@ -35,16 +35,16 @@ body {
 }
 
 .navbar-brand {
-  color: white !important;
+  color: var(--bs-dark) !important;
   font-weight: 600;
 }
 
 .nav-link {
-  color: rgba(255, 255, 255, 0.8) !important;
+  color: var(--bs-dark) !important;
 }
 
 .nav-link:hover {
-  color: white !important;
+  color: var(--bs-primary) !important;
 }
 
 .btn-primary {
@@ -74,10 +74,15 @@ body {
 .card {
   border: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-card .card,
+.collection-card .card {
   transition: transform 0.2s ease-in-out;
 }
 
-.card:hover {
+.product-card .card:hover,
+.collection-card .card:hover {
   transform: translateY(-5px);
 }
 
