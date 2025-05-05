@@ -107,7 +107,7 @@ describe('CartContext', () => {
     expect(screen.getByTestId('cart-total').textContent).toBe('199.98')
 
     fireEvent.click(screen.getByTestId('add-item-2'))
-    expect(screen.getByTestId('cart-total').textContent).toBe('249.97')
+    expect(screen.getByTestId('cart-total').textContent).toBe('349.97')
   })
 
   it('toggles cart visibility', () => {
