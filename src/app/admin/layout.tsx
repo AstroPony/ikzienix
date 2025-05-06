@@ -13,13 +13,13 @@ export default function AdminLayout({
 
   return (
     <div className="d-flex min-vh-100">
-      <div className="d-none d-md-block" style={{ minWidth: '280px', maxWidth: '280px' }}>
+      <div className="d-none d-md-block">
         <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       </div>
       <div className="d-md-none">
         <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       </div>
-      <div className="flex-grow-1 bg-light p-4">
+      <div className="flex-grow-1 p-4">
         {children}
       </div>
     </div>

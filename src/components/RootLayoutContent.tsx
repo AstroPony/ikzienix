@@ -24,7 +24,7 @@ export default function RootLayoutContent({
             <main className="flex-grow-1">
               {children}
             </main>
-            <footer className="bg-white shadow mt-5 pt-4 pb-2 border-top">
+            <footer className="bg-white shadow pt-4 pb-2 border-top">
               <div className="container">
                 <div className="row g-4">
                   <div className="col-12 col-sm-6 col-lg-3">

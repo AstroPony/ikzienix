@@ -14,10 +14,14 @@ export async function GET(req: NextRequest) {
     }
 
     const ordersRef = db.collection('orders')
-      .where('userId', '==', session.user.id)
-      .orderBy('createdAt', 'desc')
+    let query = ordersRef.orderBy('createdAt', 'desc')
 
-    const snapshot = await ordersRef.get()
+    // If not admin, only show user's orders
+    if (session.user.role !== 'admin') {
+      query = query.where('userId', '==', session.user.id)
+    }
+
+    const snapshot = await query.get()
     const orders = await Promise.all(snapshot.docs.map(async doc => {
       const orderData = doc.data()
       
@@ -33,10 +37,21 @@ export async function GET(req: NextRequest) {
         }
       }))
 
+      // Get user data if admin
+      let userData = null
+      if (session.user.role === 'admin') {
+        const userDoc = await db.collection('users').doc(orderData.userId).get()
+        userData = userDoc.data()
+      }
+
       return {
         id: doc.id,
         ...orderData,
-        items: itemsWithProducts
+        items: itemsWithProducts,
+        user: userData ? {
+          name: userData.name,
+          email: userData.email
+        } : undefined
       }
     }))
 
