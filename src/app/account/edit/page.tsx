@@ -5,45 +5,74 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ProfileForm from "../complete-profile/complete-profile-form";
 
+interface Address {
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+interface FormData {
+  phone: string;
+  shippingAddress: Address;
+  billingAddress: Address;
+  sameAsShipping: boolean;
+}
+
+const defaultFormData: FormData = {
+  phone: "",
+  shippingAddress: {
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: ""
+  },
+  billingAddress: {
+    line1: "",
+    line2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: ""
+  },
+  sameAsShipping: true
+};
+
 export default function EditProfilePage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
-  const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialValues, setInitialValues] = useState<FormData>(defaultFormData);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (status === "unauthenticated") {
+    if (!session?.user?.email) {
       router.push("/auth/signin");
       return;
     }
-    if (session?.user?.id) {
-      fetch("/api/account")
-        .then((res) => res.json())
-        .then((data) => {
-          setInitialValues({
-            phone: data.phone || "",
-            shippingAddress: data.shippingAddress || {
-              line1: "",
-              line2: "",
-              city: "",
-              postalCode: "",
-              country: "NL",
-            },
-            billingAddress: data.billingAddress || {
-              line1: "",
-              line2: "",
-              city: "",
-              postalCode: "",
-              country: "NL",
-            },
-            sameAsShipping:
-              JSON.stringify(data.shippingAddress) === JSON.stringify(data.billingAddress),
-          });
-          setLoading(false);
+
+    fetch("/api/account")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch account data");
+        return res.json();
+      })
+      .then((data) => {
+        setInitialValues({
+          phone: data.phone || defaultFormData.phone,
+          shippingAddress: data.shippingAddress || defaultFormData.shippingAddress,
+          billingAddress: data.billingAddress || defaultFormData.billingAddress,
+          sameAsShipping: data.sameAsShipping ?? defaultFormData.sameAsShipping
         });
-    }
-  }, [status, session, router]);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching account data:", error);
+        setLoading(false);
+      });
+  }, [session, router]);
 
   if (loading) {
     return (
@@ -55,7 +84,9 @@ export default function EditProfilePage() {
     );
   }
 
-  if (!initialValues) return null;
+  if (!session?.user?.email) {
+    return null;
+  }
 
   return (
     <ProfileForm
