@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import NavLinks from './NavLinks'
+import { useEffect, useRef, RefObject } from 'react'
 
 type MenuType = 'nav' | 'account'
 
@@ -11,22 +12,66 @@ interface SharedMenuProps {
   isOpen: boolean
   type: MenuType
   onClose: () => void
+  hamburgerRef?: RefObject<HTMLButtonElement>
 }
 
-export default function SharedMenu({ isOpen, type, onClose }: SharedMenuProps) {
+export default function SharedMenu({ isOpen, type, onClose, hamburgerRef }: SharedMenuProps) {
   const { data: session } = useSession()
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (hamburgerRef && hamburgerRef.current && hamburgerRef.current.contains(event.target as Node)) {
+        return
+      }
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscapeKey)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen, onClose, hamburgerRef])
 
   if (!isOpen) return null
 
   if (type === 'account' && !session) {
     return (
-      <div className="collapse navbar-collapse show position-absolute start-0 end-0 bg-white border-bottom" style={{ top: '100%', zIndex: 1000 }}>
+      <div 
+        ref={menuRef}
+        className="collapse navbar-collapse show position-absolute start-0 end-0 bg-white border-bottom" 
+        style={{ top: '100%', zIndex: 1000 }}
+        role="dialog"
+        aria-label="Sign in options"
+      >
         <div className="container py-3">
           <div className="d-flex flex-column gap-2">
-            <Link href="/auth/signin" className="btn btn-link text-dark" onClick={onClose}>
+            <Link 
+              href="/auth/signin" 
+              className="btn btn-link text-dark" 
+              onClick={onClose}
+              role="menuitem"
+            >
               Sign In
             </Link>
-            <Link href="/auth/signup" className="btn btn-outline-dark" onClick={onClose}>
+            <Link 
+              href="/auth/signup" 
+              className="btn btn-outline-dark" 
+              onClick={onClose}
+              role="menuitem"
+            >
               Sign Up
             </Link>
           </div>
@@ -36,20 +81,27 @@ export default function SharedMenu({ isOpen, type, onClose }: SharedMenuProps) {
   }
 
   return (
-    <div className="collapse navbar-collapse show position-absolute start-0 end-0 bg-white border-bottom" style={{ top: '100%', zIndex: 1000 }}>
-      <div className="container py-3">
+    <div 
+      ref={menuRef}
+      className="collapse navbar-collapse show position-absolute start-0 end-0 bg-white border-bottom" 
+      style={{ top: '100%', zIndex: 1000 }}
+      role="dialog"
+      aria-label={type === 'nav' ? 'Navigation menu' : 'Account menu'}
+    >
+      <div className="container py-3 position-relative">
         {type === 'nav' ? (
           <NavLinks onLinkClick={onClose} />
         ) : (
-          <div className="py-2">
+          <div className="py-2" role="menu">
             <div className="d-flex align-items-center mb-3">
               {session?.user?.image && (
                 <Image
                   src={session.user.image}
-                  alt={session.user?.name || 'User'}
+                  alt=""
                   width={40}
                   height={40}
                   className="rounded-circle me-2"
+                  aria-hidden="true"
                 />
               )}
               <div>
@@ -57,46 +109,53 @@ export default function SharedMenu({ isOpen, type, onClose }: SharedMenuProps) {
                 <small className="text-muted">{session?.user?.email}</small>
               </div>
             </div>
-
-            <div className="d-flex flex-column gap-2">
-              <Link 
-                href="/account" 
-                className="d-flex align-items-center text-dark text-decoration-none"
-                onClick={onClose}
-              >
-                <i className="bi bi-person me-2"></i>
-                My Account
-              </Link>
-              <Link 
-                href="/orders" 
-                className="d-flex align-items-center text-dark text-decoration-none"
-                onClick={onClose}
-              >
-                <i className="bi bi-bag me-2"></i>
-                My Orders
-              </Link>
-              {session?.user?.email === 'admin@ikzienix.com' && (
+            <ul className="list-group list-group-flush">
+              <li className="list-group-item p-0 border-0 bg-transparent">
                 <Link 
-                  href="/admin" 
-                  className="d-flex align-items-center text-dark text-decoration-none"
+                  href="/account" 
+                  className="nav-link px-0"
                   onClick={onClose}
+                  role="menuitem"
                 >
-                  <i className="bi bi-gear me-2"></i>
-                  Admin Panel
+                  My Account
                 </Link>
+              </li>
+              <li className="list-group-item p-0 border-0 bg-transparent">
+                <Link 
+                  href="/orders" 
+                  className="nav-link px-0"
+                  onClick={onClose}
+                  role="menuitem"
+                >
+                  My Orders
+                </Link>
+              </li>
+              {session?.user?.email === 'admin@ikzienix.com' && (
+                <li className="list-group-item p-0 border-0 bg-transparent">
+                  <Link 
+                    href="/admin" 
+                    className="nav-link px-0"
+                    onClick={onClose}
+                    role="menuitem"
+                  >
+                    Admin Panel
+                  </Link>
+                </li>
               )}
-              <hr className="my-2" />
-              <button 
-                className="d-flex align-items-center text-danger border-0 bg-transparent p-0"
-                onClick={() => {
-                  signOut()
-                  onClose()
-                }}
-              >
-                <i className="bi bi-box-arrow-right me-2"></i>
-                Sign Out
-              </button>
-            </div>
+              <li><hr className="my-2" /></li>
+              <li className="list-group-item p-0 border-0 bg-transparent">
+                <button 
+                  className="nav-link px-0 text-danger border-0 bg-transparent"
+                  onClick={() => {
+                    signOut()
+                    onClose()
+                  }}
+                  role="menuitem"
+                >
+                  Sign Out
+                </button>
+              </li>
+            </ul>
           </div>
         )}
       </div>

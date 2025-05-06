@@ -16,22 +16,26 @@ export default function NavLinks({ onLinkClick }: NavLinksProps) {
     { href: '/collections', label: 'Collections' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
-    { href: '/auth/signup', label: 'Sign Up' },
   ]
 
   return (
-    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-      {links.map(({ href, label }) => (
-        <li key={href} className="nav-item">
-          <Link 
-            href={href} 
-            className={`nav-link ${isActive(href) ? 'active fw-bold' : 'text-dark'}`}
-            onClick={onLinkClick}
-          >
-            {label}
-          </Link>
-        </li>
-      ))}
+    <ul className="navbar-nav me-auto mb-2 mb-lg-0" role="menubar">
+      {links.map(({ href, label }) => {
+        const active = isActive(href)
+        return (
+          <li key={href} className="nav-item p-2" role="none">
+            <Link 
+              href={href} 
+              className={`nav-link ${active ? 'active fw-bold' : 'text-dark'}`}
+              onClick={onLinkClick}
+              role="menuitem"
+              aria-current={active ? 'page' : undefined}
+            >
+              {label}
+            </Link>
+          </li>
+        )
+      })}
     </ul>
   )
 } 
