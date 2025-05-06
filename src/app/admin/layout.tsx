@@ -12,15 +12,16 @@ export default function AdminLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <>
-      <div className="d-flex flex-row min-vh-100">
+    <div className="d-flex min-vh-100">
+      <div className="d-none d-md-block" style={{ minWidth: '280px', maxWidth: '280px' }}>
         <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="flex-grow-1 d-flex flex-column">
-          <div className="flex-grow-1 bg-light">
-            {children}
-          </div>
-        </div>
       </div>
-    </>
+      <div className="d-md-none">
+        <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      </div>
+      <div className="flex-grow-1 bg-light p-4">
+        {children}
+      </div>
+    </div>
   )
 } 

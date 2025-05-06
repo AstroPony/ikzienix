@@ -86,6 +86,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [shippingData, setShippingData] = useState<ShippingData | null>(null);
   const [saveAddress, setSaveAddress] = useState(false);
+  const [initialShippingData, setInitialShippingData] = useState<ShippingData | null>(null);
 
   useEffect(() => {
     // Set loading to false once we have the session status
@@ -102,7 +103,28 @@ export default function CheckoutPage() {
       router.push('/cart');
       return;
     }
-  }, [status, router, state.items]);
+
+    if (status === 'authenticated' && session?.user?.id) {
+      fetch('/api/account')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.shippingAddress) {
+            setInitialShippingData({
+              name: data.name || '',
+              email: data.email || '',
+              phone: data.phone || '',
+              line1: data.shippingAddress.line1 || '',
+              line2: data.shippingAddress.line2 || '',
+              city: data.shippingAddress.city || '',
+              state: data.shippingAddress.state || '',
+              postalCode: data.shippingAddress.postalCode || '',
+              country: data.shippingAddress.country || '',
+              shippingMethod: 'standard',
+            });
+          }
+        });
+    }
+  }, [status, router, state.items, session]);
 
   // Early return if not authenticated or no items
   if (status === 'unauthenticated' || state.items.length === 0) {
@@ -202,7 +224,7 @@ export default function CheckoutPage() {
       <div className="row">
         <div className="col-md-8">
           {!shippingData ? (
-            <ShippingForm onSubmit={(data, saveAddr) => handleShippingSubmit(data, saveAddr)} />
+            <ShippingForm onSubmit={(data, saveAddr) => handleShippingSubmit(data, saveAddr)} initialValues={initialShippingData} />
           ) : clientSecret ? (
             <Elements
               stripe={stripePromise}

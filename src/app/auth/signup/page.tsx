@@ -224,11 +224,11 @@ function SignupPageInner() {
 
   return (
     <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-12 col-lg-8">
+      <div className="row">
+        <div className="col-12 col-lg-8 mx-auto">
           <div className="card shadow">
             <div className="card-body">
-              <h1 className="display-5 mb-4 text-center">Create Account</h1>
+              <h1 className="display-5 mb-4">Sign Up</h1>
               <button
                 className="btn btn-outline-danger w-100 mb-3"
                 type="button"
@@ -237,8 +237,8 @@ function SignupPageInner() {
                 <i className="bi bi-google me-2"></i> Sign up with Google
               </button>
               <div className="text-center mb-3 text-muted">or</div>
-              {error && <div className="alert alert-danger">{error}</div>}
-              <form onSubmit={handleSubmit}>
+              {error && <div className="alert alert-danger mt-3">{error}</div>}
+              <form onSubmit={handleSubmit} noValidate>
                 <div className="mb-4">
                   <h3 className="h5 mb-3">Personal Information</h3>
                   <div className="mb-3">
@@ -313,10 +313,10 @@ function SignupPageInner() {
 
                 <button
                   type="submit"
-                  className="btn btn-primary w-100"
+                  className="btn btn-primary btn-lg w-100"
                   disabled={loading}
                 >
-                  {loading ? 'Creating Account...' : 'Sign Up'}
+                  {loading ? 'Signing Up...' : 'Sign Up'}
                 </button>
               </form>
               <div className="text-center mt-3">

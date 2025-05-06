@@ -17,21 +17,24 @@ export interface ShippingData {
 
 interface ShippingFormProps {
   onSubmit: (data: ShippingData, saveAddress: boolean) => void;
+  initialValues?: ShippingData | null;
 }
 
-export default function ShippingForm({ onSubmit }: ShippingFormProps) {
-  const [formData, setFormData] = useState<ShippingData>({
-    name: '',
-    email: '',
-    phone: '',
-    line1: '',
-    line2: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: '',
-    shippingMethod: 'standard',
-  });
+export default function ShippingForm({ onSubmit, initialValues }: ShippingFormProps) {
+  const [formData, setFormData] = useState<ShippingData>(
+    initialValues || {
+      name: '',
+      email: '',
+      phone: '',
+      line1: '',
+      line2: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: '',
+      shippingMethod: 'standard',
+    }
+  );
   const [saveAddress, setSaveAddress] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {

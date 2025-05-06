@@ -128,85 +128,94 @@ export default function UsersPage() {
           Add User
         </button>
       </div>
-
-      <div className="card">
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-hover">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Joined</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td>
-                      <div className="fw-medium">{user.name}</div>
-                    </td>
-                    <td>
-                      <span className="text-muted">{user.email}</span>
-                    </td>
-                    <td>
-                      <span className={`badge bg-${user.role === 'admin' ? 'primary' : 'secondary'}`}>
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                      </span>
-                    </td>
-                    <td>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td>
-                      <div className="d-flex gap-2">
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => handleEdit(user)}
-                        >
-                          <i className="bi bi-pencil"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDelete(user.id)}
-                        >
-                          <i className="bi bi-trash"></i>
-                        </button>
-                        <div className="dropdown">
-                          <button
-                            className="btn btn-sm btn-outline-secondary dropdown-toggle"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            Change Role
-                          </button>
-                          <ul className="dropdown-menu">
-                            <li>
+      <div className="row justify-content-center">
+        <div className="col-12">
+          <div className="card shadow">
+            <div className="card-body">
+              <div className="table-responsive">
+                <table className="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Joined</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center text-muted">No users found.</td>
+                      </tr>
+                    ) : (
+                      users.map((user) => (
+                        <tr key={user.id}>
+                          <td>
+                            <div className="fw-medium">{user.name}</div>
+                          </td>
+                          <td>
+                            <span className="text-muted">{user.email}</span>
+                          </td>
+                          <td>
+                            <span className={`badge bg-${user.role === 'admin' ? 'primary' : 'secondary'}`}>
+                              {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                            </span>
+                          </td>
+                          <td>
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </td>
+                          <td>
+                            <div className="d-flex gap-2">
                               <button
-                                className="dropdown-item"
-                                onClick={() => handleRoleChange(user.id, 'user')}
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => handleEdit(user)}
                               >
-                                User
+                                <i className="bi bi-pencil"></i>
                               </button>
-                            </li>
-                            <li>
                               <button
-                                className="dropdown-item"
-                                onClick={() => handleRoleChange(user.id, 'admin')}
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDelete(user.id)}
                               >
-                                Admin
+                                <i className="bi bi-trash"></i>
                               </button>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                              <div className="dropdown">
+                                <button
+                                  className="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                  type="button"
+                                  data-bs-toggle="dropdown"
+                                  aria-expanded="false"
+                                >
+                                  Change Role
+                                </button>
+                                <ul className="dropdown-menu">
+                                  <li>
+                                    <button
+                                      className="dropdown-item"
+                                      onClick={() => handleRoleChange(user.id, 'user')}
+                                    >
+                                      User
+                                    </button>
+                                  </li>
+                                  <li>
+                                    <button
+                                      className="dropdown-item"
+                                      onClick={() => handleRoleChange(user.id, 'admin')}
+                                    >
+                                      Admin
+                                    </button>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>

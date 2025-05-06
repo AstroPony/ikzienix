@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/firebase-admin'
-import CompleteProfileForm from './complete-profile-form'
+import ProfileForm from './complete-profile-form'
 
 export default async function CompleteProfilePage() {
   const session = await getServerSession(authOptions)
@@ -30,7 +30,7 @@ export default async function CompleteProfilePage() {
               <p className="lead mb-4">
                 Please provide your shipping and billing information to complete your profile.
               </p>
-              <CompleteProfileForm userId={session.user.id} />
+              <ProfileForm userId={session.user.id} />
             </div>
           </div>
         </div>

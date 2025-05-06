@@ -252,98 +252,96 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 className="h2 mb-2">Products</h1>
-          <p className="text-muted">Manage your product catalog</p>
-        </div>
-        <div>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              setEditingProduct(null)
-              setIsModalOpen(true)
-            }}
-          >
-            <i className="bi bi-plus-lg me-2"></i>
-            Add Product
-          </button>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-hover">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Featured</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="img-thumbnail"
-                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                      />
-                    </td>
-                    <td>
-                      <div className="fw-medium">{product.name}</div>
-                      <small className="text-muted">{product.description}</small>
-                    </td>
-                    <td>{product.category}</td>
-                    <td>${product.price.toFixed(2)}</td>
-                    <td>
-                      <span className={`badge bg-${product.inStock ? 'success' : 'danger'}`}>
-                        {product.inStock ? 'In Stock' : 'Out of Stock'}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge bg-${product.featured ? 'primary' : 'secondary'}`}>{product.featured ? 'Yes' : 'No'}</span>
-                      <button
-                        type="button"
-                        className={`btn btn-sm ms-2 ${product.featured ? 'btn-outline-primary' : 'btn-outline-secondary'}`}
-                        onClick={() => handleToggleFeatured(product.id, product.featured)}
-                      >
-                        {product.featured ? 'Unfeature' : 'Feature'}
-                      </button>
-                    </td>
-                    <td>
-                      <div className="btn-group">
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => {
-                            setEditingProduct(product)
-                            setIsModalOpen(true)
-                          }}
-                        >
-                          <i className="bi bi-pencil"></i>
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDelete(product.id)}
-                        >
-                          <i className="bi bi-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="row justify-content-center">
+        <div className="col-12">
+          <div className="card shadow">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                  <h1 className="h2 mb-2">Products</h1>
+                  <p className="text-muted">Manage your product catalog</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingProduct(null)
+                    setIsModalOpen(true)
+                  }}
+                  className="btn btn-primary"
+                >
+                  <i className="bi bi-plus-lg me-2"></i>
+                  Add Product
+                </button>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Stock</th>
+                      <th>Featured</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center text-muted">No products found.</td>
+                      </tr>
+                    ) : (
+                      products.map((product) => (
+                        <tr key={product.id}>
+                          <td>
+                            <div className="fw-medium">{product.name}</div>
+                            <small className="text-muted">{product.description}</small>
+                          </td>
+                          <td>{product.category}</td>
+                          <td>${product.price.toFixed(2)}</td>
+                          <td>
+                            <span className={`badge bg-${product.inStock ? 'success' : 'danger'}`}>
+                              {product.inStock ? 'In Stock' : 'Out of Stock'}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`badge bg-${product.featured ? 'primary' : 'secondary'}`}>{product.featured ? 'Yes' : 'No'}</span>
+                            <button
+                              type="button"
+                              className={`btn btn-sm ms-2 ${product.featured ? 'btn-outline-primary' : 'btn-outline-secondary'}`}
+                              onClick={() => handleToggleFeatured(product.id, product.featured)}
+                            >
+                              {product.featured ? 'Unfeature' : 'Feature'}
+                            </button>
+                          </td>
+                          <td>
+                            <div className="btn-group">
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => {
+                                  setEditingProduct(product)
+                                  setIsModalOpen(true)
+                                }}
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDelete(product.id)}
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -33,7 +33,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
       {/* Sidebar */}
       <div
-        className={`admin-sidebar bg-light border-end ${isOpen ? 'start-0 position-fixed' : 'd-none d-md-block position-relative'}`}
+        className={`admin-sidebar bg-white border-end ${isOpen ? 'start-0 position-fixed' : 'd-none d-md-block position-relative'}`}
       >
         <div className="d-flex flex-column flex-grow-1 overflow-auto py-3">
           <div className="px-3 mb-3 d-flex justify-content-between align-items-center">
@@ -55,7 +55,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                   className={`nav-link d-flex align-items-center py-2 px-3 rounded ${
                     isActive
                       ? 'bg-primary text-white'
-                      : 'text-dark hover-bg-light'
+                      : 'text-dark'
                   }`}
                   onClick={onClose}
                 >
