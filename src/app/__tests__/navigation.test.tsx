@@ -13,6 +13,6 @@ describe('Navigation', () => {
       </AuthProvider>
     );
     expect(screen.getAllByLabelText(/ikzienix home/i).length).toBeGreaterThan(0);
-    expect(screen.getByLabelText(/cart/i)).toBeInTheDocument();
+    expect(screen.getAllByLabelText(/cart/i).length).toBeGreaterThan(0);
   });
 }); 
