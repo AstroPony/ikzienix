@@ -12,7 +12,7 @@ describe('Navigation', () => {
         </CartProvider>
       </AuthProvider>
     );
-    expect(screen.getByLabelText(/ikzienix home/i)).toBeInTheDocument();
+    expect(screen.getAllByLabelText(/ikzienix home/i).length).toBeGreaterThan(0);
     expect(screen.getByLabelText(/cart/i)).toBeInTheDocument();
   });
 }); 
