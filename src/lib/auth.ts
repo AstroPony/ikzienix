@@ -1,6 +1,6 @@
 import { NextAuthOptions } from 'next-auth'
 import { auth as adminAuth } from '@/lib/firebase-admin'
-import { auth as clientAuth } from '@/lib/firebase'
+import { clientAuth } from '@/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { db } from '@/lib/firebase-admin'
 import CredentialsProvider from 'next-auth/providers/credentials'

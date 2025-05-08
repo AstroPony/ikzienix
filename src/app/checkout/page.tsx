@@ -16,6 +16,10 @@ import { db } from '@/lib/firebase-admin';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+function CheckoutShippingForm({ onSubmit, initialValues }: { onSubmit: (data: ShippingData, saveAddr: boolean) => void, initialValues: ShippingData | null }) {
+  // ... existing code ...
+}
+
 function CheckoutForm({ shippingData, saveAddress, session }: { shippingData: ShippingData, saveAddress: boolean, session: any }) {
   const stripe = useStripe();
   const elements = useElements();

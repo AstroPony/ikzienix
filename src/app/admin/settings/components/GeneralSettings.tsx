@@ -75,7 +75,8 @@ export default function GeneralSettings({ settings }: GeneralSettingsProps) {
             id="logo-preview"
             src={settings.storeLogo || 'https://via.placeholder.com/120x60?text=Logo'}
             alt="Logo Preview"
-            style={{ maxHeight: 60, maxWidth: 120, objectFit: 'contain', border: '1px solid #ddd', background: '#fff' }}
+            className="img-fluid border rounded bg-white"
+            style={{ maxHeight: '60px', maxWidth: '120px' }}
           />
         </div>
       </div>

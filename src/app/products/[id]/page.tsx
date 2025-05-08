@@ -1,63 +1,42 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import Image from 'next/image'
-import { useCart } from '@/lib/cart-context'
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Product } from '@/types/product'
+import { Product, defaultProduct } from '@/types/product'
+import ProductGallery from '@/components/product/ProductGallery'
+import ProductDetails from '@/components/product/ProductDetails'
+import ProductPrice from '@/components/product/ProductPrice'
+import AddToCartButton from '@/components/product/AddToCartButton'
 
 export default function ProductPage() {
   const params = useParams()
-  const { dispatch } = useCart()
-  const [quantity, setQuantity] = useState(1)
   const [product, setProduct] = useState<Product | null>(null)
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        setIsLoading(true)
-        const productResponse = await fetch(`/api/products/${params.id}`)
-        if (!productResponse.ok) {
-          throw new Error('Failed to fetch product')
-        }
-        const data = await productResponse.json()
-        setProduct(data)
+        const response = await fetch(`/api/products/${params.id}`)
+        if (!response.ok) throw new Error('Failed to fetch product')
+        const data = await response.json()
+        // Merge with default values
+        setProduct({ ...defaultProduct, ...data } as Product)
       } catch (err) {
-        console.error('Error fetching product:', err)
         setError('Error loading product')
       } finally {
         setIsLoading(false)
       }
     }
 
-    if (params.id) {
-      fetchProduct()
-    }
+    fetchProduct()
   }, [params.id])
-
-  const handleAddToCart = () => {
-    if (!product) return
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: { product },
-    })
-    setShowSuccess(true)
-    setTimeout(() => setShowSuccess(false), 2000)
-  }
 
   if (isLoading) {
     return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-3">Loading...</p>
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     )
@@ -66,12 +45,8 @@ export default function ProductPage() {
   if (error || !product) {
     return (
       <div className="container py-5">
-        <div className="text-center">
-          <h1 className="display-5 mb-4">Error</h1>
-          <p className="lead text-muted">{error}</p>
-          <Link href="/" className="btn btn-dark mt-3">
-            Return to Home
-          </Link>
+        <div className="alert alert-danger" role="alert">
+          {error || 'Product not found'}
         </div>
       </div>
     )
@@ -79,40 +54,73 @@ export default function ProductPage() {
 
   return (
     <div className="container py-5">
-      <div className="row">
+      <div className="row g-4">
+        {/* Product Gallery */}
         <div className="col-md-6">
-          <Image
-            src={product.image}
-            alt={product.name}
-            width={500}
-            height={500}
-            className="img-fluid rounded"
-          />
+          <ProductGallery product={product} />
         </div>
+
+        {/* Product Info */}
         <div className="col-md-6">
-          <h1 className="display-5 mb-4">{product.name}</h1>
-          <p className="lead text-muted">{product.description}</p>
-          <p className="h3 mb-4">${product.price.toFixed(2)}</p>
-          {showSuccess && (
-            <div className="alert alert-success mb-3" role="alert">
-              Added to cart!
+          <h1 className="h2 mb-3">{product.name}</h1>
+          <div className="mb-3">
+            <ProductPrice product={product} className="h3" />
+          </div>
+          <p className="text-muted mb-4">{product.description}</p>
+
+          {/* Color Selection */}
+          {product.colors && product.colors.length > 0 && (
+            <div className="mb-4">
+              <label className="form-label">Color</label>
+              <div className="d-flex gap-2">
+                {product.colors.map((color) => (
+                  <div
+                    key={color}
+                    className="form-check"
+                  >
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="color"
+                      id={`color-${color}`}
+                      value={color}
+                    />
+                    <label className="form-check-label" htmlFor={`color-${color}`}>
+                      {color}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-          {product.inStock ? (
-            <button
-              className="btn btn-dark btn-lg"
-              onClick={handleAddToCart}
-              data-testid="add-to-cart"
-            >
-              <i className="bi bi-bag me-2"></i>
-              Add to Cart
-            </button>
-          ) : (
-            <p className="text-danger">Out of Stock</p>
-          )}
+
+          {/* Add to Cart */}
+          <div className="mb-4">
+            <AddToCartButton product={product} className="w-100" />
+          </div>
+
+          {/* Shipping Info */}
+          <div className="card bg-light mb-4">
+            <div className="card-body">
+              <div className="d-flex align-items-center mb-2">
+                <i className="bi bi-truck me-2"></i>
+                <span>
+                  {product.shipping.freeShipping ? 'Free Shipping' : 'Standard Shipping'}
+                </span>
+              </div>
+              <div className="d-flex align-items-center">
+                <i className="bi bi-calendar me-2"></i>
+                <span>Estimated Delivery: {product.shipping.estimatedDelivery}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Product Details */}
+        <div className="col-12 mt-4">
+          <ProductDetails product={product} />
         </div>
       </div>
-      {/* Optionally, render related products here if you implement that logic */}
     </div>
   )
 } 

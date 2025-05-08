@@ -7,17 +7,16 @@ import ProductBadge from './ProductBadge'
 interface ProductImageProps {
   product: Product
   className?: string
-  style?: React.CSSProperties
 }
 
-export default function ProductImage({ product, className = '', style = {} }: ProductImageProps) {
+export default function ProductImage({ product, className = '' }: ProductImageProps) {
   return (
-    <div className={`position-relative ${className}`} style={style}>
+    <div className={`position-relative ratio ratio-1x1 ${className}`}>
       <Image
         src={product.image}
         alt={product.name}
         fill
-        className="object-fit-cover"
+        className="object-fit-cover rounded"
       />
       {product.sale && <ProductBadge type="sale" />}
       {product.new && <ProductBadge type="new" />}

@@ -1,17 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-interface Product {
-  id: string
-  name: string
-  description: string
-  price: number
-  image: string
-  category: string
-  inStock: boolean
-  featured: boolean
-}
+import { Product, defaultProduct } from '@/types/product'
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -76,14 +66,34 @@ export default function ProductsPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
-    const productData = {
-      name: formData.get('name'),
-      description: formData.get('description'),
+    const productData: Partial<Product> = {
+      name: formData.get('name') as string,
+      description: formData.get('description') as string,
       price: parseFloat(formData.get('price') as string),
-      image: formData.get('image'),
-      category: formData.get('category'),
+      image: formData.get('image') as string,
+      category: formData.get('category') as string,
       inStock: formData.get('inStock') === 'true',
       featured: formData.get('featured') === 'on',
+      images: formData.get('images')?.toString().split('\n') || [],
+      colors: formData.get('colors')?.toString().split(', ') || [],
+      specifications: {
+        frameMaterial: formData.get('specifications.frameMaterial') as string,
+        lensMaterial: formData.get('specifications.lensMaterial') as string,
+        lensWidth: formData.get('specifications.lensWidth') as string,
+        bridgeWidth: formData.get('specifications.bridgeWidth') as string,
+        templeLength: formData.get('specifications.templeLength') as string,
+        weight: formData.get('specifications.weight') as string,
+        uvProtection: formData.get('specifications.uvProtection') as string,
+        polarization: formData.get('specifications.polarization') === 'on',
+      },
+      features: formData.get('features')?.toString().split('\n') || [],
+      careInstructions: formData.get('careInstructions')?.toString().split('\n') || [],
+      warranty: formData.get('warranty') as string,
+      shipping: {
+        freeShipping: formData.get('shipping.freeShipping') === 'on',
+        estimatedDelivery: formData.get('shipping.estimatedDelivery') as string,
+        returnPolicy: formData.get('shipping.returnPolicy') as string,
+      },
     }
 
     try {
@@ -203,6 +213,16 @@ export default function ProductsPage() {
                       />
                     </div>
                     <div className="mb-3">
+                      <label className="form-label">Additional Images (one per line)</label>
+                      <textarea
+                        className="form-control"
+                        name="images"
+                        rows={3}
+                        defaultValue={editingProduct?.images?.join('\n') || ''}
+                        placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
+                      />
+                    </div>
+                    <div className="mb-3">
                       <label className="form-label">Category</label>
                       <input
                         type="text"
@@ -211,6 +231,165 @@ export default function ProductsPage() {
                         defaultValue={editingProduct?.category || ''}
                         required
                       />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Colors (comma-separated)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="colors"
+                        defaultValue={editingProduct?.colors?.join(', ') || ''}
+                        placeholder="Black, Brown, Gold"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Specifications</label>
+                      <div className="row g-2">
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="specifications.frameMaterial"
+                            placeholder="Frame Material"
+                            defaultValue={editingProduct?.specifications?.frameMaterial || ''}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="specifications.lensMaterial"
+                            placeholder="Lens Material"
+                            defaultValue={editingProduct?.specifications?.lensMaterial || ''}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="specifications.lensWidth"
+                            placeholder="Lens Width"
+                            defaultValue={editingProduct?.specifications?.lensWidth || ''}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="specifications.bridgeWidth"
+                            placeholder="Bridge Width"
+                            defaultValue={editingProduct?.specifications?.bridgeWidth || ''}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="specifications.templeLength"
+                            placeholder="Temple Length"
+                            defaultValue={editingProduct?.specifications?.templeLength || ''}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="specifications.weight"
+                            placeholder="Weight"
+                            defaultValue={editingProduct?.specifications?.weight || ''}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="specifications.uvProtection"
+                            placeholder="UV Protection"
+                            defaultValue={editingProduct?.specifications?.uvProtection || ''}
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <div className="form-check mt-2">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              name="specifications.polarization"
+                              id="polarization"
+                              defaultChecked={editingProduct?.specifications?.polarization || false}
+                            />
+                            <label className="form-check-label" htmlFor="polarization">
+                              Polarized Lenses
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Features (one per line)</label>
+                      <textarea
+                        className="form-control"
+                        name="features"
+                        rows={3}
+                        defaultValue={editingProduct?.features?.join('\n') || ''}
+                        placeholder="UV400 Protection&#10;Lightweight Frame&#10;Scratch Resistant"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Care Instructions (one per line)</label>
+                      <textarea
+                        className="form-control"
+                        name="careInstructions"
+                        rows={3}
+                        defaultValue={editingProduct?.careInstructions?.join('\n') || ''}
+                        placeholder="Clean with microfiber cloth&#10;Store in case when not in use&#10;Avoid extreme temperatures"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Warranty</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="warranty"
+                        defaultValue={editingProduct?.warranty || ''}
+                        placeholder="1 Year Manufacturer Warranty"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Shipping Information</label>
+                      <div className="row g-2">
+                        <div className="col-md-6">
+                          <div className="form-check mt-2">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              name="shipping.freeShipping"
+                              id="freeShipping"
+                              defaultChecked={editingProduct?.shipping?.freeShipping || false}
+                            />
+                            <label className="form-check-label" htmlFor="freeShipping">
+                              Free Shipping
+                            </label>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="shipping.estimatedDelivery"
+                            placeholder="Estimated Delivery"
+                            defaultValue={editingProduct?.shipping?.estimatedDelivery || ''}
+                          />
+                        </div>
+                        <div className="col-12">
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="shipping.returnPolicy"
+                            placeholder="Return Policy"
+                            defaultValue={editingProduct?.shipping?.returnPolicy || ''}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div className="form-check mb-3">
                       <input

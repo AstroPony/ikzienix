@@ -1,133 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/firebase-admin'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { Query, CollectionReference } from 'firebase-admin/firestore'
+import { analyticsCache } from '@/lib/cache'
 
-export const dynamic = 'force-dynamic'
-
-interface OrderItem {
-  productId: string
-  quantity: number
-  price: number
-}
-
-interface Order {
-  id: string
-  status: string
-  total: number
-  items: OrderItem[]
-  createdAt: { seconds: number }
-}
-
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id || session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    const searchParams = request.nextUrl.searchParams
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
+
+    const cacheKey = `analytics-${page}-${limit}-${startDate}-${endDate}`
+    const cachedData = analyticsCache.get(cacheKey)
+    if (cachedData) {
+      return NextResponse.json(cachedData)
     }
 
-    // Get all orders
-    const ordersRef = db.collection('orders')
-    const ordersSnapshot = await ordersRef.get()
-    const orders = ordersSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Order[]
+    const ordersRef = db.collection('orders') as CollectionReference
+    let ordersQuery: Query = ordersRef
 
-    // Get all users
-    const usersRef = db.collection('users')
-    const usersSnapshot = await usersRef.get()
-    const users = usersSnapshot.docs.map(doc => ({
+    if (startDate && endDate) {
+      ordersQuery = ordersQuery
+        .where('createdAt', '>=', new Date(startDate))
+        .where('createdAt', '<=', new Date(endDate))
+    }
+
+    const totalDocs = await ordersQuery.count().get()
+    const totalOrders = totalDocs.data().count
+
+    const orders = await ordersQuery
+      .orderBy('createdAt', 'desc')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .get()
+
+    const orderData = orders.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }))
 
-    // Calculate total revenue (including pending orders)
-    const totalRevenue = orders.reduce((sum, order: any) => {
-      return (order.status === 'paid' || order.status === 'pending') ? sum + order.total : sum
-    }, 0)
+    const totalPages = Math.ceil(totalOrders / limit)
 
-    // Calculate total orders (including pending orders)
-    const totalOrders = orders.length
-
-    // Calculate total users
-    const totalUsers = users.length
-
-    // Group orders by product to find top selling products
-    const productSales: { [key: string]: number } = {}
-    const productRevenue: { [key: string]: number } = {}
-
-    for (const order of orders) {
-      if (order.status === 'paid' || order.status === 'pending') {
-        for (const item of order.items) {
-          productSales[item.productId] = (productSales[item.productId] || 0) + item.quantity
-          productRevenue[item.productId] = (productRevenue[item.productId] || 0) + (item.price * item.quantity)
-        }
+    const response = {
+      orders: orderData,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: totalOrders,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
       }
     }
 
-    // Get product details for top selling products
-    const topSellingProducts = await Promise.all(
-      Object.entries(productSales)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(async ([productId, quantity]) => {
-          const productDoc = await db.collection('products').doc(productId).get()
-          const productData = productDoc.data()
-          return {
-            name: productData?.name || 'Unknown Product',
-            sales: quantity
-          }
-        })
-    )
-
-    // Group orders by date to calculate daily sales
-    const dailySales = orders.reduce((acc: any, order: any) => {
-      if (order.status === 'paid' || order.status === 'pending') {
-        const date = new Date(order.createdAt.seconds * 1000).toISOString().split('T')[0]
-        acc[date] = (acc[date] || 0) + order.total
-      }
-      return acc
-    }, {})
-
-    // Convert daily sales to array and sort by date
-    const dailyRevenue = Object.entries(dailySales)
-      .map(([date, revenue]) => ({ date, revenue }))
-      .sort((a, b) => a.date.localeCompare(b.date))
-
-    // Calculate sales by category
-    const salesByCategory: Record<string, number> = {}
-    for (const order of orders) {
-      if (order.status === 'paid' || order.status === 'pending') {
-        for (const item of order.items) {
-          const productDoc = await db.collection('products').doc(item.productId).get()
-          const productData = productDoc.data()
-          const category = productData?.category || 'Uncategorized'
-          salesByCategory[category] = (salesByCategory[category] || 0) + (item.price * item.quantity)
-        }
-      }
-    }
-
-    return NextResponse.json({
-      revenue: totalRevenue,
-      orders: totalOrders,
-      visitors: totalUsers,
-      newUsers: totalUsers,
-      revenueChange: 0, // You can implement this based on previous period
-      ordersChange: 0, // You can implement this based on previous period
-      visitorsChange: 0, // You can implement this based on previous period
-      newUsersChange: 0, // You can implement this based on previous period
-      salesByCategory,
-      topProducts: topSellingProducts,
-      dailyRevenue
-    })
-  } catch (error: any) {
+    analyticsCache.set(cacheKey, response)
+    return NextResponse.json(response)
+  } catch (error) {
     console.error('Error fetching analytics:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch analytics' },
+      { error: 'Failed to fetch analytics data' },
       { status: 500 }
     )
   }

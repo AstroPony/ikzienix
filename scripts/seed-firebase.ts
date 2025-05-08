@@ -69,6 +69,11 @@ async function seed() {
         description: 'Timeless black sunglasses with UV400 protection and lightweight frame.',
         price: 29.99,
         image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1577803645773-f96470509666?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'classic',
         inStock: true,
         featured: true,
@@ -83,6 +88,11 @@ async function seed() {
         description: 'Vintage-inspired round sunglasses perfect for any occasion.',
         price: 34.99,
         image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'retro',
         inStock: true,
         featured: true,
@@ -97,6 +107,11 @@ async function seed() {
         description: 'Performance sunglasses designed for active lifestyles.',
         price: 39.99,
         image: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'sport',
         inStock: true,
         featured: false,
@@ -111,6 +126,11 @@ async function seed() {
         description: 'Classic aviator style with gold-tone frame and mirrored lenses.',
         price: 44.99,
         image: 'https://images.unsplash.com/photo-1565616261009-68c3ef5b9c7d?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'aviator',
         inStock: true,
         featured: true,
@@ -126,6 +146,11 @@ async function seed() {
         description: 'Feminine cat-eye sunglasses with a modern twist.',
         price: 32.99,
         image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'cat-eye',
         inStock: true,
         featured: false,
@@ -140,6 +165,11 @@ async function seed() {
         description: 'Iconic wayfarer design with polarized lenses.',
         price: 37.99,
         image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'wayfarer',
         inStock: true,
         featured: true,
@@ -154,6 +184,11 @@ async function seed() {
         description: 'Bold and colorful frames perfect for festivals and parties.',
         price: 29.99,
         image: 'https://images.unsplash.com/photo-1509695507497-903c140c43b0?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'festival',
         inStock: true,
         featured: true,
@@ -168,6 +203,11 @@ async function seed() {
         description: 'Modern square frames with gradient lenses.',
         price: 42.99,
         image: 'https://images.unsplash.com/photo-1546180245-c59500ad14d0?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'urban',
         inStock: true,
         featured: false,
@@ -182,6 +222,11 @@ async function seed() {
         description: 'Sustainable sunglasses made from bamboo with polarized lenses.',
         price: 49.99,
         image: 'https://images.unsplash.com/photo-1582142839970-2b9e04b60f65?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'eco',
         inStock: true,
         featured: true,
@@ -196,6 +241,11 @@ async function seed() {
         description: 'Colorful and durable sunglasses for children.',
         price: 24.99,
         image: 'https://images.unsplash.com/photo-1533511627347-4d1b893e1ad9?auto=format&fit=crop&w=800&q=80',
+        images: [
+          'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584036553516-5d8c4d9aa0b4?auto=format&fit=crop&w=800&q=80'
+        ],
         category: 'kids',
         inStock: true,
         featured: false,

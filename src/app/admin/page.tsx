@@ -19,10 +19,42 @@ interface AnalyticsData {
   dailyRevenue: Array<{ date: string; revenue: number }>
 }
 
+const defaultAnalyticsData: AnalyticsData = {
+  revenue: 0,
+  orders: 0,
+  visitors: 0,
+  newUsers: 0,
+  revenueChange: 0,
+  ordersChange: 0,
+  visitorsChange: 0,
+  newUsersChange: 0,
+  salesByCategory: {},
+  topProducts: [],
+  dailyRevenue: []
+}
+
+// Helper function to ensure data has all required fields
+function ensureAnalyticsData(data: any): AnalyticsData {
+  return {
+    revenue: Number(data?.revenue ?? 0),
+    orders: Number(data?.orders ?? 0),
+    visitors: Number(data?.visitors ?? 0),
+    newUsers: Number(data?.newUsers ?? 0),
+    revenueChange: Number(data?.revenueChange ?? 0),
+    ordersChange: Number(data?.ordersChange ?? 0),
+    visitorsChange: Number(data?.visitorsChange ?? 0),
+    newUsersChange: Number(data?.newUsersChange ?? 0),
+    salesByCategory: data?.salesByCategory ?? {},
+    topProducts: Array.isArray(data?.topProducts) ? data.topProducts : [],
+    dailyRevenue: Array.isArray(data?.dailyRevenue) ? data.dailyRevenue : []
+  }
+}
+
 export default function AdminDashboard() {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(defaultAnalyticsData)
   const [timeRange, setTimeRange] = useState('7d')
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAnalytics()
@@ -30,12 +62,16 @@ export default function AdminDashboard() {
 
   const fetchAnalytics = async () => {
     try {
+      setIsLoading(true)
+      setError(null)
       const response = await fetch(`/api/analytics?range=${timeRange}`)
       if (!response.ok) throw new Error('Failed to fetch analytics')
       const data = await response.json()
-      setAnalyticsData(data)
+      setAnalyticsData(ensureAnalyticsData(data))
     } catch (error) {
       console.error('Error fetching analytics:', error)
+      setError('Failed to load analytics data')
+      setAnalyticsData(defaultAnalyticsData)
     } finally {
       setIsLoading(false)
     }
@@ -43,18 +79,29 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      <div className="container py-5">
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
       </div>
     )
   }
 
-  if (!analyticsData) {
+  if (error) {
     return (
       <div className="container py-5">
-        <div className="alert alert-warning">
-          <h4 className="alert-heading">No Data Available</h4>
-          <p>There is no analytics data available for the selected time range.</p>
+        <div className="alert alert-danger">
+          <h4 className="alert-heading">Error</h4>
+          <p>{error}</p>
+          <hr />
+          <button 
+            className="btn btn-outline-danger"
+            onClick={fetchAnalytics}
+          >
+            Try Again
+          </button>
         </div>
       </div>
     )
