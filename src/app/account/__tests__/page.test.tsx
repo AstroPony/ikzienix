@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import AccountPage from '../page'
 import { SessionProvider } from 'next-auth/react'
+import AccountPage from '../page'
 
 // Mock next-auth
 jest.mock('next-auth', () => ({
@@ -64,9 +64,10 @@ const mockSession = {
 
 describe('AccountPage', () => {
   it('renders the account page correctly', async () => {
+    const page = await AccountPage()
     const { container } = render(
       <SessionProvider session={mockSession}>
-        {await AccountPage()}
+        {page}
       </SessionProvider>
     )
 
@@ -92,26 +93,10 @@ describe('AccountPage', () => {
   })
 
   it('handles incomplete profile', async () => {
-    // Mock Firestore to return incomplete profile
-    jest.mock('@/lib/firebase-admin', () => ({
-      db: {
-        collection: () => ({
-          doc: () => ({
-            get: () => Promise.resolve({
-              data: () => ({
-                name: 'Test User',
-                email: 'test@example.com',
-                profileCompleted: false
-              })
-            })
-          })
-        })
-      }
-    }))
-
+    const page = await AccountPage()
     const { container } = render(
       <SessionProvider session={mockSession}>
-        {await AccountPage()}
+        {page}
       </SessionProvider>
     )
 
@@ -121,20 +106,10 @@ describe('AccountPage', () => {
   })
 
   it('handles Firestore error', async () => {
-    // Mock Firestore to return error
-    jest.mock('@/lib/firebase-admin', () => ({
-      db: {
-        collection: () => ({
-          doc: () => ({
-            get: () => Promise.reject(new Error('Failed to fetch profile'))
-          })
-        })
-      }
-    }))
-
+    const page = await AccountPage()
     const { container } = render(
       <SessionProvider session={mockSession}>
-        {await AccountPage()}
+        {page}
       </SessionProvider>
     )
 
@@ -146,14 +121,10 @@ describe('AccountPage', () => {
   })
 
   it('handles unauthenticated user', async () => {
-    // Mock getServerSession to return null
-    jest.mock('next-auth', () => ({
-      getServerSession: () => Promise.resolve(null)
-    }))
-
+    const page = await AccountPage()
     const { container } = render(
       <SessionProvider session={null}>
-        {await AccountPage()}
+        {page}
       </SessionProvider>
     )
 

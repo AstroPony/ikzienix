@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import ChangePasswordPage from '../page'
 import { SessionProvider } from 'next-auth/react'
+import ChangePasswordPage from '../page'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

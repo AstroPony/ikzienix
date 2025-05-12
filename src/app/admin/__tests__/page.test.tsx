@@ -1,6 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import AdminDashboard from '../page'
 import { SessionProvider } from 'next-auth/react'
+import AdminDashboard from '../page'
 
 // Mock the session
 const mockSession = {

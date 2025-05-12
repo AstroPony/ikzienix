@@ -87,10 +87,14 @@ const mockReviews = [
 ]
 
 // Mock the API functions
+const mockGetProduct = jest.fn().mockResolvedValue(mockProduct)
+const mockGetRelatedProducts = jest.fn().mockResolvedValue(mockRelatedProducts)
+const mockGetReviews = jest.fn().mockResolvedValue(mockReviews)
+
 jest.mock('@/lib/api', () => ({
-  getProduct: jest.fn().mockResolvedValue(mockProduct),
-  getRelatedProducts: jest.fn().mockResolvedValue(mockRelatedProducts),
-  getReviews: jest.fn().mockResolvedValue(mockReviews)
+  getProduct: () => mockGetProduct(),
+  getRelatedProducts: () => mockGetRelatedProducts(),
+  getReviews: () => mockGetReviews()
 }))
 
 const renderWithProviders = (component: React.ReactNode) => {
@@ -134,12 +138,8 @@ describe('ProductPage', () => {
   })
 
   it('shows out of stock message for unavailable products', async () => {
-    // Mock getProduct to return out of stock product
-    jest.mock('@/lib/api', () => ({
-      getProduct: jest.fn().mockResolvedValue(mockOutOfStockProduct),
-      getRelatedProducts: jest.fn().mockResolvedValue(mockRelatedProducts),
-      getReviews: jest.fn().mockResolvedValue(mockReviews)
-    }))
+    // Update mock to return out of stock product
+    mockGetProduct.mockResolvedValueOnce(mockOutOfStockProduct)
 
     renderWithProviders(<ProductPage params={{ slug: 'out-of-stock-product' }} />)
 

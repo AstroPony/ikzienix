@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import CheckoutPage from '../page'
 import { SessionProvider } from 'next-auth/react'
+import CheckoutPage from '../page'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

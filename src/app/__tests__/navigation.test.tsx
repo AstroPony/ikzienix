@@ -1,7 +1,13 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Navigation from '@/components/navigation/Navigation';
 import { SessionProvider } from 'next-auth/react';
 import { CartProvider } from '@/lib/cart-context';
+import { WishlistProvider } from '@/context/WishlistContext';
+
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/'
+}));
 
 // Mock the session
 const mockSession = {
@@ -13,15 +19,21 @@ const mockSession = {
   expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 };
 
+const renderWithProviders = (component: React.ReactNode) => {
+  return render(
+    <SessionProvider session={mockSession}>
+      <CartProvider>
+        <WishlistProvider>
+          {component}
+        </WishlistProvider>
+      </CartProvider>
+    </SessionProvider>
+  );
+};
+
 describe('Navigation', () => {
   it('renders the navigation bar correctly', () => {
-    render(
-      <SessionProvider session={null}>
-        <CartProvider>
-          <Navigation />
-        </CartProvider>
-      </SessionProvider>
-    );
+    renderWithProviders(<Navigation />);
 
     // Check for logo
     expect(screen.getByText('Ikzienix')).toBeInTheDocument();
@@ -36,13 +48,7 @@ describe('Navigation', () => {
   });
 
   it('handles mobile menu toggle', () => {
-    render(
-      <SessionProvider session={null}>
-        <CartProvider>
-          <Navigation />
-        </CartProvider>
-      </SessionProvider>
-    );
+    renderWithProviders(<Navigation />);
 
     // Find and click the hamburger button
     const hamburgerButton = screen.getByLabelText('Toggle navigation');
@@ -56,7 +62,9 @@ describe('Navigation', () => {
     render(
       <SessionProvider session={null}>
         <CartProvider>
-          <Navigation />
+          <WishlistProvider>
+            <Navigation />
+          </WishlistProvider>
         </CartProvider>
       </SessionProvider>
     );
@@ -71,13 +79,7 @@ describe('Navigation', () => {
   });
 
   it('shows correct links for authenticated user', () => {
-    render(
-      <SessionProvider session={mockSession}>
-        <CartProvider>
-          <Navigation />
-        </CartProvider>
-      </SessionProvider>
-    );
+    renderWithProviders(<Navigation />);
 
     // Check for account dropdown
     const accountDropdown = screen.getByLabelText('Account');
@@ -94,13 +96,7 @@ describe('Navigation', () => {
   });
 
   it('handles cart interaction', () => {
-    render(
-      <SessionProvider session={null}>
-        <CartProvider>
-          <Navigation />
-        </CartProvider>
-      </SessionProvider>
-    );
+    renderWithProviders(<Navigation />);
 
     // Check for cart button
     const cartButton = screen.getByLabelText('Cart');

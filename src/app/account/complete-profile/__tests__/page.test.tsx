@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import CompleteProfilePage from '../page'
 import { SessionProvider } from 'next-auth/react'
+import CompleteProfilePage from '../page'
 
 // Mock next-auth
 jest.mock('next-auth', () => ({
@@ -57,9 +57,10 @@ const mockSession = {
 
 describe('CompleteProfilePage', () => {
   it('renders the complete profile page correctly', async () => {
-    const { container } = render(
+    const page = await CompleteProfilePage()
+    render(
       <SessionProvider session={mockSession}>
-        {await CompleteProfilePage()}
+        {page}
       </SessionProvider>
     )
 
@@ -106,9 +107,10 @@ describe('CompleteProfilePage', () => {
       }
     }))
 
-    const { container } = render(
+    const page = await CompleteProfilePage()
+    render(
       <SessionProvider session={mockSession}>
-        {await CompleteProfilePage()}
+        {page}
       </SessionProvider>
     )
 
@@ -128,9 +130,10 @@ describe('CompleteProfilePage', () => {
       }
     }))
 
-    const { container } = render(
+    const page = await CompleteProfilePage()
+    render(
       <SessionProvider session={mockSession}>
-        {await CompleteProfilePage()}
+        {page}
       </SessionProvider>
     )
 
@@ -147,9 +150,10 @@ describe('CompleteProfilePage', () => {
       getServerSession: () => Promise.resolve(null)
     }))
 
-    const { container } = render(
+    const page = await CompleteProfilePage()
+    render(
       <SessionProvider session={null}>
-        {await CompleteProfilePage()}
+        {page}
       </SessionProvider>
     )
 

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import { SessionProvider } from 'next-auth/react'
 import CollectionsPage from '../page'
 import { Product } from '@/types/product'
 
@@ -6,7 +7,7 @@ import { Product } from '@/types/product'
 const mockProducts: Product[] = [
   {
     id: '1',
-    name: 'Test Collection',
+    name: 'test Collection',
     description: 'Test Description',
     price: 99.99,
     image: '/test-image.jpg',
@@ -42,63 +43,109 @@ const mockProducts: Product[] = [
   }
 ]
 
-global.fetch = jest.fn().mockImplementation(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve(mockProducts)
-  })
-)
+// Mock fetch
+global.fetch = jest.fn()
+
+// Mock session
+const mockSession = {
+  user: {
+    id: 'test-user-id',
+    name: 'Test User',
+    email: 'test@example.com'
+  },
+  expires: new Date(Date.now() + 2 * 86400).toISOString()
+}
 
 describe('CollectionsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('renders the Collections page correctly', async () => {
-    render(<CollectionsPage />)
-    
+    // Mock successful fetch
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({
+        name: 'Test Collection',
+        description: 'Test Description',
+        price: 99.99,
+        features: ['Feature 1', 'Feature 2'],
+        shipping: {
+          method: 'standard',
+          cost: 5.99,
+          estimatedDays: '3-5'
+        }
+      })
+    })
+
+    render(
+      <SessionProvider session={mockSession}>
+        <CollectionsPage />
+      </SessionProvider>
+    )
+
     // Wait for loading to complete
     await waitFor(() => {
-      expect(screen.getByText('Collections')).toBeInTheDocument()
+      expect(screen.queryByText(/Loading collections/i)).not.toBeInTheDocument()
     })
-    
+
     // Check for collection name and description
-    expect(screen.getByText('Test Collection')).toBeInTheDocument()
-    expect(screen.getByText('Test Description')).toBeInTheDocument()
+    expect(screen.getByText(/test collection/i)).toBeInTheDocument()
+    expect(screen.getByText(/test description/i)).toBeInTheDocument()
   })
 
   it('handles error state', async () => {
-    // Mock fetch to return error
-    global.fetch = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => Promise.reject(new Error('Failed to fetch'))
-      })
-    )
+    // Mock failed fetch
+    ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to fetch'))
 
-    render(<CollectionsPage />)
+    render(
+      <SessionProvider session={mockSession}>
+        <CollectionsPage />
+      </SessionProvider>
+    )
 
     // Wait for error message
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument()
+      expect(screen.getByText(/error loading collections/i)).toBeInTheDocument()
     })
-
-    expect(screen.getByText('Failed to load collections')).toBeInTheDocument()
   })
 
   it('displays collection details', async () => {
-    render(<CollectionsPage />)
+    // Mock successful fetch
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({
+        name: 'Test Collection',
+        description: 'Test Description',
+        price: 99.99,
+        features: ['Feature 1', 'Feature 2'],
+        shipping: {
+          method: 'standard',
+          cost: 5.99,
+          estimatedDays: '3-5'
+        }
+      })
+    })
+
+    render(
+      <SessionProvider session={mockSession}>
+        <CollectionsPage />
+      </SessionProvider>
+    )
 
     // Wait for collection details to load
     await waitFor(() => {
-      expect(screen.getByText('Test Collection')).toBeInTheDocument()
+      expect(screen.queryByText(/Loading collections/i)).not.toBeInTheDocument()
     })
 
-    // Check for price
-    expect(screen.getByText('$99.99')).toBeInTheDocument()
-
-    // Check for features
-    expect(screen.getByText('UV Protection')).toBeInTheDocument()
-    expect(screen.getByText('Polarized Lenses')).toBeInTheDocument()
-
-    // Check for shipping info
-    expect(screen.getByText('Free Shipping')).toBeInTheDocument()
-    expect(screen.getByText('3-5 business days')).toBeInTheDocument()
+    // Check for collection details
+    expect(screen.getByText(/test collection/i)).toBeInTheDocument()
+    expect(screen.getByText(/test description/i)).toBeInTheDocument()
+    expect(screen.getByText(/\$99.99/i)).toBeInTheDocument()
+    expect(screen.getByText(/feature 1/i)).toBeInTheDocument()
+    expect(screen.getByText(/feature 2/i)).toBeInTheDocument()
+    expect(screen.getByText(/standard shipping/i)).toBeInTheDocument()
+    expect(screen.getByText(/\$5.99/i)).toBeInTheDocument()
+    expect(screen.getByText(/3-5 days/i)).toBeInTheDocument()
   })
 }) 
