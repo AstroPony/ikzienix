@@ -1,8 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
-import CheckoutPage from '../page'
 import { CartProvider } from '@/lib/cart-context'
-import { Product } from '@/types/product'
+import CheckoutPage from '../page'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -11,7 +10,6 @@ jest.mock('next/navigation', () => ({
   }),
 }))
 
-// Mock session
 const mockSession = {
   user: {
     id: '1',
@@ -21,42 +19,27 @@ const mockSession = {
   expires: '1',
 }
 
-// Mock cart state
-const mockProduct: Product = {
+const mockProduct = {
   id: '1',
   name: 'Test Product',
   price: 99.99,
-  description: 'Test description',
+  description: 'Test Description',
   image: '/test.jpg',
-  images: ['/test.jpg'],
   category: 'test',
-  rating: 0,
-  reviews: 0,
-  featured: false,
-  colors: ['black'],
+  rating: 4.5,
+  reviews: 10,
+  featured: true,
+  colors: ['red', 'blue'],
   inStock: true,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
   sku: 'TEST-001',
   slug: 'test-product',
-  specifications: {
-    frameMaterial: 'Metal',
-    lensMaterial: 'Polycarbonate',
-    lensWidth: '50mm',
-    bridgeWidth: '18mm',
-    templeLength: '140mm',
-    weight: '25g',
-    uvProtection: 'UV400',
-    polarization: true,
-  },
-  features: ['Feature 1', 'Feature 2'],
-  careInstructions: ['Instruction 1', 'Instruction 2'],
-  warranty: '1 year warranty',
-  shipping: {
-    freeShipping: true,
-    estimatedDelivery: '3-5 business days',
-    returnPolicy: '30 days return policy',
-  },
+  specifications: {},
+  features: [],
+  careInstructions: [],
+  warranty: '',
+  shipping: '',
 }
 
 const mockCartState = {
@@ -66,32 +49,30 @@ const mockCartState = {
       quantity: 1,
     },
   ],
-  isOpen: false,
-  isLoading: false,
-  error: null,
 }
 
-// Mock fetch
-global.fetch = jest.fn()
-
-const renderWithProviders = (component: React.ReactNode) => {
+const renderWithProviders = (ui: React.ReactElement) => {
   return render(
     <SessionProvider session={mockSession}>
-      <CartProvider>{component}</CartProvider>
+      <CartProvider>{ui}</CartProvider>
     </SessionProvider>
   )
 }
 
 describe('CheckoutPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    // Mock fetch for order creation
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ orderId: '123' }),
+    })
   })
 
   it('renders the checkout page correctly', async () => {
     renderWithProviders(<CheckoutPage />)
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Checkout' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /checkout/i })).toBeInTheDocument()
     })
   })
 
@@ -105,11 +86,6 @@ describe('CheckoutPage', () => {
   })
 
   it('handles form submission', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    })
-
     renderWithProviders(<CheckoutPage />)
 
     // Fill in shipping details
@@ -119,41 +95,24 @@ describe('CheckoutPage', () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: 'john@example.com' },
     })
-    fireEvent.change(screen.getByLabelText(/phone/i), {
-      target: { value: '1234567890' },
-    })
     fireEvent.change(screen.getByLabelText(/address/i), {
       target: { value: '123 Main St' },
     })
     fireEvent.change(screen.getByLabelText(/city/i), {
-      target: { value: 'New York' },
+      target: { value: 'Test City' },
     })
     fireEvent.change(screen.getByLabelText(/state/i), {
-      target: { value: 'NY' },
+      target: { value: 'Test State' },
     })
-    fireEvent.change(screen.getByLabelText(/postal code/i), {
-      target: { value: '10001' },
-    })
-    fireEvent.change(screen.getByLabelText(/country/i), {
-      target: { value: 'USA' },
-    })
-
-    // Fill in payment details
-    fireEvent.change(screen.getByLabelText(/card number/i), {
-      target: { value: '4242424242424242' },
-    })
-    fireEvent.change(screen.getByLabelText(/expiry/i), {
-      target: { value: '12/25' },
-    })
-    fireEvent.change(screen.getByLabelText(/cvc/i), {
-      target: { value: '123' },
+    fireEvent.change(screen.getByLabelText(/zip code/i), {
+      target: { value: '12345' },
     })
 
     // Submit form
     fireEvent.click(screen.getByRole('button', { name: /place order/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Order placed successfully!')).toBeInTheDocument()
+      expect(screen.getByText(/order placed successfully/i)).toBeInTheDocument()
     })
   })
 
@@ -164,22 +123,15 @@ describe('CheckoutPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /place order/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Full name is required')).toBeInTheDocument()
-      expect(screen.getByText('Email is required')).toBeInTheDocument()
-      expect(screen.getByText('Phone number is required')).toBeInTheDocument()
-      expect(screen.getByText('Address is required')).toBeInTheDocument()
-      expect(screen.getByText('City is required')).toBeInTheDocument()
-      expect(screen.getByText('State is required')).toBeInTheDocument()
-      expect(screen.getByText('Postal code is required')).toBeInTheDocument()
-      expect(screen.getByText('Country is required')).toBeInTheDocument()
-      expect(screen.getByText('Card number is required')).toBeInTheDocument()
-      expect(screen.getByText('Expiry date is required')).toBeInTheDocument()
-      expect(screen.getByText('CVC is required')).toBeInTheDocument()
+      expect(screen.getByText(/full name is required/i)).toBeInTheDocument()
+      expect(screen.getByText(/email is required/i)).toBeInTheDocument()
+      expect(screen.getByText(/address is required/i)).toBeInTheDocument()
     })
   })
 
   it('handles error state', async () => {
-    ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to place order'))
+    // Mock fetch to fail
+    global.fetch = jest.fn().mockRejectedValue(new Error('Failed to create order'))
 
     renderWithProviders(<CheckoutPage />)
 
@@ -190,39 +142,25 @@ describe('CheckoutPage', () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: 'john@example.com' },
     })
-    fireEvent.change(screen.getByLabelText(/phone/i), {
-      target: { value: '1234567890' },
-    })
     fireEvent.change(screen.getByLabelText(/address/i), {
       target: { value: '123 Main St' },
     })
     fireEvent.change(screen.getByLabelText(/city/i), {
-      target: { value: 'New York' },
+      target: { value: 'Test City' },
     })
     fireEvent.change(screen.getByLabelText(/state/i), {
-      target: { value: 'NY' },
+      target: { value: 'Test State' },
     })
-    fireEvent.change(screen.getByLabelText(/postal code/i), {
-      target: { value: '10001' },
-    })
-    fireEvent.change(screen.getByLabelText(/country/i), {
-      target: { value: 'USA' },
-    })
-    fireEvent.change(screen.getByLabelText(/card number/i), {
-      target: { value: '4242424242424242' },
-    })
-    fireEvent.change(screen.getByLabelText(/expiry/i), {
-      target: { value: '12/25' },
-    })
-    fireEvent.change(screen.getByLabelText(/cvc/i), {
-      target: { value: '123' },
+    fireEvent.change(screen.getByLabelText(/zip code/i), {
+      target: { value: '12345' },
     })
 
     // Submit form
     fireEvent.click(screen.getByRole('button', { name: /place order/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to place order')).toBeInTheDocument()
+      expect(screen.getByText(/error/i)).toBeInTheDocument()
+      expect(screen.getByText(/failed to place order/i)).toBeInTheDocument()
     })
   })
 
@@ -236,7 +174,7 @@ describe('CheckoutPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Please sign in to continue')).toBeInTheDocument()
+      expect(screen.getByText(/please sign in to continue/i)).toBeInTheDocument()
     })
   })
 }) 

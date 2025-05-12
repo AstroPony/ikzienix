@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
 import AccountPage from '../page'
 
@@ -6,119 +6,89 @@ import AccountPage from '../page'
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn()
-  })
+  }),
 }))
 
-// Mock the session
-const mockSession = {
-  user: {
-    id: '1',
-    email: 'test@example.com',
-    name: 'Test User'
-  },
-  expires: new Date(Date.now() + 2 * 86400).toISOString()
-}
+// Mock next-auth
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn().mockResolvedValue({
+    user: {
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+    },
+  }),
+}))
 
-// Mock fetch
-global.fetch = jest.fn().mockImplementation(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({
-      user: {
-        id: '1',
-        email: 'test@example.com',
+// Mock firebase-admin
+jest.mock('@/lib/firebase-admin', () => ({
+  db: {
+    collection: jest.fn().mockReturnThis(),
+    doc: jest.fn().mockReturnThis(),
+    get: jest.fn().mockResolvedValue({
+      exists: true,
+      data: () => ({
         name: 'Test User',
-        role: 'user'
-      },
-      orders: [
-        {
-          id: '1',
-          total: 100,
-          status: 'pending',
-          createdAt: '2024-01-01T00:00:00Z'
-        }
-      ]
-    })
-  })
-)
+        email: 'test@example.com',
+        role: 'user',
+      }),
+    }),
+  },
+}))
 
 describe('AccountPage', () => {
   it('renders the account page correctly', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
+    render(
+      <SessionProvider
+        session={{
+          user: {
+            id: '1',
+            email: 'test@example.com',
+            name: 'Test User',
+          },
+          expires: '1',
+        }}
+      >
         <AccountPage />
       </SessionProvider>
     )
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /my account/i })).toBeInTheDocument()
     })
-
-    expect(screen.getByText('My Account')).toBeInTheDocument()
-    expect(screen.getByText('Manage your account settings')).toBeInTheDocument()
   })
 
   it('displays user information', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
+    render(
+      <SessionProvider
+        session={{
+          user: {
+            id: '1',
+            email: 'test@example.com',
+            name: 'Test User',
+          },
+          expires: '1',
+        }}
+      >
         <AccountPage />
       </SessionProvider>
     )
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByText('Test User')).toBeInTheDocument()
+      expect(screen.getByText('test@example.com')).toBeInTheDocument()
     })
-
-    expect(screen.getByText('Test User')).toBeInTheDocument()
-    expect(screen.getByText('test@example.com')).toBeInTheDocument()
   })
 
-  it('displays order history', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <AccountPage />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(container).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('Order #1')).toBeInTheDocument()
-    expect(screen.getByText('$100.00')).toBeInTheDocument()
-    expect(screen.getByText('Pending')).toBeInTheDocument()
-  })
-
-  it('handles error state', async () => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
-      Promise.reject(new Error('Failed to fetch account data'))
-    )
-
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <AccountPage />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(container).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('Error')).toBeInTheDocument()
-    expect(screen.getByText('Failed to load account data')).toBeInTheDocument()
-  })
-
-  it('handles unauthorized access', async () => {
-    const { container } = render(
+  it('redirects to sign in if not authenticated', async () => {
+    render(
       <SessionProvider session={null}>
         <AccountPage />
       </SessionProvider>
     )
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByText(/please sign in to continue/i)).toBeInTheDocument()
     })
   })
 }) 

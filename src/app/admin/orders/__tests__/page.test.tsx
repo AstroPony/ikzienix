@@ -20,20 +20,39 @@ const mockSession = {
   expires: '1',
 }
 
-// Mock fetch
-global.fetch = jest.fn()
+const mockOrders = [
+  {
+    id: 'ORD-001',
+    customer: {
+      name: 'John Doe',
+      email: 'john@example.com',
+    },
+    date: '2024-01-01',
+    total: 100.00,
+    status: 'pending',
+  },
+  {
+    id: 'ORD-002',
+    customer: {
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+    },
+    date: '2024-01-02',
+    total: 150.00,
+    status: 'processing',
+  },
+]
 
 describe('OrdersPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    // Mock fetch for orders data
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockOrders),
+    })
   })
 
   it('renders the orders page correctly', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve([]),
-    })
-
     render(
       <SessionProvider session={mockSession}>
         <OrdersPage />
@@ -41,41 +60,12 @@ describe('OrdersPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Orders' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /orders/i })).toBeInTheDocument()
+      expect(screen.getByText(/manage customer orders/i)).toBeInTheDocument()
     })
   })
 
   it('displays orders data correctly', async () => {
-    const mockOrders = [
-      {
-        id: '1',
-        orderNumber: 'ORD-001',
-        customer: {
-          name: 'John Doe',
-          email: 'john@example.com',
-        },
-        total: 100.00,
-        status: 'pending',
-        createdAt: '2024-01-01T00:00:00Z',
-      },
-      {
-        id: '2',
-        orderNumber: 'ORD-002',
-        customer: {
-          name: 'Jane Smith',
-          email: 'jane@example.com',
-        },
-        total: 200.00,
-        status: 'processing',
-        createdAt: '2024-01-02T00:00:00Z',
-      },
-    ]
-
-    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockOrders),
-    })
-
     render(
       <SessionProvider session={mockSession}>
         <OrdersPage />
@@ -88,14 +78,19 @@ describe('OrdersPage', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('Jane Smith')).toBeInTheDocument()
       expect(screen.getByText('$100.00')).toBeInTheDocument()
-      expect(screen.getByText('$200.00')).toBeInTheDocument()
-      expect(screen.getAllByText('Pending')[0]).toBeInTheDocument()
-      expect(screen.getAllByText('Processing')[0]).toBeInTheDocument()
+      expect(screen.getByText('$150.00')).toBeInTheDocument()
+      
+      // Use getAllByText for status badges since there might be multiple elements
+      const pendingBadges = screen.getAllByText('Pending')
+      expect(pendingBadges[0]).toBeInTheDocument()
+      const processingBadges = screen.getAllByText('Processing')
+      expect(processingBadges[0]).toBeInTheDocument()
     })
   })
 
   it('handles error state', async () => {
-    ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to load orders'))
+    // Mock fetch to fail
+    global.fetch = jest.fn().mockRejectedValue(new Error('Failed to fetch'))
 
     render(
       <SessionProvider session={mockSession}>
@@ -104,18 +99,15 @@ describe('OrdersPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument()
-      expect(screen.getByText('Failed to load orders')).toBeInTheDocument()
+      expect(screen.getByText(/error/i)).toBeInTheDocument()
+      expect(screen.getByText(/failed to load orders/i)).toBeInTheDocument()
     })
   })
 
   it('redirects non-admin users', async () => {
     const nonAdminSession = {
       ...mockSession,
-      user: {
-        ...mockSession.user,
-        role: 'user',
-      },
+      user: { ...mockSession.user, role: 'user' },
     }
 
     render(
@@ -125,8 +117,8 @@ describe('OrdersPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('Access denied')).toBeInTheDocument()
-      expect(screen.getByText('You do not have permission to access this page.')).toBeInTheDocument()
+      expect(screen.getByText(/access denied/i)).toBeInTheDocument()
+      expect(screen.getByText(/you do not have permission to access this page/i)).toBeInTheDocument()
     })
   })
 }) 
