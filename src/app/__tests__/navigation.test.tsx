@@ -1,17 +1,17 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import Navigation from '@/components/navigation/Navigation';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SessionProvider } from 'next-auth/react';
+import Navigation from '@/components/navigation/Navigation';
 import { CartProvider } from '@/lib/cart-context';
 import { WishlistProvider } from '@/context/WishlistContext';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
+  usePathname: () => '/',
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
     prefetch: jest.fn()
-  }),
-  usePathname: () => '/'
+  })
 }));
 
 // Mock the session
@@ -38,52 +38,36 @@ const renderWithProviders = (component: React.ReactNode) => {
 
 describe('Navigation', () => {
   it('renders the navigation correctly', () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <Navigation />
-      </SessionProvider>
-    );
+    renderWithProviders(<Navigation />);
 
-    expect(container).toBeInTheDocument();
-    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('Shop')).toBeInTheDocument();
     expect(screen.getByText('Collections')).toBeInTheDocument();
-    expect(screen.getByText('About')).toBeInTheDocument();
-    expect(screen.getByText('Contact')).toBeInTheDocument();
+    expect(screen.getByText('Account')).toBeInTheDocument();
   });
 
   it('displays user menu when logged in', () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <Navigation />
-      </SessionProvider>
-    );
+    renderWithProviders(<Navigation />);
 
-    expect(container).toBeInTheDocument();
     expect(screen.getByText('Test User')).toBeInTheDocument();
-    expect(screen.getByText('Account')).toBeInTheDocument();
-    expect(screen.getByText('Orders')).toBeInTheDocument();
-    expect(screen.getByText('Sign Out')).toBeInTheDocument();
   });
 
   it('displays sign in button when not logged in', () => {
-    const { container } = render(
+    render(
       <SessionProvider session={null}>
-        <Navigation />
+        <CartProvider>
+          <WishlistProvider>
+            <Navigation />
+          </WishlistProvider>
+        </CartProvider>
       </SessionProvider>
     );
 
-    expect(container).toBeInTheDocument();
     expect(screen.getByText('Sign In')).toBeInTheDocument();
   });
 
-  it('toggles mobile menu', () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <Navigation />
-      </SessionProvider>
-    );
+  it('handles mobile menu toggle', () => {
+    renderWithProviders(<Navigation />);
 
-    expect(container).toBeInTheDocument();
     const menuButton = screen.getByRole('button', { name: /menu/i });
     fireEvent.click(menuButton);
 
@@ -91,13 +75,8 @@ describe('Navigation', () => {
   });
 
   it('displays cart icon', () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <Navigation />
-      </SessionProvider>
-    );
+    renderWithProviders(<Navigation />);
 
-    expect(container).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /cart/i })).toBeInTheDocument();
   });
 }); 

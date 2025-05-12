@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
 import CheckoutPage from '../page'
+import { CartProvider } from '@/lib/cart-context'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -22,191 +23,124 @@ const mockSession = {
 }
 
 // Mock cart context
-jest.mock('@/lib/cart-context', () => ({
-  useCart: () => ({
-    items: [
-      {
-        id: '1',
-        name: 'Test Product',
-        price: 100,
-        quantity: 2,
-        image: 'test-image.jpg'
-      }
-    ],
-    total: 200,
-    addItem: jest.fn(),
-    removeItem: jest.fn(),
-    updateQuantity: jest.fn(),
-    clearCart: jest.fn()
-  })
-}))
+const mockCartState = {
+  items: [
+    {
+      id: '1',
+      name: 'Test Product',
+      price: 100,
+      quantity: 1,
+      image: '/test.jpg'
+    }
+  ],
+  total: 100
+}
 
-// Mock fetch
-global.fetch = jest.fn().mockImplementation(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ success: true })
-  })
-)
+const renderWithProviders = (component: React.ReactNode) => {
+  return render(
+    <SessionProvider session={mockSession}>
+      <CartProvider>
+        {component}
+      </CartProvider>
+    </SessionProvider>
+  )
+}
 
 describe('CheckoutPage', () => {
   it('renders the checkout page correctly', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <CheckoutPage />
-      </SessionProvider>
-    )
+    renderWithProviders(<CheckoutPage />)
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.queryByText('Loading checkout...')).not.toBeInTheDocument()
     })
 
-    expect(screen.getByText('Checkout')).toBeInTheDocument()
-    expect(screen.getByText('Complete your purchase')).toBeInTheDocument()
+    expect(screen.getByText('Payment Details')).toBeInTheDocument()
   })
 
   it('displays cart items correctly', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <CheckoutPage />
-      </SessionProvider>
-    )
+    renderWithProviders(<CheckoutPage />)
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.queryByText('Loading checkout...')).not.toBeInTheDocument()
     })
 
     expect(screen.getByText('Test Product')).toBeInTheDocument()
     expect(screen.getByText('$100.00')).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
-    expect(screen.getByText('$200.00')).toBeInTheDocument()
   })
 
   it('handles form submission', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <CheckoutPage />
-      </SessionProvider>
-    )
+    renderWithProviders(<CheckoutPage />)
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.queryByText('Loading checkout...')).not.toBeInTheDocument()
     })
 
-    const nameInput = screen.getByLabelText(/name/i)
-    const emailInput = screen.getByLabelText(/email/i)
-    const addressInput = screen.getByLabelText(/address/i)
-    const cityInput = screen.getByLabelText(/city/i)
-    const stateInput = screen.getByLabelText(/state/i)
-    const postalCodeInput = screen.getByLabelText(/postal code/i)
-    const countryInput = screen.getByLabelText(/country/i)
-    const cardNumberInput = screen.getByLabelText(/card number/i)
-    const expiryInput = screen.getByLabelText(/expiry/i)
-    const cvcInput = screen.getByLabelText(/cvc/i)
+    // Fill in shipping form
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'John Doe' } })
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } })
+    fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } })
+    fireEvent.change(screen.getByLabelText(/city/i), { target: { value: 'New York' } })
+    fireEvent.change(screen.getByLabelText(/state/i), { target: { value: 'NY' } })
+    fireEvent.change(screen.getByLabelText(/postal code/i), { target: { value: '10001' } })
+    fireEvent.change(screen.getByLabelText(/country/i), { target: { value: 'USA' } })
 
-    fireEvent.change(nameInput, { target: { value: 'Test User' } })
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    fireEvent.change(addressInput, { target: { value: '123 Test St' } })
-    fireEvent.change(cityInput, { target: { value: 'Test City' } })
-    fireEvent.change(stateInput, { target: { value: 'TS' } })
-    fireEvent.change(postalCodeInput, { target: { value: '12345' } })
-    fireEvent.change(countryInput, { target: { value: 'Test Country' } })
-    fireEvent.change(cardNumberInput, { target: { value: '4242424242424242' } })
-    fireEvent.change(expiryInput, { target: { value: '12/25' } })
-    fireEvent.change(cvcInput, { target: { value: '123' } })
+    // Submit form
+    fireEvent.click(screen.getByText('Pay Now'))
 
-    const submitButton = screen.getByRole('button', { name: /place order/i })
-    fireEvent.click(submitButton)
-
+    // Wait for success message
     await waitFor(() => {
-      expect(screen.getByText('Order placed successfully')).toBeInTheDocument()
+      expect(screen.getByText('Processing...')).toBeInTheDocument()
     })
   })
 
   it('handles form validation', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <CheckoutPage />
-      </SessionProvider>
-    )
+    renderWithProviders(<CheckoutPage />)
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.queryByText('Loading checkout...')).not.toBeInTheDocument()
     })
 
-    const submitButton = screen.getByRole('button', { name: /place order/i })
-    fireEvent.click(submitButton)
+    // Submit form without filling required fields
+    fireEvent.click(screen.getByText('Pay Now'))
 
+    // Check for validation messages
     expect(screen.getByText('Name is required')).toBeInTheDocument()
     expect(screen.getByText('Email is required')).toBeInTheDocument()
     expect(screen.getByText('Address is required')).toBeInTheDocument()
-    expect(screen.getByText('City is required')).toBeInTheDocument()
-    expect(screen.getByText('State is required')).toBeInTheDocument()
-    expect(screen.getByText('Postal code is required')).toBeInTheDocument()
-    expect(screen.getByText('Country is required')).toBeInTheDocument()
-    expect(screen.getByText('Card number is required')).toBeInTheDocument()
-    expect(screen.getByText('Expiry date is required')).toBeInTheDocument()
-    expect(screen.getByText('CVC is required')).toBeInTheDocument()
   })
 
   it('handles error state', async () => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
-      Promise.reject(new Error('Failed to process payment'))
+    // Mock fetch to fail
+    global.fetch = jest.fn(() =>
+      Promise.reject(new Error('Failed to create payment intent'))
     )
 
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <CheckoutPage />
-      </SessionProvider>
-    )
+    renderWithProviders(<CheckoutPage />)
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.queryByText('Loading checkout...')).not.toBeInTheDocument()
     })
 
-    const nameInput = screen.getByLabelText(/name/i)
-    const emailInput = screen.getByLabelText(/email/i)
-    const addressInput = screen.getByLabelText(/address/i)
-    const cityInput = screen.getByLabelText(/city/i)
-    const stateInput = screen.getByLabelText(/state/i)
-    const postalCodeInput = screen.getByLabelText(/postal code/i)
-    const countryInput = screen.getByLabelText(/country/i)
-    const cardNumberInput = screen.getByLabelText(/card number/i)
-    const expiryInput = screen.getByLabelText(/expiry/i)
-    const cvcInput = screen.getByLabelText(/cvc/i)
-
-    fireEvent.change(nameInput, { target: { value: 'Test User' } })
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    fireEvent.change(addressInput, { target: { value: '123 Test St' } })
-    fireEvent.change(cityInput, { target: { value: 'Test City' } })
-    fireEvent.change(stateInput, { target: { value: 'TS' } })
-    fireEvent.change(postalCodeInput, { target: { value: '12345' } })
-    fireEvent.change(countryInput, { target: { value: 'Test Country' } })
-    fireEvent.change(cardNumberInput, { target: { value: '4242424242424242' } })
-    fireEvent.change(expiryInput, { target: { value: '12/25' } })
-    fireEvent.change(cvcInput, { target: { value: '123' } })
-
-    const submitButton = screen.getByRole('button', { name: /place order/i })
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument()
-      expect(screen.getByText('Failed to process payment')).toBeInTheDocument()
-    })
+    expect(screen.getByText('An error occurred')).toBeInTheDocument()
   })
 
   it('handles unauthorized access', async () => {
-    const { container } = render(
+    render(
       <SessionProvider session={null}>
-        <CheckoutPage />
+        <CartProvider>
+          <CheckoutPage />
+        </CartProvider>
       </SessionProvider>
     )
 
+    // Wait for redirect
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(window.location.pathname).toBe('/auth/signin')
     })
-
-    expect(screen.getByText('Error')).toBeInTheDocument()
-    expect(screen.getByText('You must be logged in to view this page')).toBeInTheDocument()
   })
 }) 

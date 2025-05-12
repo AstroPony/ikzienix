@@ -63,7 +63,9 @@ const mockSession = {
 global.fetch = jest.fn().mockImplementation(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve({ success: true })
+    json: () => Promise.resolve({
+      success: true
+    })
   })
 )
 
@@ -94,19 +96,21 @@ describe('CompleteProfilePage', () => {
       expect(container).toBeInTheDocument()
     })
 
-    const phoneInput = screen.getByLabelText(/phone/i)
-    const addressInput = screen.getByLabelText(/address/i)
-    const cityInput = screen.getByLabelText(/city/i)
-    const stateInput = screen.getByLabelText(/state/i)
-    const postalCodeInput = screen.getByLabelText(/postal code/i)
-    const countryInput = screen.getByLabelText(/country/i)
+    const nameInput = screen.getByLabelText('Full Name')
+    const phoneInput = screen.getByLabelText('Phone Number')
+    const addressInput = screen.getByLabelText('Address')
+    const cityInput = screen.getByLabelText('City')
+    const stateInput = screen.getByLabelText('State')
+    const postalCodeInput = screen.getByLabelText('Postal Code')
+    const countryInput = screen.getByLabelText('Country')
 
+    fireEvent.change(nameInput, { target: { value: 'John Doe' } })
     fireEvent.change(phoneInput, { target: { value: '1234567890' } })
-    fireEvent.change(addressInput, { target: { value: '123 Test St' } })
-    fireEvent.change(cityInput, { target: { value: 'Test City' } })
-    fireEvent.change(stateInput, { target: { value: 'TS' } })
-    fireEvent.change(postalCodeInput, { target: { value: '12345' } })
-    fireEvent.change(countryInput, { target: { value: 'Test Country' } })
+    fireEvent.change(addressInput, { target: { value: '123 Main St' } })
+    fireEvent.change(cityInput, { target: { value: 'New York' } })
+    fireEvent.change(stateInput, { target: { value: 'NY' } })
+    fireEvent.change(postalCodeInput, { target: { value: '10001' } })
+    fireEvent.change(countryInput, { target: { value: 'USA' } })
 
     const submitButton = screen.getByRole('button', { name: /save/i })
     fireEvent.click(submitButton)
@@ -130,6 +134,7 @@ describe('CompleteProfilePage', () => {
     const submitButton = screen.getByRole('button', { name: /save/i })
     fireEvent.click(submitButton)
 
+    expect(screen.getByText('Full name is required')).toBeInTheDocument()
     expect(screen.getByText('Phone number is required')).toBeInTheDocument()
     expect(screen.getByText('Address is required')).toBeInTheDocument()
     expect(screen.getByText('City is required')).toBeInTheDocument()
@@ -140,7 +145,7 @@ describe('CompleteProfilePage', () => {
 
   it('handles error state', async () => {
     global.fetch = jest.fn().mockImplementationOnce(() =>
-      Promise.reject(new Error('Failed to update'))
+      Promise.reject(new Error('Failed to update profile'))
     )
 
     const { container } = render(
@@ -153,19 +158,21 @@ describe('CompleteProfilePage', () => {
       expect(container).toBeInTheDocument()
     })
 
-    const phoneInput = screen.getByLabelText(/phone/i)
-    const addressInput = screen.getByLabelText(/address/i)
-    const cityInput = screen.getByLabelText(/city/i)
-    const stateInput = screen.getByLabelText(/state/i)
-    const postalCodeInput = screen.getByLabelText(/postal code/i)
-    const countryInput = screen.getByLabelText(/country/i)
+    const nameInput = screen.getByLabelText('Full Name')
+    const phoneInput = screen.getByLabelText('Phone Number')
+    const addressInput = screen.getByLabelText('Address')
+    const cityInput = screen.getByLabelText('City')
+    const stateInput = screen.getByLabelText('State')
+    const postalCodeInput = screen.getByLabelText('Postal Code')
+    const countryInput = screen.getByLabelText('Country')
 
+    fireEvent.change(nameInput, { target: { value: 'John Doe' } })
     fireEvent.change(phoneInput, { target: { value: '1234567890' } })
-    fireEvent.change(addressInput, { target: { value: '123 Test St' } })
-    fireEvent.change(cityInput, { target: { value: 'Test City' } })
-    fireEvent.change(stateInput, { target: { value: 'TS' } })
-    fireEvent.change(postalCodeInput, { target: { value: '12345' } })
-    fireEvent.change(countryInput, { target: { value: 'Test Country' } })
+    fireEvent.change(addressInput, { target: { value: '123 Main St' } })
+    fireEvent.change(cityInput, { target: { value: 'New York' } })
+    fireEvent.change(stateInput, { target: { value: 'NY' } })
+    fireEvent.change(postalCodeInput, { target: { value: '10001' } })
+    fireEvent.change(countryInput, { target: { value: 'USA' } })
 
     const submitButton = screen.getByRole('button', { name: /save/i })
     fireEvent.click(submitButton)

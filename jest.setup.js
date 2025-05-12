@@ -6,26 +6,31 @@ jest.mock('next/navigation', () => ({
     push: jest.fn(),
     replace: jest.fn(),
     prefetch: jest.fn(),
-    back: jest.fn(),
   }),
   usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
-  useParams: () => ({ slug: 'test-product' }),
 }))
 
 // Mock next-auth
 jest.mock('next-auth/react', () => ({
-  useSession: () => ({ data: null, status: 'unauthenticated' }),
-  signIn: jest.fn(),
-  signOut: jest.fn(),
-  getSession: jest.fn(),
+  useSession: () => ({
+    data: {
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test User',
+      },
+      expires: new Date(Date.now() + 2 * 86400).toISOString(),
+    },
+    status: 'authenticated',
+  }),
+  SessionProvider: ({ children }) => children,
 }))
 
 // Mock fetch
 global.fetch = jest.fn(() =>
   Promise.resolve({
-    json: () => Promise.resolve({}),
     ok: true,
+    json: () => Promise.resolve({}),
   })
 )
 

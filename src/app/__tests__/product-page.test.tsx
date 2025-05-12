@@ -8,13 +8,13 @@ import { WishlistProvider } from '@/context/WishlistContext'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
+  useParams: () => ({
+    slug: 'test-product'
+  }),
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
     prefetch: jest.fn()
-  }),
-  useParams: () => ({
-    slug: 'test-product'
   })
 }))
 
@@ -29,47 +29,18 @@ const mockSession = {
 }
 
 // Mock fetch
-const mockProduct: Product = {
-  id: '1',
-  name: 'Test Product',
-  description: 'Test Description',
-  price: 100,
-  image: '/test-image.jpg',
-  images: ['image1.jpg', 'image2.jpg'],
-  slug: 'test-product',
-  category: 'Test Category',
-  rating: 4.5,
-  reviews: 10,
-  featured: false,
-  inStock: true,
-  colors: ['black', 'white'],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  sku: 'TEST-001',
-  specifications: {
-    frameMaterial: 'Metal',
-    lensMaterial: 'Polycarbonate',
-    lensWidth: '55mm',
-    bridgeWidth: '18mm',
-    templeLength: '145mm',
-    weight: '25g',
-    uvProtection: '100%',
-    polarization: true
-  },
-  features: ['UV Protection', 'Polarized Lenses'],
-  careInstructions: ['Clean with microfiber cloth', 'Store in case'],
-  warranty: '2 years',
-  shipping: {
-    freeShipping: true,
-    estimatedDelivery: '3-5 business days',
-    returnPolicy: '30 days return policy'
-  }
-}
-
 global.fetch = jest.fn().mockImplementation(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve(mockProduct)
+    json: () => Promise.resolve({
+      id: '1',
+      name: 'Test Product',
+      description: 'Test Description',
+      price: 100,
+      images: ['/images/test.jpg'],
+      category: 'Test Category',
+      stock: 10
+    })
   })
 )
 
@@ -151,6 +122,73 @@ describe('ProductPage', () => {
     expect(screen.getByText('$100.00')).toBeInTheDocument()
   })
 
+  it('handles add to cart', async () => {
+    const { container } = render(
+      <SessionProvider session={mockSession}>
+        <ProductPage params={{ slug: 'test-product' }} />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    const addToCartButton = screen.getByRole('button', { name: /add to cart/i })
+    fireEvent.click(addToCartButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Added to cart')).toBeInTheDocument()
+    })
+  })
+
+  it('handles error state', async () => {
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.reject(new Error('Failed to fetch product'))
+    )
+
+    const { container } = render(
+      <SessionProvider session={mockSession}>
+        <ProductPage params={{ slug: 'test-product' }} />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Error')).toBeInTheDocument()
+    expect(screen.getByText('Failed to load product')).toBeInTheDocument()
+  })
+
+  it('handles out of stock state', async () => {
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          id: '1',
+          name: 'Test Product',
+          description: 'Test Description',
+          price: 100,
+          images: ['/images/test.jpg'],
+          category: 'Test Category',
+          stock: 0
+        })
+      })
+    )
+
+    const { container } = render(
+      <SessionProvider session={mockSession}>
+        <ProductPage params={{ slug: 'test-product' }} />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Out of Stock')).toBeInTheDocument()
+  })
+
   it('displays product details correctly', async () => {
     const { container } = render(
       <SessionProvider session={mockSession}>
@@ -168,25 +206,6 @@ describe('ProductPage', () => {
     expect(screen.getByText('In Stock')).toBeInTheDocument()
   })
 
-  it('handles error state', async () => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
-      Promise.reject(new Error('Failed to fetch'))
-    )
-
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(container).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('Error')).toBeInTheDocument()
-    expect(screen.getByText('Failed to load product')).toBeInTheDocument()
-  })
-
   it('displays loading state', async () => {
     const { container } = render(
       <SessionProvider session={mockSession}>
@@ -202,23 +221,6 @@ describe('ProductPage', () => {
     })
   })
 
-  it('handles add to cart', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(container).toBeInTheDocument()
-    })
-
-    const addToCartButton = screen.getByRole('button', { name: /add to cart/i })
-    fireEvent.click(addToCartButton)
-
-    expect(screen.getByText('Added to cart')).toBeInTheDocument()
-  })
-
   it('displays product specifications', async () => {
     renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
@@ -231,17 +233,6 @@ describe('ProductPage', () => {
     expect(screen.getByText('Frame Material: Metal')).toBeInTheDocument()
     expect(screen.getByText('Lens Material: Polycarbonate')).toBeInTheDocument()
     expect(screen.getByText('UV Protection: 100%')).toBeInTheDocument()
-  })
-
-  it('displays out of stock message', async () => {
-    mockGetProduct.mockResolvedValueOnce(mockOutOfStockProduct)
-
-    renderWithProviders(<ProductPage params={{ slug: 'out-of-stock-product' }} />)
-
-    // Wait for out of stock message
-    await waitFor(() => {
-      expect(screen.getByText('Out of Stock')).toBeInTheDocument()
-    })
   })
 
   it('displays related products', async () => {
