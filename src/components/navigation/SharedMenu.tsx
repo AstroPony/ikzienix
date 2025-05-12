@@ -88,7 +88,7 @@ export default function SharedMenu({ isOpen, type, onClose, hamburgerRef }: Shar
       role="dialog"
       aria-label={type === 'nav' ? 'Navigation menu' : 'Account menu'}
     >
-      <div className="container py-3 position-relative">
+      <div className="container position-relative">
         {type === 'nav' ? (
           <NavLinks onLinkClick={onClose} />
         ) : (

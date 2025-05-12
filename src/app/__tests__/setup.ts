@@ -25,7 +25,31 @@ jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => {
     // eslint-disable-next-line @next/next/no-img-element
-    return createElement('img', props)
+    return jest.requireActual('react').createElement('img', props)
+  },
+}))
+
+// Mock Firebase
+jest.mock('@/lib/firebase', () => ({
+  db: {
+    collection: jest.fn().mockReturnThis(),
+    doc: jest.fn().mockReturnThis(),
+    get: jest.fn().mockResolvedValue({
+      exists: true,
+      data: () => ({}),
+    }),
+  },
+  clientAuth: {
+    onAuthStateChanged: jest.fn(),
+    signInWithEmailAndPassword: jest.fn(),
+    createUserWithEmailAndPassword: jest.fn(),
+    signOut: jest.fn(),
+    sendPasswordResetEmail: jest.fn(),
+  },
+  storage: {
+    ref: jest.fn().mockReturnThis(),
+    uploadBytes: jest.fn(),
+    getDownloadURL: jest.fn(),
   },
 }))
 
