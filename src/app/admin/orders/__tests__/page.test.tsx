@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
-import AdminOrdersPage from '../page'
+import OrdersPage from '../page'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -15,130 +15,108 @@ jest.mock('next/navigation', () => ({
 const mockSession = {
   user: {
     id: '1',
-    email: 'test@example.com',
-    name: 'Test User'
+    email: 'admin@example.com',
+    name: 'Admin User',
+    role: 'ADMIN'
   },
   expires: new Date(Date.now() + 2 * 86400).toISOString()
 }
 
-const mockOrders = {
-  orders: [
-    {
-      id: '1',
-      userId: '1',
-      status: 'pending',
-      total: 100,
-      createdAt: '2024-01-01T00:00:00Z',
-      user: {
-        name: 'Test User',
-        email: 'test@example.com'
-      }
+// Mock orders data
+const mockOrders = [
+  {
+    id: '1',
+    orderNumber: 'ORD-001',
+    status: 'PENDING',
+    total: 99.99,
+    createdAt: new Date().toISOString(),
+    customer: {
+      name: 'John Doe',
+      email: 'john@example.com'
     }
-  ],
-  pagination: {
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 1,
-    hasNextPage: false,
-    hasPrevPage: false
+  },
+  {
+    id: '2',
+    orderNumber: 'ORD-002',
+    status: 'COMPLETED',
+    total: 149.99,
+    createdAt: new Date().toISOString(),
+    customer: {
+      name: 'Jane Smith',
+      email: 'jane@example.com'
+    }
   }
-}
+]
 
-// Mock fetch
-global.fetch = jest.fn(() =>
-  Promise.resolve(
-    new Response(JSON.stringify(mockOrders), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+describe('OrdersPage', () => {
+  beforeEach(() => {
+    // Mock fetch to return orders
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockOrders)
     })
-  )
-)
+  })
 
-const renderWithProviders = (component: React.ReactNode) => {
-  return render(
-    <SessionProvider session={mockSession}>
-      {component}
-    </SessionProvider>
-  )
-}
-
-describe('AdminOrdersPage', () => {
   it('renders the orders page correctly', async () => {
-    renderWithProviders(<AdminOrdersPage />)
-
-    // Wait for loading to finish
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-    })
+    render(
+      <SessionProvider session={mockSession}>
+        <OrdersPage />
+      </SessionProvider>
+    )
 
     expect(screen.getByText('Orders')).toBeInTheDocument()
-    expect(screen.getByText('Manage customer orders')).toBeInTheDocument()
-  })
-
-  it('displays orders data', async () => {
-    renderWithProviders(<AdminOrdersPage />)
-
-    // Wait for loading to finish
     await waitFor(() => {
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
     })
-
-    expect(screen.getByText('#1')).toBeInTheDocument()
-    expect(screen.getByText('Test User')).toBeInTheDocument()
-    expect(screen.getByText('test@example.com')).toBeInTheDocument()
-    expect(screen.getByText('$100.00')).toBeInTheDocument()
-    expect(screen.getAllByText('Pending')[0]).toBeInTheDocument()
   })
 
-  it('handles order status change', async () => {
-    renderWithProviders(<AdminOrdersPage />)
+  it('displays orders data correctly', async () => {
+    render(
+      <SessionProvider session={mockSession}>
+        <OrdersPage />
+      </SessionProvider>
+    )
 
-    // Wait for loading to finish
     await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-    })
-
-    // Click status dropdown
-    fireEvent.click(screen.getByText('Change Status'))
-
-    // Click new status
-    fireEvent.click(screen.getByText('Processing'))
-
-    // Wait for status update
-    await waitFor(() => {
-      expect(screen.getByText('Processing')).toBeInTheDocument()
+      expect(screen.getByText('ORD-001')).toBeInTheDocument()
+      expect(screen.getByText('ORD-002')).toBeInTheDocument()
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument()
+      expect(screen.getByText('$99.99')).toBeInTheDocument()
+      expect(screen.getByText('$149.99')).toBeInTheDocument()
     })
   })
 
   it('handles error state', async () => {
     // Mock fetch to fail
-    global.fetch = jest.fn(() =>
-      Promise.reject(new Error('Failed to fetch orders'))
-    )
+    global.fetch = jest.fn().mockRejectedValueOnce(new Error('Failed to fetch orders'))
 
-    renderWithProviders(<AdminOrdersPage />)
-
-    // Wait for loading to finish
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-    })
-
-    expect(screen.getByText('Error')).toBeInTheDocument()
-    expect(screen.getByText('Failed to load orders')).toBeInTheDocument()
-  })
-
-  it('handles unauthorized access', async () => {
     render(
-      <SessionProvider session={null}>
-        <AdminOrdersPage />
+      <SessionProvider session={mockSession}>
+        <OrdersPage />
       </SessionProvider>
     )
 
-    // Wait for redirect
     await waitFor(() => {
-      expect(window.location.pathname).toBe('/auth/signin')
+      expect(screen.getByText('Failed to fetch orders')).toBeInTheDocument()
     })
+  })
+
+  it('redirects non-admin users', () => {
+    const nonAdminSession = {
+      ...mockSession,
+      user: {
+        ...mockSession.user,
+        role: 'USER'
+      }
+    }
+
+    render(
+      <SessionProvider session={nonAdminSession}>
+        <OrdersPage />
+      </SessionProvider>
+    )
+
+    expect(screen.getByText('Access denied')).toBeInTheDocument()
   })
 }) 

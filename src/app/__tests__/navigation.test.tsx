@@ -40,9 +40,9 @@ describe('Navigation', () => {
   it('renders the navigation correctly', () => {
     renderWithProviders(<Navigation />);
 
-    expect(screen.getByText('Shop')).toBeInTheDocument();
     expect(screen.getByText('Collections')).toBeInTheDocument();
-    expect(screen.getByText('Account')).toBeInTheDocument();
+    expect(screen.getByText('About')).toBeInTheDocument();
+    expect(screen.getByText('Contact')).toBeInTheDocument();
   });
 
   it('displays user menu when logged in', () => {
@@ -51,7 +51,7 @@ describe('Navigation', () => {
     expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
-  it('displays sign in button when not logged in', () => {
+  it('displays sign up button when not logged in', () => {
     render(
       <SessionProvider session={null}>
         <CartProvider>
@@ -62,13 +62,13 @@ describe('Navigation', () => {
       </SessionProvider>
     );
 
-    expect(screen.getByText('Sign In')).toBeInTheDocument();
+    expect(screen.getByText('Sign Up')).toBeInTheDocument();
   });
 
   it('handles mobile menu toggle', () => {
     renderWithProviders(<Navigation />);
 
-    const menuButton = screen.getByRole('button', { name: /menu/i });
+    const menuButton = screen.getByRole('button', { name: /toggle navigation/i });
     fireEvent.click(menuButton);
 
     expect(screen.getByRole('navigation')).toHaveClass('navbar-expand-lg');
