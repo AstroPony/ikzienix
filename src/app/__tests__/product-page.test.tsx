@@ -270,17 +270,17 @@ describe('ProductPage', () => {
   })
 
   test.skip('renders product details correctly', async () => {
-    render(<ProductPage params={{ slug: 'test-product' }} />)
+    render(<ProductPage />)
     await screen.findByText('Test Product')
   })
 
   test.skip('handles product not found', async () => {
-    render(<ProductPage params={{ slug: 'non-existent' }} />)
+    render(<ProductPage />)
     await screen.findByText('Product not found')
   })
 
   test.skip('handles error state', async () => {
-    render(<ProductPage params={{ slug: 'error-product' }} />)
+    render(<ProductPage />)
     await screen.findByText('Error loading product')
   })
 }) 
