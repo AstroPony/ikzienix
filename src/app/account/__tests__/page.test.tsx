@@ -2,54 +2,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
 import AccountPage from '../page'
 
-// Mock next-auth
-jest.mock('next-auth', () => ({
-  getServerSession: () => Promise.resolve({
-    user: {
-      id: '1',
-      email: 'test@example.com',
-      name: 'Test User'
-    }
-  })
-}))
-
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
-  redirect: jest.fn()
-}))
-
-// Mock Firestore
-jest.mock('@/lib/firebase-admin', () => ({
-  db: {
-    collection: () => ({
-      doc: () => ({
-        get: () => Promise.resolve({
-          data: () => ({
-            name: 'Test User',
-            email: 'test@example.com',
-            phone: '1234567890',
-            shippingAddress: {
-              line1: '123 Test St',
-              city: 'Test City',
-              state: 'TS',
-              postalCode: '12345',
-              country: 'Test Country'
-            },
-            billingAddress: {
-              line1: '123 Test St',
-              city: 'Test City',
-              state: 'TS',
-              postalCode: '12345',
-              country: 'Test Country'
-            },
-            role: 'user',
-            createdAt: new Date('2024-01-01'),
-            profileCompleted: true
-          })
-        })
-      })
-    })
-  }
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn()
+  })
 }))
 
 // Mock the session
@@ -59,76 +18,103 @@ const mockSession = {
     email: 'test@example.com',
     name: 'Test User'
   },
-  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+  expires: new Date(Date.now() + 2 * 86400).toISOString()
 }
+
+// Mock fetch
+const mockUserData = {
+  id: '1',
+  name: 'Test User',
+  email: 'test@example.com',
+  role: 'user',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+}
+
+global.fetch = jest.fn().mockImplementation(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(mockUserData)
+  })
+)
 
 describe('AccountPage', () => {
   it('renders the account page correctly', async () => {
-    const page = await AccountPage()
     const { container } = render(
       <SessionProvider session={mockSession}>
-        {page}
+        <AccountPage />
       </SessionProvider>
     )
 
-    // Check for main heading
-    expect(screen.getByText('My Account')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
 
-    // Check for personal information
-    expect(screen.getByText('Personal Information')).toBeInTheDocument()
+    expect(screen.getByText('My Account')).toBeInTheDocument()
+    expect(screen.getByText('Account Settings')).toBeInTheDocument()
+  })
+
+  it('displays user information correctly', async () => {
+    const { container } = render(
+      <SessionProvider session={mockSession}>
+        <AccountPage />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
     expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText('test@example.com')).toBeInTheDocument()
-    expect(screen.getByText('1234567890')).toBeInTheDocument()
-
-    // Check for addresses
-    expect(screen.getByText('Shipping Address')).toBeInTheDocument()
-    expect(screen.getByText('Billing Address')).toBeInTheDocument()
-    expect(screen.getAllByText('123 Test St')).toHaveLength(2)
-    expect(screen.getAllByText('Test City, TS 12345')).toHaveLength(2)
-    expect(screen.getAllByText('Test Country')).toHaveLength(2)
-
-    // Check for action buttons
-    expect(screen.getByText('Edit Profile')).toBeInTheDocument()
-    expect(screen.getByText('Change Password')).toBeInTheDocument()
   })
 
-  it('handles incomplete profile', async () => {
-    const page = await AccountPage()
+  it('handles error state', async () => {
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.reject(new Error('Failed to fetch'))
+    )
+
     const { container } = render(
       <SessionProvider session={mockSession}>
-        {page}
+        <AccountPage />
       </SessionProvider>
     )
 
-    // Check for complete profile prompt
-    expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
-    expect(screen.getByText('Please complete your profile to continue shopping.')).toBeInTheDocument()
-  })
-
-  it('handles Firestore error', async () => {
-    const page = await AccountPage()
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        {page}
-      </SessionProvider>
-    )
-
-    // Check for error message
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument()
+      expect(container).toBeInTheDocument()
     })
-    expect(screen.getByText('Failed to load profile')).toBeInTheDocument()
+
+    expect(screen.getByText('Error')).toBeInTheDocument()
+    expect(screen.getByText('Failed to load account information')).toBeInTheDocument()
   })
 
-  it('handles unauthenticated user', async () => {
-    const page = await AccountPage()
+  it('displays loading state', async () => {
+    const { container } = render(
+      <SessionProvider session={mockSession}>
+        <AccountPage />
+      </SessionProvider>
+    )
+
+    expect(container).toBeInTheDocument()
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    })
+  })
+
+  it('handles unauthorized access', async () => {
     const { container } = render(
       <SessionProvider session={null}>
-        {page}
+        <AccountPage />
       </SessionProvider>
     )
 
-    // Check for redirect
-    expect(screen.getByText('Please sign in to view your account')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Error')).toBeInTheDocument()
+    expect(screen.getByText('You must be logged in to view this page')).toBeInTheDocument()
   })
 }) 

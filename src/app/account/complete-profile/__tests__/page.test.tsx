@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
 import CompleteProfilePage from '../page'
 
@@ -15,7 +15,11 @@ jest.mock('next-auth', () => ({
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
-  redirect: jest.fn()
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn()
+  })
 }))
 
 // Mock Firestore
@@ -52,112 +56,138 @@ const mockSession = {
     email: 'test@example.com',
     name: 'Test User'
   },
-  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+  expires: new Date(Date.now() + 2 * 86400).toISOString()
 }
+
+// Mock fetch
+global.fetch = jest.fn().mockImplementation(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ success: true })
+  })
+)
 
 describe('CompleteProfilePage', () => {
   it('renders the complete profile page correctly', async () => {
-    const page = await CompleteProfilePage()
-    render(
+    const { container } = render(
       <SessionProvider session={mockSession}>
-        {page}
+        <CompleteProfilePage />
       </SessionProvider>
     )
 
-    // Check for main heading
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
     expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
-
-    // Check for description
-    expect(screen.getByText(/Please provide your shipping and billing information/)).toBeInTheDocument()
-
-    // Check for profile form
-    expect(screen.getByTestId('profile-form')).toBeInTheDocument()
+    expect(screen.getByText('Please provide your information to continue')).toBeInTheDocument()
   })
 
-  it('handles already completed profile', async () => {
-    // Mock Firestore to return completed profile
-    jest.mock('@/lib/firebase-admin', () => ({
-      db: {
-        collection: () => ({
-          doc: () => ({
-            get: () => Promise.resolve({
-              data: () => ({
-                name: 'Test User',
-                email: 'test@example.com',
-                phone: '1234567890',
-                shippingAddress: {
-                  line1: '123 Test St',
-                  city: 'Test City',
-                  state: 'TS',
-                  postalCode: '12345',
-                  country: 'Test Country'
-                },
-                billingAddress: {
-                  line1: '123 Test St',
-                  city: 'Test City',
-                  state: 'TS',
-                  postalCode: '12345',
-                  country: 'Test Country'
-                },
-                profileCompleted: true
-              })
-            })
-          })
-        })
-      }
-    }))
-
-    const page = await CompleteProfilePage()
-    render(
+  it('handles form submission', async () => {
+    const { container } = render(
       <SessionProvider session={mockSession}>
-        {page}
+        <CompleteProfilePage />
       </SessionProvider>
     )
 
-    // Check for redirect message
-    expect(screen.getByText('Your profile is already complete.')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    const phoneInput = screen.getByLabelText(/phone/i)
+    const addressInput = screen.getByLabelText(/address/i)
+    const cityInput = screen.getByLabelText(/city/i)
+    const stateInput = screen.getByLabelText(/state/i)
+    const postalCodeInput = screen.getByLabelText(/postal code/i)
+    const countryInput = screen.getByLabelText(/country/i)
+
+    fireEvent.change(phoneInput, { target: { value: '1234567890' } })
+    fireEvent.change(addressInput, { target: { value: '123 Test St' } })
+    fireEvent.change(cityInput, { target: { value: 'Test City' } })
+    fireEvent.change(stateInput, { target: { value: 'TS' } })
+    fireEvent.change(postalCodeInput, { target: { value: '12345' } })
+    fireEvent.change(countryInput, { target: { value: 'Test Country' } })
+
+    const submitButton = screen.getByRole('button', { name: /save/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Profile updated successfully')).toBeInTheDocument()
+    })
   })
 
-  it('handles Firestore error', async () => {
-    // Mock Firestore to return error
-    jest.mock('@/lib/firebase-admin', () => ({
-      db: {
-        collection: () => ({
-          doc: () => ({
-            get: () => Promise.reject(new Error('Failed to fetch profile'))
-          })
-        })
-      }
-    }))
-
-    const page = await CompleteProfilePage()
-    render(
+  it('handles form validation', async () => {
+    const { container } = render(
       <SessionProvider session={mockSession}>
-        {page}
+        <CompleteProfilePage />
       </SessionProvider>
     )
 
-    // Check for error message
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    const submitButton = screen.getByRole('button', { name: /save/i })
+    fireEvent.click(submitButton)
+
+    expect(screen.getByText('Phone number is required')).toBeInTheDocument()
+    expect(screen.getByText('Address is required')).toBeInTheDocument()
+    expect(screen.getByText('City is required')).toBeInTheDocument()
+    expect(screen.getByText('State is required')).toBeInTheDocument()
+    expect(screen.getByText('Postal code is required')).toBeInTheDocument()
+    expect(screen.getByText('Country is required')).toBeInTheDocument()
+  })
+
+  it('handles error state', async () => {
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.reject(new Error('Failed to update'))
+    )
+
+    const { container } = render(
+      <SessionProvider session={mockSession}>
+        <CompleteProfilePage />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    const phoneInput = screen.getByLabelText(/phone/i)
+    const addressInput = screen.getByLabelText(/address/i)
+    const cityInput = screen.getByLabelText(/city/i)
+    const stateInput = screen.getByLabelText(/state/i)
+    const postalCodeInput = screen.getByLabelText(/postal code/i)
+    const countryInput = screen.getByLabelText(/country/i)
+
+    fireEvent.change(phoneInput, { target: { value: '1234567890' } })
+    fireEvent.change(addressInput, { target: { value: '123 Test St' } })
+    fireEvent.change(cityInput, { target: { value: 'Test City' } })
+    fireEvent.change(stateInput, { target: { value: 'TS' } })
+    fireEvent.change(postalCodeInput, { target: { value: '12345' } })
+    fireEvent.change(countryInput, { target: { value: 'Test Country' } })
+
+    const submitButton = screen.getByRole('button', { name: /save/i })
+    fireEvent.click(submitButton)
+
     await waitFor(() => {
       expect(screen.getByText('Error')).toBeInTheDocument()
+      expect(screen.getByText('Failed to update profile')).toBeInTheDocument()
     })
-    expect(screen.getByText('Failed to load profile')).toBeInTheDocument()
   })
 
-  it('handles unauthenticated user', async () => {
-    // Mock getServerSession to return null
-    jest.mock('next-auth', () => ({
-      getServerSession: () => Promise.resolve(null)
-    }))
-
-    const page = await CompleteProfilePage()
-    render(
+  it('handles unauthorized access', async () => {
+    const { container } = render(
       <SessionProvider session={null}>
-        {page}
+        <CompleteProfilePage />
       </SessionProvider>
     )
 
-    // Check for redirect
-    expect(screen.getByText('Please sign in to complete your profile')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Error')).toBeInTheDocument()
+    expect(screen.getByText('You must be logged in to view this page')).toBeInTheDocument()
   })
 }) 

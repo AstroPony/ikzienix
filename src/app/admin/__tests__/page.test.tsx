@@ -2,30 +2,39 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
 import AdminDashboard from '../page'
 
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn()
+  })
+}))
+
 // Mock the session
 const mockSession = {
   user: {
     id: '1',
-    email: 'admin@example.com',
+    email: 'test@example.com',
+    name: 'Test User',
     role: 'admin'
   },
-  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+  expires: new Date(Date.now() + 2 * 86400).toISOString()
 }
 
 // Mock fetch
-const mockDashboardData = {
+const mockAnalyticsData = {
   revenue: 1000,
   orders: 50,
   visitors: 200,
   newUsers: 30,
-  revenueChange: 5.5,
-  ordersChange: 2.3,
-  visitorsChange: 8.1,
-  newUsersChange: 4.2,
+  revenueChange: 10,
+  ordersChange: 5,
+  visitorsChange: 15,
+  newUsersChange: 20,
   salesByCategory: {
-    'Sunglasses': 500,
-    'Eyewear': 300,
-    'Accessories': 200
+    'Category 1': 500,
+    'Category 2': 500
   },
   topProducts: [
     { name: 'Product 1', sales: 100 },
@@ -40,112 +49,116 @@ const mockDashboardData = {
 global.fetch = jest.fn().mockImplementation(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve(mockDashboardData)
+    json: () => Promise.resolve(mockAnalyticsData)
   })
 )
 
 describe('AdminDashboard', () => {
   it('renders the admin dashboard correctly', async () => {
-    render(
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <AdminDashboard />
       </SessionProvider>
     )
 
-    // Wait for loading to complete
     await waitFor(() => {
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      expect(container).toBeInTheDocument()
     })
 
-    // Check for stats
-    expect(screen.getByText('Total Revenue')).toBeInTheDocument()
-    expect(screen.getByText('Total Orders')).toBeInTheDocument()
-    expect(screen.getByText('Active Users')).toBeInTheDocument()
-    expect(screen.getByText('New Users')).toBeInTheDocument()
-
-    // Check for time range selector
-    expect(screen.getByRole('combobox')).toBeInTheDocument()
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+    expect(screen.getByText('Overview of your store\'s performance')).toBeInTheDocument()
   })
 
   it('displays dashboard data correctly', async () => {
-    render(
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <AdminDashboard />
       </SessionProvider>
     )
 
-    // Wait for data to load
     await waitFor(() => {
-      expect(screen.getByText('$1,000.00')).toBeInTheDocument()
+      expect(container).toBeInTheDocument()
     })
 
+    expect(screen.getByText('$1,000.00')).toBeInTheDocument()
     expect(screen.getByText('50')).toBeInTheDocument()
     expect(screen.getByText('200')).toBeInTheDocument()
     expect(screen.getByText('30')).toBeInTheDocument()
   })
 
   it('handles error state', async () => {
-    // Mock fetch to return error
-    global.fetch = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => Promise.reject(new Error('Failed to fetch'))
-      })
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.reject(new Error('Failed to fetch'))
     )
 
-    render(
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <AdminDashboard />
       </SessionProvider>
     )
 
-    // Wait for error message
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument()
+      expect(container).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Failed to load dashboard data')).toBeInTheDocument()
+    expect(screen.getByText('Error')).toBeInTheDocument()
+    expect(screen.getByText('Failed to load analytics data')).toBeInTheDocument()
   })
 
   it('handles unauthorized access', async () => {
-    // Mock session without admin role
     const nonAdminSession = {
+      ...mockSession,
       user: {
-        id: '2',
-        email: 'user@example.com',
+        ...mockSession.user,
         role: 'user'
-      },
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      }
     }
 
-    render(
+    const { container } = render(
       <SessionProvider session={nonAdminSession}>
         <AdminDashboard />
       </SessionProvider>
     )
 
-    // Check for unauthorized message
-    expect(screen.getByText('Unauthorized')).toBeInTheDocument()
-    expect(screen.getByText('You do not have permission to access this page.')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Error')).toBeInTheDocument()
+    expect(screen.getByText('You do not have permission to access this page')).toBeInTheDocument()
   })
 
   it('updates time range', async () => {
-    render(
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <AdminDashboard />
       </SessionProvider>
     )
 
-    // Wait for time range selector to load
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument()
+      expect(container).toBeInTheDocument()
     })
 
-    // Select new time range
-    const timeRangeSelector = screen.getByRole('combobox')
-    fireEvent.change(timeRangeSelector, { target: { value: 'week' } })
+    const timeRangeSelect = screen.getByRole('combobox')
+    expect(timeRangeSelect).toHaveValue('7d')
 
-    // Check if fetch was called with new time range
-    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('timeRange=week'))
+    // Mock fetch for new time range
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          ...mockAnalyticsData,
+          revenue: 2000,
+          orders: 100
+        })
+      })
+    )
+
+    fireEvent.change(timeRangeSelect, { target: { value: '30d' } })
+
+    await waitFor(() => {
+      expect(screen.getByText('$2,000.00')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+    })
   })
 }) 

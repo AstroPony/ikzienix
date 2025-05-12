@@ -15,9 +15,10 @@ jest.mock('next/navigation', () => ({
 const mockSession = {
   user: {
     id: '1',
-    email: 'test@example.com'
+    email: 'test@example.com',
+    name: 'Test User'
   },
-  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+  expires: new Date(Date.now() + 2 * 86400).toISOString()
 }
 
 // Mock fetch
@@ -26,105 +27,139 @@ global.fetch = jest.fn().mockImplementation(() =>
     ok: true,
     json: () => Promise.resolve({ success: true })
   })
-) as jest.Mock
+)
 
 describe('ChangePasswordPage', () => {
-  it('renders the change password form correctly', () => {
-    render(
+  it('renders the change password page correctly', async () => {
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <ChangePasswordPage />
       </SessionProvider>
     )
-    expect(screen.getAllByText('Change Password')).toHaveLength(2)
-    expect(screen.getByLabelText('Current Password')).toBeInTheDocument()
-    expect(screen.getByLabelText('New Password')).toBeInTheDocument()
-    expect(screen.getByLabelText('Confirm New Password')).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Change Password')).toBeInTheDocument()
+    expect(screen.getByText('Update your account password')).toBeInTheDocument()
   })
 
   it('handles password change submission', async () => {
-    render(
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <ChangePasswordPage />
       </SessionProvider>
     )
 
-    // Fill in the form
-    fireEvent.change(screen.getByLabelText('Current Password'), {
-      target: { value: 'currentpass' }
-    })
-    fireEvent.change(screen.getByLabelText('New Password'), {
-      target: { value: 'newpass123' }
-    })
-    fireEvent.change(screen.getByLabelText('Confirm New Password'), {
-      target: { value: 'newpass123' }
-    })
-
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: 'Change Password' }))
-
-    // Wait for success message
     await waitFor(() => {
-      expect(screen.getByText('Password changed successfully!')).toBeInTheDocument()
+      expect(container).toBeInTheDocument()
+    })
+
+    const currentPasswordInput = screen.getByLabelText(/current password/i)
+    const newPasswordInput = screen.getByLabelText(/new password/i)
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i)
+
+    fireEvent.change(currentPasswordInput, { target: { value: 'oldpassword123' } })
+    fireEvent.change(newPasswordInput, { target: { value: 'newpassword123' } })
+    fireEvent.change(confirmPasswordInput, { target: { value: 'newpassword123' } })
+
+    const submitButton = screen.getByRole('button', { name: /change password/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Password changed successfully')).toBeInTheDocument()
     })
   })
 
-  it('shows error when passwords do not match', async () => {
-    render(
+  it('handles password mismatch', async () => {
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <ChangePasswordPage />
       </SessionProvider>
     )
 
-    // Fill in the form with mismatched passwords
-    fireEvent.change(screen.getByLabelText('Current Password'), {
-      target: { value: 'currentpass' }
-    })
-    fireEvent.change(screen.getByLabelText('New Password'), {
-      target: { value: 'newpass123' }
-    })
-    fireEvent.change(screen.getByLabelText('Confirm New Password'), {
-      target: { value: 'differentpass' }
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
     })
 
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: 'Change Password' }))
+    const currentPasswordInput = screen.getByLabelText(/current password/i)
+    const newPasswordInput = screen.getByLabelText(/new password/i)
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i)
 
-    // Check for error message
-    expect(screen.getByText('New passwords do not match.')).toBeInTheDocument()
+    fireEvent.change(currentPasswordInput, { target: { value: 'oldpassword123' } })
+    fireEvent.change(newPasswordInput, { target: { value: 'newpassword123' } })
+    fireEvent.change(confirmPasswordInput, { target: { value: 'differentpassword123' } })
+
+    const submitButton = screen.getByRole('button', { name: /change password/i })
+    fireEvent.click(submitButton)
+
+    expect(screen.getByText('Passwords do not match')).toBeInTheDocument()
   })
 
-  it('handles API error', async () => {
-    // Mock fetch to return error
-    global.fetch = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => Promise.resolve({ error: 'Failed to change password' })
-      })
-    )
-
-    render(
+  it('handles form validation', async () => {
+    const { container } = render(
       <SessionProvider session={mockSession}>
         <ChangePasswordPage />
       </SessionProvider>
     )
 
-    // Fill in the form
-    fireEvent.change(screen.getByLabelText('Current Password'), {
-      target: { value: 'currentpass' }
-    })
-    fireEvent.change(screen.getByLabelText('New Password'), {
-      target: { value: 'newpass123' }
-    })
-    fireEvent.change(screen.getByLabelText('Confirm New Password'), {
-      target: { value: 'newpass123' }
-    })
-
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: 'Change Password' }))
-
-    // Wait for error message
     await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    const submitButton = screen.getByRole('button', { name: /change password/i })
+    fireEvent.click(submitButton)
+
+    expect(screen.getByText('Current password is required')).toBeInTheDocument()
+    expect(screen.getByText('New password is required')).toBeInTheDocument()
+    expect(screen.getByText('Confirm password is required')).toBeInTheDocument()
+  })
+
+  it('handles error state', async () => {
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.reject(new Error('Failed to change password'))
+    )
+
+    const { container } = render(
+      <SessionProvider session={mockSession}>
+        <ChangePasswordPage />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    const currentPasswordInput = screen.getByLabelText(/current password/i)
+    const newPasswordInput = screen.getByLabelText(/new password/i)
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i)
+
+    fireEvent.change(currentPasswordInput, { target: { value: 'oldpassword123' } })
+    fireEvent.change(newPasswordInput, { target: { value: 'newpassword123' } })
+    fireEvent.change(confirmPasswordInput, { target: { value: 'newpassword123' } })
+
+    const submitButton = screen.getByRole('button', { name: /change password/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Error')).toBeInTheDocument()
       expect(screen.getByText('Failed to change password')).toBeInTheDocument()
     })
+  })
+
+  it('handles unauthorized access', async () => {
+    const { container } = render(
+      <SessionProvider session={null}>
+        <ChangePasswordPage />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(container).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Error')).toBeInTheDocument()
+    expect(screen.getByText('You must be logged in to view this page')).toBeInTheDocument()
   })
 }) 
