@@ -49,26 +49,25 @@ jest.mock('../complete-profile-form', () => {
   }
 })
 
-// Mock the session
+// Mock session
 const mockSession = {
   user: {
     id: '1',
     email: 'test@example.com',
-    name: 'Test User'
+    name: 'Test User',
   },
-  expires: new Date(Date.now() + 2 * 86400).toISOString()
+  expires: '1',
 }
 
 // Mock fetch
-global.fetch = jest.fn().mockImplementation(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ success: true })
-  })
-)
+global.fetch = jest.fn()
 
 describe('CompleteProfilePage', () => {
-  it('renders the complete profile page correctly', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('renders the complete profile page', async () => {
     render(
       <SessionProvider session={mockSession}>
         <CompleteProfilePage />
@@ -81,6 +80,11 @@ describe('CompleteProfilePage', () => {
   })
 
   it('handles form submission', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    })
+
     render(
       <SessionProvider session={mockSession}>
         <CompleteProfilePage />
@@ -88,20 +92,26 @@ describe('CompleteProfilePage', () => {
     )
 
     // Fill in form fields
-    fireEvent.change(screen.getByLabelText(/phone number/i), {
-      target: { value: '1234567890' }
+    fireEvent.change(screen.getByLabelText(/full name/i), {
+      target: { value: 'John Doe' },
+    })
+    fireEvent.change(screen.getByLabelText(/phone/i), {
+      target: { value: '1234567890' },
     })
     fireEvent.change(screen.getByLabelText(/address/i), {
-      target: { value: '123 Main St' }
+      target: { value: '123 Main St' },
     })
     fireEvent.change(screen.getByLabelText(/city/i), {
-      target: { value: 'New York' }
+      target: { value: 'New York' },
     })
     fireEvent.change(screen.getByLabelText(/state/i), {
-      target: { value: 'NY' }
+      target: { value: 'NY' },
     })
-    fireEvent.change(screen.getByLabelText(/zip code/i), {
-      target: { value: '10001' }
+    fireEvent.change(screen.getByLabelText(/postal code/i), {
+      target: { value: '10001' },
+    })
+    fireEvent.change(screen.getByLabelText(/country/i), {
+      target: { value: 'USA' },
     })
 
     // Submit form
@@ -112,7 +122,7 @@ describe('CompleteProfilePage', () => {
     })
   })
 
-  it('handles form validation', async () => {
+  it('shows validation errors for required fields', async () => {
     render(
       <SessionProvider session={mockSession}>
         <CompleteProfilePage />
@@ -123,14 +133,18 @@ describe('CompleteProfilePage', () => {
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() => {
+      expect(screen.getByText('Full name is required')).toBeInTheDocument()
       expect(screen.getByText('Phone number is required')).toBeInTheDocument()
       expect(screen.getByText('Address is required')).toBeInTheDocument()
+      expect(screen.getByText('City is required')).toBeInTheDocument()
+      expect(screen.getByText('State is required')).toBeInTheDocument()
+      expect(screen.getByText('Postal code is required')).toBeInTheDocument()
+      expect(screen.getByText('Country is required')).toBeInTheDocument()
     })
   })
 
   it('handles error state', async () => {
-    // Mock fetch to fail
-    global.fetch = jest.fn().mockRejectedValueOnce(new Error('Failed to update profile'))
+    ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to update profile'))
 
     render(
       <SessionProvider session={mockSession}>
@@ -138,12 +152,27 @@ describe('CompleteProfilePage', () => {
       </SessionProvider>
     )
 
-    // Fill in form fields
-    fireEvent.change(screen.getByLabelText(/phone number/i), {
-      target: { value: '1234567890' }
+    // Fill in required fields
+    fireEvent.change(screen.getByLabelText(/full name/i), {
+      target: { value: 'John Doe' },
+    })
+    fireEvent.change(screen.getByLabelText(/phone/i), {
+      target: { value: '1234567890' },
     })
     fireEvent.change(screen.getByLabelText(/address/i), {
-      target: { value: '123 Main St' }
+      target: { value: '123 Main St' },
+    })
+    fireEvent.change(screen.getByLabelText(/city/i), {
+      target: { value: 'New York' },
+    })
+    fireEvent.change(screen.getByLabelText(/state/i), {
+      target: { value: 'NY' },
+    })
+    fireEvent.change(screen.getByLabelText(/postal code/i), {
+      target: { value: '10001' },
+    })
+    fireEvent.change(screen.getByLabelText(/country/i), {
+      target: { value: 'USA' },
     })
 
     // Submit form
