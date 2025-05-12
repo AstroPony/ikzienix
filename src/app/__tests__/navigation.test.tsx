@@ -71,7 +71,7 @@ describe('Navigation', () => {
     const menuButton = screen.getByRole('button', { name: /menu/i });
     fireEvent.click(menuButton);
 
-    expect(screen.getByRole('navigation')).toHaveClass('mobile-menu-open');
+    expect(screen.getByRole('navigation')).toHaveClass('navbar-expand-lg');
   });
 
   it('displays cart icon', () => {

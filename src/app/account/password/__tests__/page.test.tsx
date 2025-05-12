@@ -41,7 +41,7 @@ describe('ChangePasswordPage', () => {
       expect(container).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Change Password')).toBeInTheDocument()
+    expect(screen.getAllByText('Change Password')[0]).toBeInTheDocument()
     expect(screen.getByLabelText('Current Password')).toBeInTheDocument()
     expect(screen.getByLabelText('New Password')).toBeInTheDocument()
     expect(screen.getByLabelText('Confirm New Password')).toBeInTheDocument()

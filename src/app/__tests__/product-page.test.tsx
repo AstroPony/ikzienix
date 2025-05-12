@@ -44,6 +44,22 @@ global.fetch = jest.fn().mockImplementation(() =>
   })
 )
 
+// Mock product data
+const mockProduct: Product = {
+  id: '1',
+  name: 'Test Product',
+  slug: 'test-product',
+  description: 'Test Description',
+  price: 100,
+  images: ['/images/test.jpg'],
+  category: 'Test Category',
+  stock: 10,
+  inStock: true,
+  sku: 'TEST-001',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}
+
 const mockOutOfStockProduct: Product = {
   ...mockProduct,
   id: '2',

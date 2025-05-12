@@ -8,6 +8,15 @@ jest.mock('next/navigation', () => ({
     prefetch: jest.fn(),
   }),
   usePathname: () => '/',
+  useSearchParams: () => ({
+    get: jest.fn(),
+    has: jest.fn(),
+    forEach: jest.fn(),
+    entries: jest.fn(),
+    keys: jest.fn(),
+    values: jest.fn(),
+    toString: jest.fn(),
+  }),
 }))
 
 // Mock next-auth

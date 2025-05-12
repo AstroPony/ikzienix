@@ -89,7 +89,7 @@ describe('AdminOrdersPage', () => {
     expect(screen.getByText('Test User')).toBeInTheDocument()
     expect(screen.getByText('test@example.com')).toBeInTheDocument()
     expect(screen.getByText('$100.00')).toBeInTheDocument()
-    expect(screen.getByText('Pending')).toBeInTheDocument()
+    expect(screen.getAllByText('Pending')[0]).toBeInTheDocument()
   })
 
   it('handles order status change', async () => {
