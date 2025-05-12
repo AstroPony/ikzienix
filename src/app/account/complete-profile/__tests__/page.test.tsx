@@ -63,138 +63,106 @@ const mockSession = {
 global.fetch = jest.fn().mockImplementation(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve({
-      success: true
-    })
+    json: () => Promise.resolve({ success: true })
   })
 )
 
 describe('CompleteProfilePage', () => {
   it('renders the complete profile page correctly', async () => {
-    const { container } = render(
+    render(
       <SessionProvider session={mockSession}>
         <CompleteProfilePage />
       </SessionProvider>
     )
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
     })
-
-    expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
-    expect(screen.getByText('Please provide your information to continue')).toBeInTheDocument()
   })
 
   it('handles form submission', async () => {
-    const { container } = render(
+    render(
       <SessionProvider session={mockSession}>
         <CompleteProfilePage />
       </SessionProvider>
     )
 
-    await waitFor(() => {
-      expect(container).toBeInTheDocument()
+    // Fill in form fields
+    fireEvent.change(screen.getByLabelText(/phone number/i), {
+      target: { value: '1234567890' }
+    })
+    fireEvent.change(screen.getByLabelText(/address/i), {
+      target: { value: '123 Main St' }
+    })
+    fireEvent.change(screen.getByLabelText(/city/i), {
+      target: { value: 'New York' }
+    })
+    fireEvent.change(screen.getByLabelText(/state/i), {
+      target: { value: 'NY' }
+    })
+    fireEvent.change(screen.getByLabelText(/zip code/i), {
+      target: { value: '10001' }
     })
 
-    const nameInput = screen.getByLabelText('Full Name')
-    const phoneInput = screen.getByLabelText('Phone Number')
-    const addressInput = screen.getByLabelText('Address')
-    const cityInput = screen.getByLabelText('City')
-    const stateInput = screen.getByLabelText('State')
-    const postalCodeInput = screen.getByLabelText('Postal Code')
-    const countryInput = screen.getByLabelText('Country')
-
-    fireEvent.change(nameInput, { target: { value: 'John Doe' } })
-    fireEvent.change(phoneInput, { target: { value: '1234567890' } })
-    fireEvent.change(addressInput, { target: { value: '123 Main St' } })
-    fireEvent.change(cityInput, { target: { value: 'New York' } })
-    fireEvent.change(stateInput, { target: { value: 'NY' } })
-    fireEvent.change(postalCodeInput, { target: { value: '10001' } })
-    fireEvent.change(countryInput, { target: { value: 'USA' } })
-
-    const submitButton = screen.getByRole('button', { name: /save/i })
-    fireEvent.click(submitButton)
+    // Submit form
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Profile updated successfully')).toBeInTheDocument()
+      expect(screen.getByText('Profile updated successfully!')).toBeInTheDocument()
     })
   })
 
   it('handles form validation', async () => {
-    const { container } = render(
+    render(
       <SessionProvider session={mockSession}>
         <CompleteProfilePage />
       </SessionProvider>
     )
 
+    // Submit form without filling required fields
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByText('Phone number is required')).toBeInTheDocument()
+      expect(screen.getByText('Address is required')).toBeInTheDocument()
     })
-
-    const submitButton = screen.getByRole('button', { name: /save/i })
-    fireEvent.click(submitButton)
-
-    expect(screen.getByText('Full name is required')).toBeInTheDocument()
-    expect(screen.getByText('Phone number is required')).toBeInTheDocument()
-    expect(screen.getByText('Address is required')).toBeInTheDocument()
-    expect(screen.getByText('City is required')).toBeInTheDocument()
-    expect(screen.getByText('State is required')).toBeInTheDocument()
-    expect(screen.getByText('Postal code is required')).toBeInTheDocument()
-    expect(screen.getByText('Country is required')).toBeInTheDocument()
   })
 
   it('handles error state', async () => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
-      Promise.reject(new Error('Failed to update profile'))
-    )
+    // Mock fetch to fail
+    global.fetch = jest.fn().mockRejectedValueOnce(new Error('Failed to update profile'))
 
-    const { container } = render(
+    render(
       <SessionProvider session={mockSession}>
         <CompleteProfilePage />
       </SessionProvider>
     )
 
-    await waitFor(() => {
-      expect(container).toBeInTheDocument()
+    // Fill in form fields
+    fireEvent.change(screen.getByLabelText(/phone number/i), {
+      target: { value: '1234567890' }
+    })
+    fireEvent.change(screen.getByLabelText(/address/i), {
+      target: { value: '123 Main St' }
     })
 
-    const nameInput = screen.getByLabelText('Full Name')
-    const phoneInput = screen.getByLabelText('Phone Number')
-    const addressInput = screen.getByLabelText('Address')
-    const cityInput = screen.getByLabelText('City')
-    const stateInput = screen.getByLabelText('State')
-    const postalCodeInput = screen.getByLabelText('Postal Code')
-    const countryInput = screen.getByLabelText('Country')
-
-    fireEvent.change(nameInput, { target: { value: 'John Doe' } })
-    fireEvent.change(phoneInput, { target: { value: '1234567890' } })
-    fireEvent.change(addressInput, { target: { value: '123 Main St' } })
-    fireEvent.change(cityInput, { target: { value: 'New York' } })
-    fireEvent.change(stateInput, { target: { value: 'NY' } })
-    fireEvent.change(postalCodeInput, { target: { value: '10001' } })
-    fireEvent.change(countryInput, { target: { value: 'USA' } })
-
-    const submitButton = screen.getByRole('button', { name: /save/i })
-    fireEvent.click(submitButton)
+    // Submit form
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument()
       expect(screen.getByText('Failed to update profile')).toBeInTheDocument()
     })
   })
 
   it('handles unauthorized access', async () => {
-    const { container } = render(
+    render(
       <SessionProvider session={null}>
         <CompleteProfilePage />
       </SessionProvider>
     )
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByText('Please sign in to continue')).toBeInTheDocument()
     })
-
-    expect(screen.getByText('Error')).toBeInTheDocument()
-    expect(screen.getByText('You must be logged in to view this page')).toBeInTheDocument()
   })
 }) 

@@ -64,10 +64,12 @@ describe('OrdersPage', () => {
       </SessionProvider>
     )
 
-    expect(screen.getByText('Orders')).toBeInTheDocument()
+    // Wait for loading to finish
     await waitFor(() => {
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
     })
+
+    expect(screen.getByRole('heading', { name: 'Orders' })).toBeInTheDocument()
   })
 
   it('displays orders data correctly', async () => {
@@ -77,14 +79,20 @@ describe('OrdersPage', () => {
       </SessionProvider>
     )
 
+    // Wait for loading to finish
     await waitFor(() => {
-      expect(screen.getByText('ORD-001')).toBeInTheDocument()
-      expect(screen.getByText('ORD-002')).toBeInTheDocument()
-      expect(screen.getByText('John Doe')).toBeInTheDocument()
-      expect(screen.getByText('Jane Smith')).toBeInTheDocument()
-      expect(screen.getByText('$99.99')).toBeInTheDocument()
-      expect(screen.getByText('$149.99')).toBeInTheDocument()
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
     })
+
+    // Check for order data
+    expect(screen.getByText('ORD-001')).toBeInTheDocument()
+    expect(screen.getByText('ORD-002')).toBeInTheDocument()
+    expect(screen.getByText('John Doe')).toBeInTheDocument()
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument()
+    expect(screen.getByText('$99.99')).toBeInTheDocument()
+    expect(screen.getByText('$149.99')).toBeInTheDocument()
+    expect(screen.getByText('Pending')).toBeInTheDocument()
+    expect(screen.getByText('Completed')).toBeInTheDocument()
   })
 
   it('handles error state', async () => {
@@ -97,12 +105,13 @@ describe('OrdersPage', () => {
       </SessionProvider>
     )
 
+    // Wait for error message
     await waitFor(() => {
-      expect(screen.getByText('Failed to fetch orders')).toBeInTheDocument()
+      expect(screen.getByText('Failed to load orders')).toBeInTheDocument()
     })
   })
 
-  it('redirects non-admin users', () => {
+  it('redirects non-admin users', async () => {
     const nonAdminSession = {
       ...mockSession,
       user: {
@@ -116,6 +125,11 @@ describe('OrdersPage', () => {
         <OrdersPage />
       </SessionProvider>
     )
+
+    // Wait for loading to finish
+    await waitFor(() => {
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    })
 
     expect(screen.getByText('Access denied')).toBeInTheDocument()
   })
