@@ -270,17 +270,38 @@ describe('ProductPage', () => {
   })
 
   test.skip('renders product details correctly', async () => {
-    render(<ProductPage />)
-    await screen.findByText('Test Product')
-  })
+    render(
+      <CartProvider>
+        <ProductPage params={{ slug: 'test-product' }} />
+      </CartProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Product')).toBeInTheDocument();
+    });
+  });
 
   test.skip('handles product not found', async () => {
-    render(<ProductPage />)
-    await screen.findByText('Product not found')
-  })
+    render(
+      <CartProvider>
+        <ProductPage params={{ slug: 'non-existent' }} />
+      </CartProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Product not found')).toBeInTheDocument();
+    });
+  });
 
   test.skip('handles error state', async () => {
-    render(<ProductPage />)
-    await screen.findByText('Error loading product')
-  })
+    render(
+      <CartProvider>
+        <ProductPage params={{ slug: 'error-product' }} />
+      </CartProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Error loading product')).toBeInTheDocument();
+    });
+  });
 }) 

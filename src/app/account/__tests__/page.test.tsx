@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import AccountPage from '../page'
-import { CartProvider } from '@/lib/cart-context'
+import { CartProvider } from '@/contexts/CartContext'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -53,8 +53,10 @@ describe('AccountPage', () => {
       </CartProvider>
     )
 
-    await screen.findByText('My Account')
-    expect(screen.getByText('test@example.com')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('My Account')).toBeInTheDocument()
+      expect(screen.getByText('test@example.com')).toBeInTheDocument()
+    })
   })
 
   test.skip('displays order history', async () => {
@@ -64,7 +66,9 @@ describe('AccountPage', () => {
       </CartProvider>
     )
 
-    await screen.findByText('Order History')
+    await waitFor(() => {
+      expect(screen.getByText('Order History')).toBeInTheDocument()
+    })
   })
 
   test.skip('redirects to sign in if not authenticated', async () => {
@@ -74,6 +78,8 @@ describe('AccountPage', () => {
       </CartProvider>
     )
 
-    await screen.findByText('Please sign in to view your account')
+    await waitFor(() => {
+      expect(screen.getByText('Please sign in to view your account')).toBeInTheDocument()
+    })
   })
 }) 
