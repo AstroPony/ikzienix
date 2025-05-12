@@ -1,77 +1,105 @@
-import { NextResponse } from 'next/server'
-import { db } from '@/lib/firebase-admin'
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/firebase'
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore'
+import { Product } from '@/types/product'
+import { getCachedData, setCachedData, CACHE_KEYS, CACHE_TTL, invalidateCache } from '@/lib/cache'
 
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
-    const docRef = db.collection('products').doc(id)
-    const doc = await docRef.get()
+    const { id } = params
 
-    if (!doc.exists) {
-      return new NextResponse('Product not found', { status: 404 })
+    // Try to get from cache first
+    const cacheKey = CACHE_KEYS.product(id)
+    const cachedProduct = await getCachedData<Product>(cacheKey)
+
+    if (cachedProduct) {
+      return NextResponse.json(cachedProduct)
+    }
+
+    // If not in cache, fetch from database
+    const productRef = doc(db, 'products', id)
+    const productDoc = await getDoc(productRef)
+
+    if (!productDoc.exists()) {
+      return NextResponse.json(
+        { error: 'Product not found' },
+        { status: 404 }
+      )
     }
 
     const product = {
-      id: doc.id,
-      ...doc.data()
-    }
+      id: productDoc.id,
+      ...productDoc.data()
+    } as Product
+
+    // Cache the product
+    await setCachedData(cacheKey, product, CACHE_TTL.PRODUCT)
 
     return NextResponse.json(product)
   } catch (error) {
     console.error('Error fetching product:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to fetch product' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: 'Failed to fetch product' },
+      { status: 500 }
     )
   }
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const data = await request.json()
-    
-    const docRef = db.collection('products').doc(id)
-    await docRef.update({
+
+    const productRef = doc(db, 'products', id)
+    await updateDoc(productRef, {
       ...data,
-      updatedAt: new Date()
+      updatedAt: new Date().toISOString()
     })
 
-    const updatedDoc = await docRef.get()
-    const product = {
-      id: updatedDoc.id,
-      ...updatedDoc.data()
-    }
+    // Invalidate cache for this product and the products list
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.product(id)),
+      invalidateCache('products:*')
+    ])
 
-    return NextResponse.json(product)
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error updating product:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to update product' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: 'Failed to update product' },
+      { status: 500 }
     )
   }
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
-    await db.collection('products').doc(id).delete()
-    return new NextResponse(null, { status: 204 })
+    const { id } = params
+
+    const productRef = doc(db, 'products', id)
+    await deleteDoc(productRef)
+
+    // Invalidate cache for this product and the products list
+    await Promise.all([
+      invalidateCache(CACHE_KEYS.product(id)),
+      invalidateCache('products:*')
+    ])
+
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting product:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to delete product' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: 'Failed to delete product' },
+      { status: 500 }
     )
   }
 } 

@@ -1,41 +1,42 @@
+export interface ProductSpecifications {
+  frameMaterial: string
+  lensMaterial: string
+  lensWidth: string
+  bridgeWidth: string
+  templeLength: string
+  weight: string
+  uvProtection: string
+  polarization: boolean
+}
+
+export interface ProductShipping {
+  freeShipping: boolean
+  estimatedDelivery: string
+  returnPolicy: string
+}
+
 export interface Product {
   id: string
   name: string
-  description: string
   price: number
   image: string
   images: string[]
+  description: string
   category: string
-  collection?: string
-  inStock: boolean
+  rating: number
+  reviews: number
   featured: boolean
-  new?: boolean
-  sale?: boolean
-  salePrice?: number
-  colors?: string[]
-  sizes?: string[]
-  rating?: number
-  reviews?: number
+  colors: string[]
+  inStock: boolean
   createdAt: string
   updatedAt: string
-  specifications: {
-    frameMaterial: string
-    lensMaterial: string
-    lensWidth: string
-    bridgeWidth: string
-    templeLength: string
-    weight: string
-    uvProtection: string
-    polarization?: boolean
-  }
+  sku: string
+  slug: string
+  specifications: ProductSpecifications
   features: string[]
   careInstructions: string[]
   warranty: string
-  shipping: {
-    freeShipping: boolean
-    estimatedDelivery: string
-    returnPolicy: string
-  }
+  shipping: ProductShipping
 }
 
 export const defaultProduct: Partial<Product> = {

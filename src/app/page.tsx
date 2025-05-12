@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Product } from '@/types/product'
 import ProductCard from '@/components/ProductCard'
+import InstagramFeed from '@/components/social/InstagramFeed'
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
@@ -148,6 +149,20 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <section className="py-5 bg-light">
+        <div className="container">
+          <div className="row mb-4">
+            <div className="col-12 text-center">
+              <h2 className="h3 mb-2">Follow Us on Instagram</h2>
+              <p className="text-muted mb-0">
+                @ikzienix
+              </p>
+            </div>
+          </div>
+          <InstagramFeed />
+        </div>
+      </section>
     </>
   )
 } 

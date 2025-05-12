@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { withRateLimit } from '@/lib/rate-limit';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
 });
 
-export async function POST(req: NextRequest) {
+async function handler(req: NextRequest) {
   try {
     const { payment_intent, payment_intent_client_secret } = await req.json();
 
@@ -32,4 +33,7 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+// Limit to 10 payment verifications per minute
+export const POST = withRateLimit(handler, 10); 

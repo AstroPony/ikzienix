@@ -1,52 +1,175 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Product, defaultProduct } from '@/types/product'
+import { Review, ReviewStats as ReviewStatsType } from '@/types/review'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductDetails from '@/components/product/ProductDetails'
 import ProductPrice from '@/components/product/ProductPrice'
 import AddToCartButton from '@/components/product/AddToCartButton'
+import ReviewStats from '@/components/reviews/ReviewStats'
+import ReviewList from '@/components/reviews/ReviewList'
+import ReviewForm from '@/components/reviews/ReviewForm'
+import { useSession } from 'next-auth/react'
+import SocialShare from '@/components/social/SocialShare'
+import SizeGuide from '@/components/product/SizeGuide'
 
 export default function ProductPage() {
   const params = useParams()
-  const [product, setProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: session } = useSession()
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviewStats, setReviewStats] = useState<ReviewStatsType | null>(null)
+  const [reviewPage, setReviewPage] = useState(1)
+  const [hasMoreReviews, setHasMoreReviews] = useState(true)
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await fetch(`/api/products/${params.id}`)
-        if (!response.ok) throw new Error('Failed to fetch product')
-        const data = await response.json()
-        // Merge with default values
-        setProduct({ ...defaultProduct, ...data } as Product)
-      } catch (err) {
-        setError('Error loading product')
-      } finally {
-        setIsLoading(false)
+  const fetchProduct = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch(`/api/products/${params.id}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch product')
       }
+      const data = await response.json()
+      // Merge with default values
+      setProduct({ ...defaultProduct, ...data } as Product)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch product')
+    } finally {
+      setLoading(false)
     }
-
-    fetchProduct()
   }, [params.id])
 
-  if (isLoading) {
+  const fetchReviews = useCallback(async (page: number) => {
+    try {
+      const response = await fetch(`/api/reviews?productId=${params.id}&page=${page}&limit=5`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch reviews')
+      }
+      const data = await response.json()
+      
+      if (page === 1) {
+        setReviews(data.reviews)
+      } else {
+        setReviews(prev => [...prev, ...data.reviews])
+      }
+      
+      setHasMoreReviews(data.pagination.hasNextPage)
+      
+      // Calculate review stats
+      const stats: ReviewStatsType = {
+        averageRating: product?.rating || 0,
+        totalReviews: data.pagination.totalItems,
+        ratingDistribution: data.reviews.reduce((acc: { [key: number]: number }, review: Review) => {
+          acc[review.rating] = (acc[review.rating] || 0) + 1
+          return acc
+        }, {})
+      }
+      setReviewStats(stats)
+    } catch (err) {
+      console.error('Error fetching reviews:', err)
+    }
+  }, [params.id, product?.rating])
+
+  const handleReviewSubmit = async (review: {
+    rating: number
+    title: string
+    comment: string
+    images?: string[]
+  }) => {
+    try {
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: params.id,
+          ...review
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit review')
+      }
+
+      // Refresh reviews
+      setReviewPage(1)
+      fetchReviews(1)
+      fetchProduct() // Refresh product to update rating
+    } catch (err) {
+      console.error('Error submitting review:', err)
+    }
+  }
+
+  const handleHelpfulClick = async (reviewId: string) => {
+    try {
+      const response = await fetch(`/api/reviews/${reviewId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ helpful: true })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to mark review as helpful')
+      }
+
+      // Refresh reviews
+      fetchReviews(reviewPage)
+    } catch (err) {
+      console.error('Error marking review as helpful:', err)
+    }
+  }
+
+  useEffect(() => {
+    fetchProduct()
+  }, [fetchProduct])
+
+  useEffect(() => {
+    if (product) {
+      fetchReviews(1)
+    }
+  }, [product, fetchReviews])
+
+  if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <div className="container py-5">
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
         </div>
       </div>
     )
   }
 
-  if (error || !product) {
+  if (error) {
     return (
       <div className="container py-5">
         <div className="alert alert-danger" role="alert">
-          {error || 'Product not found'}
+          Error loading product
+          <button 
+            onClick={fetchProduct} 
+            className="btn btn-link text-danger p-0 ms-2"
+          >
+            try again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="container py-5">
+        <div className="alert alert-danger" role="alert">
+          Product not found
         </div>
       </div>
     )
@@ -100,7 +223,7 @@ export default function ProductPage() {
           </div>
 
           {/* Shipping Info */}
-          <div className="card bg-light mb-4">
+          <div className="card mb-4">
             <div className="card-body">
               <div className="d-flex align-items-center mb-2">
                 <i className="bi bi-truck me-2"></i>
@@ -114,11 +237,68 @@ export default function ProductPage() {
               </div>
             </div>
           </div>
+
+          {/* Social Share */}
+          <div className="mb-4">
+            <h3 className="h6 mb-3">Share this product</h3>
+            <SocialShare product={product} />
+          </div>
         </div>
 
         {/* Product Details */}
         <div className="col-12 mt-4">
           <ProductDetails product={product} />
+        </div>
+
+        {/* Size Guide */}
+        <div className="col-12 mt-4">
+          <h2 className="h3 mb-4">Size Guide</h2>
+          <SizeGuide />
+        </div>
+
+        {/* Reviews Section */}
+        <div className="col-12 mt-5">
+          <h2 className="h3 mb-4">Customer Reviews</h2>
+          
+          {/* Review Stats */}
+          {reviewStats && (
+            <ReviewStats stats={reviewStats} className="mb-5" />
+          )}
+
+          {/* Review Form */}
+          {session?.user && (
+            <div className="mb-5">
+              <h3 className="h4 mb-4">Write a Review</h3>
+              <ReviewForm
+                productId={product.id}
+                onSubmit={handleReviewSubmit}
+              />
+            </div>
+          )}
+
+          {/* Review List */}
+          <div className="mb-4">
+            <ReviewList
+              reviews={reviews}
+              onHelpfulClick={handleHelpfulClick}
+            />
+          </div>
+
+          {/* Load More Reviews */}
+          {hasMoreReviews && (
+            <div className="text-center">
+              <button
+                className="btn btn-outline-primary"
+                onClick={() => {
+                  const nextPage = reviewPage + 1
+                  setReviewPage(nextPage)
+                  fetchReviews(nextPage)
+                }}
+              >
+                Load More Reviews
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/firebase-admin';
+import { withRateLimit } from '@/lib/rate-limit';
 
-export async function GET(req: NextRequest) {
+async function handler(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
@@ -19,4 +20,7 @@ export async function GET(req: NextRequest) {
     console.error('Error fetching user profile:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch profile' }, { status: 500 });
   }
-} 
+}
+
+// Limit to 30 requests per minute
+export const GET = withRateLimit(handler, 30); 

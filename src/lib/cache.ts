@@ -1,48 +1,77 @@
-type CacheEntry<T> = {
-  value: T
-  timestamp: number
+import { Redis } from '@upstash/redis'
+
+// Initialize Redis client
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+})
+
+// Cache TTLs in seconds
+export const CACHE_TTL = {
+  PRODUCTS: 3600, // 1 hour
+  PRODUCT: 1800, // 30 minutes
+  CATEGORIES: 86400, // 24 hours
+  ORDERS: 300, // 5 minutes
+  REVIEWS: 1800, // 30 minutes
+  USER_PROFILE: 300, // 5 minutes
+  INSTAGRAM_POSTS: 1800, // 30 minutes
 }
 
-export class Cache<T> {
-  private store: Map<string, CacheEntry<T>>
-  private ttl: number
-
-  constructor(ttl: number = 5 * 60 * 1000) { // Default 5 minutes
-    this.store = new Map()
-    this.ttl = ttl
+export async function getCachedData<T>(key: string): Promise<T | null> {
+  try {
+    const data = await redis.get<T>(key)
+    return data
+  } catch (error) {
+    console.error('Cache get error:', error)
+    return null
   }
+}
 
-  set(key: string, value: T): void {
-    this.store.set(key, {
-      value,
-      timestamp: Date.now()
-    })
+export async function setCachedData<T>(
+  key: string,
+  data: T,
+  ttl: number = CACHE_TTL.PRODUCTS
+): Promise<void> {
+  try {
+    await redis.set(key, data, { ex: ttl })
+  } catch (error) {
+    console.error('Cache set error:', error)
   }
+}
 
-  get(key: string): T | undefined {
-    const entry = this.store.get(key)
-    if (!entry) return undefined
-
-    if (Date.now() - entry.timestamp > this.ttl) {
-      this.store.delete(key)
-      return undefined
+export async function invalidateCache(pattern: string): Promise<void> {
+  try {
+    const keys = await redis.keys(pattern)
+    if (keys.length > 0) {
+      await redis.del(...keys)
     }
-
-    return entry.value
-  }
-
-  has(key: string): boolean {
-    return this.get(key) !== undefined
-  }
-
-  delete(key: string): void {
-    this.store.delete(key)
-  }
-
-  clear(): void {
-    this.store.clear()
+  } catch (error) {
+    console.error('Cache invalidation error:', error)
   }
 }
 
-export const ordersCache = new Cache()
-export const analyticsCache = new Cache() 
+// Cache key generators
+export const CACHE_KEYS = {
+  products: (params?: { category?: string; search?: string; page?: number }) => {
+    const key = ['products']
+    if (params?.category) key.push(`category:${params.category}`)
+    if (params?.search) key.push(`search:${params.search}`)
+    if (params?.page) key.push(`page:${params.page}`)
+    return key.join(':')
+  },
+  product: (id: string) => `product:${id}`,
+  categories: () => 'categories',
+  orders: (userId: string, page?: number) => {
+    const key = ['orders', userId]
+    if (page) key.push(`page:${page}`)
+    return key.join(':')
+  },
+  order: (id: string) => `order:${id}`,
+  reviews: (productId: string, page?: number) => {
+    const key = ['reviews', productId]
+    if (page) key.push(`page:${page}`)
+    return key.join(':')
+  },
+  userProfile: (userId: string) => `user:${userId}:profile`,
+  instagramPosts: () => 'instagram:posts',
+} 

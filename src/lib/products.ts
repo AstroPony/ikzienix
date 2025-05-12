@@ -1,4 +1,5 @@
 import { placeholderImages } from './placeholder-images'
+import { Product } from '@/types/product'
 
 export interface Product {
   id: string
@@ -58,4 +59,16 @@ export const products: Product[] = [
     image: placeholderImages['wayfarer'],
     category: 'wayfarer'
   }
-] 
+]
+
+export async function getProduct(slug: string): Promise<Product | null> {
+  // TODO: Implement actual product fetching from your database
+  // This is a placeholder implementation
+  return null
+}
+
+export async function getAllProducts(): Promise<Product[]> {
+  // TODO: Implement actual products fetching from your database
+  // This is a placeholder implementation
+  return []
+} 

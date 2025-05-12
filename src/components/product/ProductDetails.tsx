@@ -157,12 +157,20 @@ export default function ProductDetails({ product, className = '' }: ProductDetai
             <div className="mb-4">
               <h6 className="mb-3">Care Instructions</h6>
               <ul className="list-unstyled mb-0">
-                {product.careInstructions?.map((instruction, index) => (
-                  <li key={index} className="d-flex align-items-center mb-2">
-                    <i className="bi bi-dot me-2"></i>
-                    {instruction}
-                  </li>
-                ))}
+                {Array.isArray(product.careInstructions) 
+                  ? product.careInstructions.map((instruction, index) => (
+                      <li key={index} className="d-flex align-items-center mb-2">
+                        <i className="bi bi-dot me-2"></i>
+                        {instruction}
+                      </li>
+                    ))
+                  : (
+                      <li className="d-flex align-items-center mb-2">
+                        <i className="bi bi-dot me-2"></i>
+                        {product.careInstructions}
+                      </li>
+                    )
+                }
               </ul>
             </div>
             <div>

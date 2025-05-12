@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/firebase-admin';
+import { withRateLimit } from '@/lib/rate-limit';
 
-export async function POST(req: NextRequest) {
+async function handler(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
@@ -20,4 +21,7 @@ export async function POST(req: NextRequest) {
     console.error('Error updating user profile:', error);
     return NextResponse.json({ error: error.message || 'Failed to update profile' }, { status: 500 });
   }
-} 
+}
+
+// Limit to 10 profile updates per minute
+export const POST = withRateLimit(handler, 10); 

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useWishlist } from '@/context/WishlistContext'
 
 interface NavLinksProps {
   onLinkClick: () => void
@@ -9,11 +10,13 @@ interface NavLinksProps {
 
 export default function NavLinks({ onLinkClick }: NavLinksProps) {
   const pathname = usePathname()
+  const { wishlist } = useWishlist()
   const isActive = (path: string) => pathname === path
 
   const links = [
     { href: '/', label: 'Home' },
     { href: '/collections', label: 'Collections' },
+    { href: '/wishlist', label: `Wishlist ${wishlist.length > 0 ? `(${wishlist.length})` : ''}` },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
   ]

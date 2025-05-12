@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './globals.css'
 import RootLayoutContent from '@/components/RootLayoutContent'
+import { WishlistProvider } from '@/context/WishlistContext'
+import { ComparisonProvider } from '@/lib/comparison-context'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,9 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <RootLayoutContent>
-          {children}
-        </RootLayoutContent>
+        <ComparisonProvider>
+          <WishlistProvider>
+            <RootLayoutContent>
+              {children}
+            </RootLayoutContent>
+          </WishlistProvider>
+        </ComparisonProvider>
       </body>
     </html>
   )

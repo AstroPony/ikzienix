@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/firebase-admin'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { withRateLimit } from '@/lib/rate-limit'
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+async function handler(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -16,7 +14,15 @@ export async function GET(
       )
     }
 
-    const orderDoc = await db.collection('orders').doc(params.id).get()
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Order ID is required' },
+        { status: 400 }
+      )
+    }
+
+    const orderDoc = await db.collection('orders').doc(id).get()
     if (!orderDoc.exists) {
       return NextResponse.json(
         { error: 'Order not found' },
@@ -75,6 +81,9 @@ export async function GET(
     )
   }
 }
+
+// Limit to 30 requests per minute
+export const GET = withRateLimit(handler, 30)
 
 export async function PUT(
   req: NextRequest,

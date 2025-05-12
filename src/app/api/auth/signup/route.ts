@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { db } from '@/lib/firebase-admin';
+import { withRateLimit } from '@/lib/rate-limit';
 
-export async function POST(req: NextRequest) {
+async function handler(req: NextRequest) {
   try {
     const { name, email, password } = await req.json();
 
@@ -45,4 +46,7 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+// Limit to 3 signup attempts per minute
+export const POST = withRateLimit(handler, 3); 

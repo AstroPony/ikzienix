@@ -7,7 +7,7 @@ import { authOptions } from '@/lib/auth'
 import { withRateLimit } from '@/lib/rate-limit'
 import { handleAPIError, successResponse, validateRequiredFields, APIError } from '@/lib/api-utils'
 
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -81,42 +81,29 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function handler(req: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       throw new APIError('Unauthorized', 401)
     }
 
-    const { items, paymentIntentId } = await req.json()
-
-    validateRequiredFields({ items, paymentIntentId }, ['items', 'paymentIntentId'])
-
-    if (!Array.isArray(items) || items.length === 0) {
-      throw new APIError('Invalid items array', 400)
-    }
-
-    // Calculate total
-    const total = items.reduce((sum, item) => {
-      return sum + item.product.price * item.quantity
-    }, 0)
+    const data = await request.json()
+    validateRequiredFields(data, ['items', 'shippingAddress', 'paymentMethod'])
 
     // Create order
     const orderRef = await db.collection('orders').add({
       userId: session.user.id,
-      total,
+      items: data.items,
+      shippingAddress: data.shippingAddress,
+      paymentMethod: data.paymentMethod,
       status: 'pending',
-      paymentIntentId,
-      items: items.map(item => ({
-        productId: item.product.id,
-        quantity: item.quantity,
-        price: item.product.price
-      })),
+      total: data.total,
       createdAt: new Date(),
       updatedAt: new Date()
     })
 
-    // Get the created order with all its data
+    // Get the created order
     const orderDoc = await orderRef.get()
     const orderData = orderDoc.data()
     
@@ -124,31 +111,17 @@ async function handler(req: NextRequest) {
       throw new APIError('Failed to create order', 500)
     }
 
-    // Get product data for each item
-    const itemsWithProducts = await Promise.all(orderData.items.map(async (item: any) => {
-      const productDoc = await db.collection('products').doc(item.productId).get()
-      if (!productDoc.exists) {
-        throw new APIError(`Product ${item.productId} not found`, 404)
-      }
-      return {
-        ...item,
-        product: {
-          id: productDoc.id,
-          ...productDoc.data()
-        }
-      }
-    }))
-
-    const order = {
+    return successResponse({
       id: orderDoc.id,
-      ...orderData,
-      items: itemsWithProducts
-    }
-
-    return successResponse(order, 201)
+      ...orderData
+    }, 201)
   } catch (error) {
     return handleAPIError(error)
   }
 }
 
-export const POST = withRateLimit(handler, 10) // 10 requests per minute 
+// Limit to 30 requests per minute for GET
+export const GET = withRateLimit(getHandler, 30)
+
+// Limit to 5 orders per minute for POST
+export const POST = withRateLimit(postHandler, 5) 

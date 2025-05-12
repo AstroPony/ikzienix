@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { Product } from '@/types/product'
 import ProductBadge from './ProductBadge'
+import OptimizedImage from '../common/OptimizedImage'
 
 interface ProductGalleryProps {
   product: Product
@@ -35,13 +35,14 @@ export default function ProductGallery({ product, className = '' }: ProductGalle
               className={`carousel-item ${index === activeIndex ? 'active' : ''}`}
             >
               <div className="position-relative" style={{ paddingTop: '100%' }}>
-                <Image
+                <OptimizedImage
                   src={image}
                   alt={`${product.name} - Image ${index + 1}`}
                   fill
                   className="object-fit-cover rounded-3"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   priority={index === 0}
+                  quality={90}
                 />
                 {index === 0 && product.sale && <ProductBadge type="sale" />}
                 {index === 0 && product.new && <ProductBadge type="new" />}
@@ -86,13 +87,14 @@ export default function ProductGallery({ product, className = '' }: ProductGalle
               style={{ width: '80px', height: '80px' }}
               onClick={() => setActiveIndex(index)}
             >
-              <Image
+              <OptimizedImage
                 src={image}
                 alt={`${product.name} - Thumbnail ${index + 1}`}
                 width={80}
                 height={80}
                 className="object-fit-cover"
                 style={{ width: '100%', height: '100%' }}
+                quality={75}
               />
             </button>
           ))}
