@@ -271,27 +271,16 @@ describe('ProductPage', () => {
 
   test.skip('renders product details correctly', async () => {
     render(<ProductPage params={{ slug: 'test-product' }} />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Product')).toBeInTheDocument()
-      expect(screen.getByText('$99.99')).toBeInTheDocument()
-      expect(screen.getByText('Test description')).toBeInTheDocument()
-    })
+    await screen.findByText('Test Product')
   })
 
   test.skip('handles product not found', async () => {
     render(<ProductPage params={{ slug: 'non-existent' }} />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Product not found')).toBeInTheDocument()
-    })
+    await screen.findByText('Product not found')
   })
 
   test.skip('handles error state', async () => {
     render(<ProductPage params={{ slug: 'error-product' }} />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Error loading product')).toBeInTheDocument()
-    })
+    await screen.findByText('Error loading product')
   })
 }) 

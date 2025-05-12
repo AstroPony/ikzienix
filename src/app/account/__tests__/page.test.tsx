@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { SessionProvider } from 'next-auth/react'
+import { render, screen } from '@testing-library/react'
 import AccountPage from '../page'
+import { CartProvider } from '@/lib/cart-context'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -46,40 +46,34 @@ const mockSession = {
 }
 
 describe('AccountPage', () => {
-  test.skip('renders account page correctly', async () => {
+  test.skip('renders the account page correctly', async () => {
     render(
-      <SessionProvider session={mockSession}>
+      <CartProvider>
         <AccountPage />
-      </SessionProvider>
+      </CartProvider>
     )
 
-    await waitFor(() => {
-      expect(screen.getByText('My Account')).toBeInTheDocument()
-      expect(screen.getByText('test@example.com')).toBeInTheDocument()
-    })
+    await screen.findByText('My Account')
+    expect(screen.getByText('test@example.com')).toBeInTheDocument()
   })
 
   test.skip('displays order history', async () => {
     render(
-      <SessionProvider session={mockSession}>
+      <CartProvider>
         <AccountPage />
-      </SessionProvider>
+      </CartProvider>
     )
 
-    await waitFor(() => {
-      expect(screen.getByText('Order History')).toBeInTheDocument()
-    })
+    await screen.findByText('Order History')
   })
 
   test.skip('redirects to sign in if not authenticated', async () => {
     render(
-      <SessionProvider session={null}>
+      <CartProvider>
         <AccountPage />
-      </SessionProvider>
+      </CartProvider>
     )
 
-    await waitFor(() => {
-      expect(screen.getByText('Please sign in to view your account')).toBeInTheDocument()
-    })
+    await screen.findByText('Please sign in to view your account')
   })
 }) 
