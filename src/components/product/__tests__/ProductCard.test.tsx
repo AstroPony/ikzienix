@@ -1,10 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import ProductCard from '@/components/ProductCard'
-import { Product } from '@/types/product'
+import ProductCard from '../ProductCard'
 import { CartProvider } from '@/lib/cart-context'
 import { ComparisonProvider } from '@/lib/comparison-context'
 
-const mockProduct: Product = {
+const mockProduct = {
   id: '1',
   name: 'Test Product',
   price: 99.99,
@@ -13,27 +12,27 @@ const mockProduct: Product = {
   description: 'Test description',
   category: 'Test category',
   rating: 4.5,
-  reviews: 0,
+  reviews: 10,
   featured: false,
-  colors: ['Black', 'White'],
+  colors: ['black'],
   inStock: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
   sku: 'TEST-001',
   slug: 'test-product',
   specifications: {
-    frameMaterial: 'Metal',
-    lensMaterial: 'Polycarbonate',
+    frameMaterial: 'Test material',
+    lensMaterial: 'Test lens',
     lensWidth: '50mm',
     bridgeWidth: '18mm',
     templeLength: '145mm',
-    weight: '30g',
+    weight: '25g',
     uvProtection: 'UV400',
     polarization: true
   },
   features: ['Feature 1', 'Feature 2'],
-  careInstructions: ['Care 1', 'Care 2'],
-  warranty: '1 year',
+  careInstructions: ['Instruction 1', 'Instruction 2'],
+  warranty: '1 year warranty',
   shipping: {
     freeShipping: true,
     estimatedDelivery: '3-5 business days',
@@ -41,10 +40,15 @@ const mockProduct: Product = {
   }
 }
 
-const outOfStockProduct: Product = {
-  ...mockProduct,
-  inStock: false
-}
+const mockDispatch = jest.fn()
+
+jest.mock('@/lib/cart-context', () => ({
+  ...jest.requireActual('@/lib/cart-context'),
+  useCart: () => ({
+    dispatch: mockDispatch,
+    state: { items: [] }
+  })
+}))
 
 const renderWithProviders = (component: React.ReactNode) => {
   return render(
@@ -56,45 +60,33 @@ const renderWithProviders = (component: React.ReactNode) => {
   )
 }
 
-// Mock the addToCart function
-jest.mock('@/lib/cart-context', () => ({
-  ...jest.requireActual('@/lib/cart-context'),
-  useCart: () => ({
-    addToCart: jest.fn().mockResolvedValue(undefined)
-  })
-}))
-
 describe('ProductCard', () => {
   it('renders product information correctly', () => {
     renderWithProviders(<ProductCard product={mockProduct} />)
     
-    // Check basic product information
-    expect(screen.getByText(mockProduct.name)).toBeInTheDocument()
-    expect(screen.getByText(`$${mockProduct.price.toFixed(2)}`)).toBeInTheDocument()
-    expect(screen.getByText(mockProduct.category)).toBeInTheDocument()
-    
-    // Check image
-    const image = screen.getByRole('img')
-    expect(image).toHaveAttribute('src', mockProduct.image)
-    expect(image).toHaveAttribute('alt', mockProduct.name)
+    expect(screen.getByText('Test Product')).toBeInTheDocument()
+    expect(screen.getByText('$99.99')).toBeInTheDocument()
+    expect(screen.getByText('Test category')).toBeInTheDocument()
+    expect(screen.getByAltText('Test Product')).toHaveAttribute('src', '/test.jpg')
   })
 
   it('has a functional add to cart button', () => {
     renderWithProviders(<ProductCard product={mockProduct} />)
     
-    const button = screen.getByRole('button', { name: /add to cart/i })
-    expect(button).toBeEnabled()
-    fireEvent.click(button)
+    const addToCartButton = screen.getByText('Add to Cart')
+    fireEvent.click(addToCartButton)
     
-    // After clicking, the button should show "Added to Cart"
-    expect(screen.getByText('Added to Cart')).toBeInTheDocument()
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'ADD_ITEM',
+      payload: { product: mockProduct }
+    })
   })
 
   it('handles out of stock products', () => {
+    const outOfStockProduct = { ...mockProduct, inStock: false }
     renderWithProviders(<ProductCard product={outOfStockProduct} />)
     
-    const button = screen.getByRole('button', { name: /out of stock/i })
+    const button = screen.getByText('Out of Stock')
     expect(button).toBeDisabled()
-    expect(button).toHaveTextContent('Out of Stock')
   })
 }) 

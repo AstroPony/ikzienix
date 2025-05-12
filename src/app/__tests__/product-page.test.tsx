@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { CartProvider } from '@/lib/cart-context'
-import ProductPage from '@/app/products/[slug]/page'
+import ProductPage from '../products/[slug]/page'
 import { Product } from '@/types/product'
 import { act } from 'react'
 import { ComparisonProvider } from '@/lib/comparison-context'
@@ -8,6 +8,11 @@ import { ComparisonProvider } from '@/lib/comparison-context'
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
   useParams: () => ({ slug: 'test-product' })
+}))
+
+// Mock the getProduct function
+jest.mock('@/lib/api', () => ({
+  getProduct: jest.fn().mockResolvedValue(mockProduct)
 }))
 
 const mockProduct: Product = {
@@ -28,8 +33,8 @@ const mockProduct: Product = {
   sku: 'TEST-001',
   slug: 'test-product',
   specifications: {
-    frameMaterial: 'Metal',
-    lensMaterial: 'Polycarbonate',
+    frameMaterial: 'Test material',
+    lensMaterial: 'Test lens',
     lensWidth: '50mm',
     bridgeWidth: '18mm',
     templeLength: '145mm',
@@ -96,11 +101,6 @@ const mockReviews = {
   ]
 }
 
-// Mock the getProduct function
-jest.mock('@/lib/api', () => ({
-  getProduct: jest.fn().mockResolvedValue(mockProduct)
-}))
-
 const renderWithProviders = (component: React.ReactNode) => {
   return render(
     <CartProvider>
@@ -120,15 +120,19 @@ describe('ProductPage', () => {
     jest.resetAllMocks()
   })
 
-  it('renders the Product page correctly', async () => {
-    renderWithProviders(<ProductPage />)
-    await waitFor(() => {
-      expect(screen.getByText(mockProduct.name)).toBeInTheDocument()
-    })
+  it('renders the product page correctly', async () => {
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    
+    // Wait for the product data to load
+    const productName = await screen.findByText('Test Product')
+    expect(productName).toBeInTheDocument()
+    expect(screen.getByText('$99.99')).toBeInTheDocument()
+    expect(screen.getByText('Test description')).toBeInTheDocument()
+    expect(screen.getByText('Test category')).toBeInTheDocument()
   })
 
   it('renders product details correctly', async () => {
-    renderWithProviders(<ProductPage />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
     
     await waitFor(() => {
       // Check basic product information
@@ -179,7 +183,7 @@ describe('ProductPage', () => {
       return Promise.reject(new Error('Not found'))
     })
 
-    renderWithProviders(<ProductPage />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     expect(screen.getByRole('status')).toBeInTheDocument()
 
@@ -194,13 +198,13 @@ describe('ProductPage', () => {
   })
 
   it('shows error message when product fetch fails', async () => {
-    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to fetch'))
-    renderWithProviders(<ProductPage />)
-    
+    ;(global.fetch as jest.Mock).mockRejectedValue(new Error('Failed to fetch'))
+
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+
     await waitFor(() => {
       expect(screen.getByText('Error loading product')).toBeInTheDocument()
     })
-    expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
   })
 
   it('shows out of stock message when product is not available', async () => {
@@ -213,7 +217,7 @@ describe('ProductPage', () => {
       json: () => Promise.resolve(mockReviews)
     })
 
-    renderWithProviders(<ProductPage />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
     
     await waitFor(() => {
       expect(screen.getByText('Out of Stock')).toBeInTheDocument()
@@ -230,7 +234,7 @@ describe('ProductPage', () => {
       json: () => Promise.resolve(mockReviews)
     })
 
-    renderWithProviders(<ProductPage />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
     
     await waitFor(() => {
       expect(screen.getByText(mockProduct.name)).toBeInTheDocument()

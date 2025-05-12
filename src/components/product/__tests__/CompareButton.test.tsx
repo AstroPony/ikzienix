@@ -1,9 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import CompareButton from '../CompareButton'
 import { ComparisonProvider } from '@/lib/comparison-context'
-import { Product } from '@/types/product'
 
-const mockProduct: Product = {
+const mockProduct = {
   id: '1',
   name: 'Test Product',
   price: 99.99,
@@ -12,27 +11,27 @@ const mockProduct: Product = {
   description: 'Test description',
   category: 'Test category',
   rating: 4.5,
-  reviews: 0,
+  reviews: 10,
   featured: false,
-  colors: ['Black', 'White'],
+  colors: ['black'],
   inStock: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
   sku: 'TEST-001',
   slug: 'test-product',
   specifications: {
-    frameMaterial: 'Metal',
-    lensMaterial: 'Polycarbonate',
+    frameMaterial: 'Test material',
+    lensMaterial: 'Test lens',
     lensWidth: '50mm',
     bridgeWidth: '18mm',
     templeLength: '145mm',
-    weight: '30g',
+    weight: '25g',
     uvProtection: 'UV400',
     polarization: true
   },
   features: ['Feature 1', 'Feature 2'],
-  careInstructions: ['Care 1', 'Care 2'],
-  warranty: '1 year',
+  careInstructions: ['Instruction 1', 'Instruction 2'],
+  warranty: '1 year warranty',
   shipping: {
     freeShipping: true,
     estimatedDelivery: '3-5 business days',
@@ -40,23 +39,46 @@ const mockProduct: Product = {
   }
 }
 
-const renderWithProvider = (component: React.ReactNode) =>
-  render(<ComparisonProvider>{component}</ComparisonProvider>)
+const mockDispatch = jest.fn()
+
+jest.mock('@/lib/comparison-context', () => ({
+  ...jest.requireActual('@/lib/comparison-context'),
+  useComparison: () => ({
+    addToComparison: jest.fn(),
+    removeFromComparison: jest.fn(),
+    isInComparison: jest.fn().mockReturnValue(false),
+    state: { items: [] }
+  })
+}))
+
+const renderWithProvider = (component: React.ReactNode) => {
+  return render(
+    <ComparisonProvider>
+      {component}
+    </ComparisonProvider>
+  )
+}
 
 describe('CompareButton', () => {
   it('shows correct initial state and toggles on click', () => {
     renderWithProvider(<CompareButton product={mockProduct} />)
     
-    // Initial state - button should show "Compare" text
-    const button = screen.getByRole('button', { name: /compare/i })
+    // Initial state - button should show "Add to comparison" text
+    const button = screen.getByTitle('Add to comparison')
     expect(button).toBeInTheDocument()
     
     // Click to add to comparison
     fireEvent.click(button)
-    expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument()
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'ADD_ITEM',
+      payload: { product: mockProduct }
+    })
     
     // Click again to remove from comparison
-    fireEvent.click(screen.getByRole('button', { name: /remove/i }))
-    expect(screen.getByRole('button', { name: /compare/i })).toBeInTheDocument()
+    fireEvent.click(button)
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'REMOVE_ITEM',
+      payload: { productId: mockProduct.id }
+    })
   })
 }) 

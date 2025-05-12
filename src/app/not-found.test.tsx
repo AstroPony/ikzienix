@@ -6,6 +6,7 @@ describe('NotFoundPage', () => {
     render(<NotFoundPage />);
     expect(screen.getByText('404')).toBeInTheDocument();
     expect(screen.getByText('Page Not Found')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Go Home/i })).toBeInTheDocument();
+    expect(screen.getByText('Sorry, the page you are looking for does not exist or has been moved.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Go Home/i })).toHaveAttribute('href', '/');
   });
 }); 
