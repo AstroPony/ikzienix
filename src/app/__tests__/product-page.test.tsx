@@ -30,22 +30,6 @@ const mockSession = {
   expires: new Date(Date.now() + 2 * 86400).toISOString()
 }
 
-// Mock fetch
-global.fetch = jest.fn().mockImplementation(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({
-      id: '1',
-      name: 'Test Product',
-      description: 'Test Description',
-      price: 100,
-      images: ['/images/test.jpg'],
-      category: 'Test Category',
-      stock: 10
-    })
-  })
-)
-
 // Mock product data
 const mockProduct: Product = {
   id: '1',
@@ -53,13 +37,35 @@ const mockProduct: Product = {
   slug: 'test-product',
   description: 'Test Description',
   price: 100,
+  image: '/images/test.jpg',
   images: ['/images/test.jpg'],
   category: 'Test Category',
-  stock: 10,
+  rating: 4.5,
+  reviews: 10,
+  featured: false,
+  colors: ['black', 'brown'],
   inStock: true,
   sku: 'TEST-001',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  specifications: {
+    frameMaterial: 'Metal',
+    lensMaterial: 'Polycarbonate',
+    lensWidth: '50mm',
+    bridgeWidth: '18mm',
+    templeLength: '145mm',
+    weight: '25g',
+    uvProtection: 'UV400',
+    polarization: true
+  },
+  features: ['Lightweight', 'Durable'],
+  careInstructions: ['Clean with microfiber cloth'],
+  warranty: '1 year warranty',
+  shipping: {
+    freeShipping: true,
+    estimatedDelivery: '3-5 business days',
+    returnPolicy: '30 days return policy'
+  }
 }
 
 const mockOutOfStockProduct: Product = {
@@ -99,9 +105,9 @@ const mockReviews = [
 ]
 
 // Mock the API functions
-const mockGetProduct = jest.fn().mockResolvedValue(mockProduct)
-const mockGetRelatedProducts = jest.fn().mockResolvedValue(mockRelatedProducts)
-const mockGetReviews = jest.fn().mockResolvedValue(mockReviews)
+const mockGetProduct = jest.fn()
+const mockGetRelatedProducts = jest.fn()
+const mockGetReviews = jest.fn()
 
 jest.mock('@/lib/api', () => ({
   getProduct: () => mockGetProduct(),
@@ -161,11 +167,13 @@ const mockParams = {
 describe('ProductPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(getProduct as jest.Mock).mockResolvedValue(mockProduct)
+    mockGetProduct.mockResolvedValue(mockProduct)
+    mockGetRelatedProducts.mockResolvedValue(mockRelatedProducts)
+    mockGetReviews.mockResolvedValue(mockReviews)
   })
 
   it('renders product details correctly', async () => {
-    render(<ProductPage params={{ slug: 'test-product' }} />)
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument()
@@ -180,9 +188,9 @@ describe('ProductPage', () => {
   })
 
   it('handles product not found', async () => {
-    ;(getProduct as jest.Mock).mockResolvedValue(null)
+    mockGetProduct.mockResolvedValue(null)
 
-    render(<ProductPage params={{ slug: 'non-existent-product' }} />)
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     await waitFor(() => {
       expect(require('next/navigation').notFound).toHaveBeenCalled()
@@ -190,9 +198,9 @@ describe('ProductPage', () => {
   })
 
   it('handles error state', async () => {
-    ;(getProduct as jest.Mock).mockRejectedValue(new Error('Failed to fetch product'))
+    mockGetProduct.mockRejectedValue(new Error('Failed to fetch product'))
 
-    render(<ProductPage params={{ slug: 'test-product' }} />)
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     await waitFor(() => {
       expect(screen.getByText('Error loading product')).toBeInTheDocument()
@@ -201,14 +209,10 @@ describe('ProductPage', () => {
   })
 
   it('handles add to cart', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /add to cart/i })).toBeInTheDocument()
     })
 
     const addToCartButton = screen.getByRole('button', { name: /add to cart/i })
@@ -220,32 +224,13 @@ describe('ProductPage', () => {
   })
 
   it('handles out of stock state', async () => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({
-          id: '1',
-          name: 'Test Product',
-          description: 'Test Description',
-          price: 100,
-          images: ['/images/test.jpg'],
-          category: 'Test Category',
-          stock: 0
-        })
-      })
-    )
+    mockGetProduct.mockResolvedValue(mockOutOfStockProduct)
 
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByText('Out of Stock')).toBeInTheDocument()
     })
-
-    expect(screen.getByText('Out of Stock')).toBeInTheDocument()
   })
 
   it('displays product details correctly', async () => {

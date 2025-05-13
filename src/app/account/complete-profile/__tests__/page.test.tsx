@@ -26,6 +26,13 @@ jest.mock('next/navigation', () => ({
   redirect: jest.fn(),
 }))
 
+// Mock Firebase auth
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({
+    currentUser: null
+  }))
+}))
+
 describe('CompleteProfilePage', () => {
   const mockSession = {
     user: {

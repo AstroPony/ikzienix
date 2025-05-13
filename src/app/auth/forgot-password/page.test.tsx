@@ -5,6 +5,9 @@ import { sendPasswordResetEmail } from 'firebase/auth'
 // Mock Firebase auth
 jest.mock('firebase/auth', () => ({
   sendPasswordResetEmail: jest.fn(),
+  getAuth: jest.fn(() => ({
+    currentUser: null
+  }))
 }))
 
 // Mock next/link
