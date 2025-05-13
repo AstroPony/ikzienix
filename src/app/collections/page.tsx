@@ -60,7 +60,7 @@ export default function CollectionsPage() {
                 <div className="card h-100 border-0 shadow-sm">
                   <div className="position-relative" style={{ aspectRatio: '1/1' }}>
                     <Image
-                      src={product?.image || 'https://source.unsplash.com/600x400/?sunglasses,collection'}
+                      src={product?.images?.[0]?.url || 'https://source.unsplash.com/600x400/?sunglasses,collection'}
                       alt={cat}
                       fill
                       className="card-img-top object-fit-cover"

@@ -7,11 +7,9 @@ export const products: Product[] = [
     name: 'Classic Black',
     description: 'Timeless black sunglasses with UV400 protection and lightweight frame. Perfect for everyday street style.',
     price: 29.99,
-    image: placeholderImages['classic-black'],
-    images: [placeholderImages['classic-black']],
+    images: [{ id: 'classic-black-1', url: placeholderImages['classic-black'], alt: 'Classic Black' }],
     category: 'classic',
     rating: 4.8,
-    reviews: 156,
     featured: true,
     colors: ['Black', 'Tortoise'],
     inStock: true,
@@ -45,18 +43,20 @@ export const products: Product[] = [
       freeShipping: true,
       estimatedDelivery: '2-3 business days',
       returnPolicy: '30 days return policy'
-    }
+    },
+    brand: 'Ikzienix',
+    new: false,
+    sale: false,
+    reviewCount: 0
   },
   {
     id: '2',
     name: 'Retro Round',
     description: 'Vintage-inspired round sunglasses with a modern twist. Channel your inner rockstar with these iconic frames.',
     price: 34.99,
-    image: placeholderImages['retro-round'],
-    images: [placeholderImages['retro-round']],
+    images: [{ id: 'retro-round-1', url: placeholderImages['retro-round'], alt: 'Retro Round' }],
     category: 'retro',
     rating: 4.7,
-    reviews: 128,
     featured: true,
     colors: ['Gold', 'Silver', 'Rose Gold'],
     inStock: true,
@@ -90,18 +90,20 @@ export const products: Product[] = [
       freeShipping: true,
       estimatedDelivery: '2-3 business days',
       returnPolicy: '30 days return policy'
-    }
+    },
+    brand: 'Ikzienix',
+    new: false,
+    sale: false,
+    reviewCount: 0
   },
   {
     id: '3',
     name: 'Sport Shield',
     description: 'Performance sunglasses designed for active lifestyles. Stay protected and stylish during your workouts.',
     price: 39.99,
-    image: placeholderImages['sport-shield'],
-    images: [placeholderImages['sport-shield']],
+    images: [{ id: 'sport-shield-1', url: placeholderImages['sport-shield'], alt: 'Sport Shield' }],
     category: 'sport',
     rating: 4.9,
-    reviews: 203,
     featured: true,
     colors: ['Black', 'Blue', 'Red'],
     inStock: true,
@@ -136,18 +138,20 @@ export const products: Product[] = [
       freeShipping: true,
       estimatedDelivery: '2-3 business days',
       returnPolicy: '30 days return policy'
-    }
+    },
+    brand: 'Ikzienix',
+    new: false,
+    sale: false,
+    reviewCount: 0
   },
   {
     id: '4',
     name: 'Aviator Gold',
     description: 'Classic aviator style with gold-tone frame and mirrored lenses. The ultimate statement piece for any outfit.',
     price: 44.99,
-    image: placeholderImages['aviator-gold'],
-    images: [placeholderImages['aviator-gold']],
+    images: [{ id: 'aviator-gold-1', url: placeholderImages['aviator-gold'], alt: 'Aviator Gold' }],
     category: 'aviator',
     rating: 4.8,
-    reviews: 175,
     featured: true,
     colors: ['Gold', 'Silver'],
     inStock: true,
@@ -182,18 +186,20 @@ export const products: Product[] = [
       freeShipping: true,
       estimatedDelivery: '2-3 business days',
       returnPolicy: '30 days return policy'
-    }
+    },
+    brand: 'Ikzienix',
+    new: false,
+    sale: false,
+    reviewCount: 0
   },
   {
     id: '5',
     name: 'Cat Eye',
     description: 'Feminine cat-eye sunglasses with a modern twist. Perfect for adding a touch of retro glam to your look.',
     price: 32.99,
-    image: placeholderImages['cat-eye'],
-    images: [placeholderImages['cat-eye']],
+    images: [{ id: 'cat-eye-1', url: placeholderImages['cat-eye'], alt: 'Cat Eye' }],
     category: 'cat-eye',
     rating: 4.6,
-    reviews: 142,
     featured: false,
     colors: ['Tortoise', 'Black', 'Crystal'],
     inStock: true,
@@ -205,7 +211,7 @@ export const products: Product[] = [
       frameMaterial: 'Acetate',
       lensMaterial: 'CR-39',
       lensWidth: '52mm',
-      bridgeWidth: '16mm',
+      bridgeWidth: '17mm',
       templeLength: '140mm',
       weight: '24g',
       uvProtection: 'UV400',
@@ -214,8 +220,8 @@ export const products: Product[] = [
     features: [
       '100% UV Protection',
       'Polarized Lenses',
-      'Acetate Frame',
-      'Includes Fashion Case'
+      'Cat-Eye Frame',
+      'Includes Soft Pouch'
     ],
     careInstructions: [
       'Clean with microfiber cloth',
@@ -227,18 +233,20 @@ export const products: Product[] = [
       freeShipping: true,
       estimatedDelivery: '2-3 business days',
       returnPolicy: '30 days return policy'
-    }
+    },
+    brand: 'Ikzienix',
+    new: false,
+    sale: false,
+    reviewCount: 0
   },
   {
     id: '6',
     name: 'Wayfarer',
     description: 'Iconic wayfarer design with polarized lenses. A timeless classic that never goes out of style.',
     price: 37.99,
-    image: placeholderImages['wayfarer'],
-    images: [placeholderImages['wayfarer']],
+    images: [{ id: 'wayfarer-1', url: placeholderImages['wayfarer'], alt: 'Wayfarer' }],
     category: 'wayfarer',
     rating: 4.9,
-    reviews: 189,
     featured: true,
     colors: ['Black', 'Tortoise', 'Crystal'],
     inStock: true,
@@ -272,7 +280,11 @@ export const products: Product[] = [
       freeShipping: true,
       estimatedDelivery: '2-3 business days',
       returnPolicy: '30 days return policy'
-    }
+    },
+    brand: 'Ikzienix',
+    new: false,
+    sale: false,
+    reviewCount: 0
   }
 ]
 

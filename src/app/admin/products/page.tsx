@@ -16,7 +16,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     if (editingProduct) {
-      setImagePreview(editingProduct.image)
+      setImagePreview(editingProduct.images?.[0]?.url || '')
     } else {
       setImagePreview('')
     }
@@ -66,15 +66,21 @@ export default function ProductsPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
+    const imagesArray = (formData.get('images')?.toString().split('\n') || [])
+      .filter(url => url.trim())
+      .map((url, i) => ({
+        id: `img-${Date.now()}-${i}`,
+        url: url.trim(),
+        alt: `${formData.get('name') || 'Product'} image ${i + 1}`
+      }))
     const productData: Partial<Product> = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       price: parseFloat(formData.get('price') as string),
-      image: formData.get('image') as string,
       category: formData.get('category') as string,
       inStock: formData.get('inStock') === 'true',
       featured: formData.get('featured') === 'on',
-      images: formData.get('images')?.toString().split('\n') || [],
+      images: imagesArray,
       colors: formData.get('colors')?.toString().split(', ') || [],
       specifications: {
         frameMaterial: formData.get('specifications.frameMaterial') as string,
@@ -204,10 +210,10 @@ export default function ProductsPage() {
                     <div className="mb-3">
                       <label className="form-label">Image URL</label>
                       <input
-                        type="url"
+                        type="text"
                         className="form-control"
                         name="image"
-                        defaultValue={editingProduct?.image || ''}
+                        defaultValue={editingProduct?.images?.[0]?.url || ''}
                         required
                         onChange={e => setImagePreview(e.target.value)}
                       />
@@ -218,7 +224,7 @@ export default function ProductsPage() {
                         className="form-control"
                         name="images"
                         rows={3}
-                        defaultValue={editingProduct?.images?.join('\n') || ''}
+                        defaultValue={editingProduct?.images?.map(img => img.url).join('\n') || ''}
                         placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
                       />
                     </div>

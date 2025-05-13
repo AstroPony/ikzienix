@@ -13,7 +13,7 @@ export default function ProductImage({ product, className = '' }: ProductImagePr
   return (
     <div className={`position-relative ratio ratio-1x1 ${className}`}>
       <Image
-        src={product.image}
+        src={product.images?.[0]?.url || '/placeholder.png'}
         alt={product.name}
         fill
         className="object-fit-cover rounded"

@@ -2,11 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { ShippingData } from '@/components/ShippingForm';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
 });
+
+type ShippingData = {
+  name: string;
+  email: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  shippingMethod: 'standard' | 'express';
+};
 
 export async function POST(req: NextRequest) {
   try {

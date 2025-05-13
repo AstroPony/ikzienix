@@ -36,13 +36,13 @@ async function getReviewsPrisma(productId: string): Promise<Review[]> {
     include: { user: { select: { id: true, name: true, image: true } } },
     orderBy: { createdAt: 'desc' },
   })
-  return reviews.map((review: PrismaReview) => ({
+  return reviews.map((review: any) => ({
     id: review.id,
     productId: review.productId,
     userId: review.userId,
     user: {
       id: review.user.id,
-      name: review.user.name,
+      name: review.user.name || '',
       avatar: review.user.image || undefined,
     },
     rating: review.rating,
@@ -68,7 +68,7 @@ async function addReviewPrisma(productId: string, review: Omit<Review, 'id' | 'c
     userId: created.userId,
     user: {
       id: created.user.id,
-      name: created.user.name,
+      name: created.user.name || '',
       avatar: created.user.image || undefined,
     },
     rating: created.rating,

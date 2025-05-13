@@ -25,7 +25,7 @@ export default function CartPage() {
             {cart.map((item) => (
               <div key={item.product.id} className="col-12 col-md-6 col-lg-4">
                 <div className="card h-100">
-                  <img src={item.product.image} alt={item.product.name} className="card-img-top" />
+                  <img src={item.product.images?.[0]?.url || '/placeholder.png'} alt={item.product.name} className="card-img-top" />
                   <div className="card-body">
                     <h5 className="card-title">{item.product.name}</h5>
                     <p className="card-text">${item.product.price.toFixed(2)}</p>

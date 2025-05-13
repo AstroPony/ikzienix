@@ -11,10 +11,23 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { useSession } from 'next-auth/react';
-import ShippingForm, { ShippingData } from '@/components/ShippingForm';
+import ShippingForm from '@/components/ShippingForm';
 import { db } from '@/lib/firebase-admin';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+type ShippingData = {
+  name: string;
+  email: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  shippingMethod: 'standard' | 'express';
+};
 
 function CheckoutShippingForm({ onSubmit, initialValues }: { onSubmit: (data: ShippingData, saveAddr: boolean) => void, initialValues: ShippingData | null }) {
   // ... existing code ...
@@ -228,7 +241,7 @@ export default function CheckoutPage() {
       <div className="row">
         <div className="col-md-8">
           {!shippingData ? (
-            <ShippingForm onSubmit={(data, saveAddr) => handleShippingSubmit(data, saveAddr)} initialValues={initialShippingData} />
+            <ShippingForm onSubmit={(data, saveAddr) => handleShippingSubmit(data, saveAddr)} initialValues={initialShippingData || undefined} />
           ) : clientSecret ? (
             <Elements
               stripe={stripePromise}
@@ -267,7 +280,7 @@ export default function CheckoutPage() {
                       <tr key={item.product.id}>
                         <td style={{ width: 80 }}>
                           <img
-                            src={item.product.image}
+                            src={item.product.images?.[0]?.url || '/placeholder.png'}
                             alt={item.product.name}
                             style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4 }}
                           />

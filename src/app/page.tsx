@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Product } from '@/types/product'
-import ProductCard from '@/components/ProductCard'
+import ProductCard from '@/components/product/ProductCard'
 import InstagramFeed from '@/components/social/InstagramFeed'
 
 export default function Home() {
@@ -160,7 +160,7 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <InstagramFeed />
+          <InstagramFeed hashtag="ikzienix" />
         </div>
       </section>
     </>

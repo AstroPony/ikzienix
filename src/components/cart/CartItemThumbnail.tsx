@@ -12,7 +12,7 @@ export default function CartItemThumbnail({ product, className = '' }: CartItemT
   return (
     <div className={`position-relative ratio ratio-1x1 ${className}`} style={{ width: '80px' }}>
       <Image
-        src={product.image}
+        src={product.images?.[0]?.url || '/placeholder.png'}
         alt={product.name}
         fill
         className="object-fit-cover rounded"

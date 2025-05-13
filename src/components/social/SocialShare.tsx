@@ -26,7 +26,7 @@ export default function SocialShare({
     url: product ? `${url}/products/${product.id}` : url,
     title: product ? product.name : title,
     description: product ? product.description : description,
-    image: product ? product.image : image,
+    image: product ? product.images?.[0]?.url : image,
   }
 
   const shareUrls = {

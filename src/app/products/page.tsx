@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/types/product";
-import ProductCard from '@/components/ProductCard'
+import ProductCard from '@/components/product/ProductCard'
 
 const PAGE_SIZE = 20;
 

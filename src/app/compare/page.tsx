@@ -62,7 +62,7 @@ export default function ComparePage() {
                     <div className="text-center">
                       <div className="position-relative mb-3" style={{ height: '200px' }}>
                         <Image
-                          src={product.image}
+                          src={product.images?.[0]?.url || '/placeholder.png'}
                           alt={product.name}
                           fill
                           className="object-fit-contain"

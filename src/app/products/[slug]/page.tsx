@@ -29,7 +29,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <ProductGallery product={product} />
+            <ProductGallery images={product.images} productName={product.name} />
           </div>
           <div>
             <div className="sticky top-4">
@@ -41,7 +41,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     {'☆'.repeat(5 - Math.round(product.rating))}
                   </div>
                 )}
-                <span className="text-muted">({product.reviews} reviews)</span>
+                <span className="text-muted">({product.reviewCount} reviews)</span>
               </div>
               <p className="text-2xl font-semibold mb-4">${product.price.toFixed(2)}</p>
               <p className="text-gray-600 mb-6">{product.description}</p>
@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Related Products */}
         <div className="mt-12">
           <Suspense fallback={<div>Loading related products...</div>}>
-            <RelatedProducts productId={product.id} />
+            <RelatedProducts category={product.category} currentProductId={product.id} />
           </Suspense>
         </div>
       </div>
