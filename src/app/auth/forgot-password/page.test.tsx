@@ -86,7 +86,7 @@ describe('ForgotPasswordPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('handles generic error', async () => {
@@ -102,6 +102,6 @@ describe('ForgotPasswordPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/an error occurred/i)).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 }) 

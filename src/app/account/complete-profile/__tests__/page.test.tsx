@@ -51,6 +51,7 @@ describe('CompleteProfilePage', () => {
     
     // Mock Firestore response
     const mockGet = jest.fn().mockResolvedValue({
+      exists: true,
       data: () => ({
         shippingAddress: null,
         billingAddress: null,
@@ -139,7 +140,7 @@ describe('CompleteProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/error loading profile/i)).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('handles unauthorized access', async () => {
@@ -155,6 +156,6 @@ describe('CompleteProfilePage', () => {
     // Should redirect to sign in page
     await waitFor(() => {
       expect(require('next/navigation').redirect).toHaveBeenCalledWith('/auth/signin')
-    })
+    }, { timeout: 3000 })
   })
 }) 

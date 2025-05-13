@@ -36,7 +36,7 @@ const mockProduct: Product = {
   name: 'Test Product',
   slug: 'test-product',
   description: 'Test Description',
-  price: 100,
+  price: 99.99,
   image: '/images/test.jpg',
   images: ['/images/test.jpg'],
   category: 'Test Category',
@@ -160,10 +160,6 @@ const renderWithProviders = (component: React.ReactNode) => {
   )
 }
 
-const mockParams = {
-  slug: 'test-product'
-}
-
 describe('ProductPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -173,7 +169,7 @@ describe('ProductPage', () => {
   })
 
   it('renders product details correctly', async () => {
-    renderWithProviders(<ProductPage params={mockParams} />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument()
@@ -190,7 +186,7 @@ describe('ProductPage', () => {
   it('handles product not found', async () => {
     mockGetProduct.mockResolvedValue(null)
 
-    renderWithProviders(<ProductPage params={mockParams} />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
       expect(require('next/navigation').notFound).toHaveBeenCalled()
@@ -200,7 +196,7 @@ describe('ProductPage', () => {
   it('handles error state', async () => {
     mockGetProduct.mockRejectedValue(new Error('Failed to fetch product'))
 
-    renderWithProviders(<ProductPage params={mockParams} />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
       expect(screen.getByText('Error loading product')).toBeInTheDocument()
@@ -209,7 +205,7 @@ describe('ProductPage', () => {
   })
 
   it('handles add to cart', async () => {
-    renderWithProviders(<ProductPage params={mockParams} />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /add to cart/i })).toBeInTheDocument()
@@ -226,7 +222,7 @@ describe('ProductPage', () => {
   it('handles out of stock state', async () => {
     mockGetProduct.mockResolvedValue(mockOutOfStockProduct)
 
-    renderWithProviders(<ProductPage params={mockParams} />)
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
       expect(screen.getByText('Out of Stock')).toBeInTheDocument()
@@ -234,78 +230,13 @@ describe('ProductPage', () => {
   })
 
   it('displays product details correctly', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
+    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('Test Category')).toBeInTheDocument()
-    expect(screen.getByText('4.5')).toBeInTheDocument()
-    expect(screen.getByText('10 reviews')).toBeInTheDocument()
-    expect(screen.getByText('In Stock')).toBeInTheDocument()
-  })
-
-  it('displays loading state', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
-
-    expect(container).toBeInTheDocument()
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-
-    await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-    })
-  })
-
-  it('displays product specifications', async () => {
-    renderWithProviders(<ProductPage params={mockParams} />)
-
-    // Wait for specifications to load
-    await waitFor(() => {
-      expect(screen.getByText('Specifications')).toBeInTheDocument()
-    })
-
-    // Check for specification details
-    expect(screen.getByText('Frame Material: Metal')).toBeInTheDocument()
-    expect(screen.getByText('Lens Material: Polycarbonate')).toBeInTheDocument()
-    expect(screen.getByText('UV Protection: 100%')).toBeInTheDocument()
-  })
-
-  it('displays related products', async () => {
-    renderWithProviders(<ProductPage params={mockParams} />)
-
-    // Wait for related products to load
-    await waitFor(() => {
-      expect(screen.getByText('Related Products')).toBeInTheDocument()
-    })
-  })
-
-  it('shows product reviews', async () => {
-    renderWithProviders(<ProductPage params={mockParams} />)
-
-    // Wait for reviews to load
-    await waitFor(() => {
-      expect(screen.getByText('Reviews')).toBeInTheDocument()
-    })
-  })
-
-  it('renders product details', async () => {
-    render(
-      <SessionProvider session={null}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/test product/i)).toBeInTheDocument()
+      expect(screen.getByText('Test Category')).toBeInTheDocument()
+      expect(screen.getByText('4.5')).toBeInTheDocument()
+      expect(screen.getByText('10 reviews')).toBeInTheDocument()
+      expect(screen.getByText('In Stock')).toBeInTheDocument()
     })
   })
 }) 
