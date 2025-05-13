@@ -38,6 +38,7 @@ export interface Product {
   warranty: string
   shipping: ProductShipping
   sale?: boolean
+  new?: boolean
 }
 
 export const defaultProduct: Partial<Product> = {
