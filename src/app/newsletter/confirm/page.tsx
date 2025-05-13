@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { db } from '@/lib/firebase'
 import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore'
 
-export default function NewsletterConfirmation() {
+function ConfirmPageContent() {
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
@@ -119,5 +119,13 @@ export default function NewsletterConfirmation() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ConfirmPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ConfirmPageContent />
+    </Suspense>
   )
 } 
