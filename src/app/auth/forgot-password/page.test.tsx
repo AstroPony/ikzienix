@@ -49,7 +49,7 @@ describe('ForgotPasswordPage', () => {
 
     await waitFor(() => {
       expect(sendPasswordResetEmail).toHaveBeenCalledWith(expect.anything(), 'test@example.com')
-      expect(screen.getByText(/password reset link has been sent/i)).toBeInTheDocument()
+      expect(screen.getByText(/password reset link has been sent to your email/i)).toBeInTheDocument()
     })
   })
 
@@ -67,7 +67,7 @@ describe('ForgotPasswordPage', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/no account found with this email address/i)).toBeInTheDocument()
+      expect(screen.getByText('No account found with this email address.')).toBeInTheDocument()
     }, { timeout: 3000 })
   })
 
@@ -85,8 +85,7 @@ describe('ForgotPasswordPage', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      const errorMessage = screen.getByText(/please enter a valid email address/i)
-      expect(errorMessage).toBeInTheDocument()
+      expect(screen.getByText('Please enter a valid email address.')).toBeInTheDocument()
     }, { timeout: 3000 })
   })
 
@@ -102,8 +101,7 @@ describe('ForgotPasswordPage', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      const errorMessage = screen.getByText(/an error occurred/i)
-      expect(errorMessage).toBeInTheDocument()
+      expect(screen.getByText('An error occurred. Please try again later.')).toBeInTheDocument()
     }, { timeout: 3000 })
   })
 }) 

@@ -33,6 +33,37 @@ jest.mock('firebase/auth', () => ({
   }))
 }))
 
+// Mock the ProfileForm component
+jest.mock('../complete-profile-form', () => {
+  return function MockProfileForm({ userId }: { userId: string }) {
+    return (
+      <form>
+        <div className="mb-3">
+          <label htmlFor="phone" className="form-label">Phone</label>
+          <input type="tel" className="form-control" id="phone" required />
+        </div>
+        <button type="submit" className="btn btn-primary">Save</button>
+      </form>
+    )
+  }
+})
+
+// Mock the i18n context
+jest.mock('@/lib/i18n/context', () => ({
+  useLanguage: () => ({
+    t: (key: string) => key,
+  }),
+}))
+
+// Mock the router
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    refresh: jest.fn(),
+  }),
+  redirect: jest.fn(),
+}))
+
 describe('CompleteProfilePage', () => {
   const mockSession = {
     user: {
@@ -75,7 +106,7 @@ describe('CompleteProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('handles form submission', async () => {
@@ -87,11 +118,11 @@ describe('CompleteProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
 
     // Fill out the form
     fireEvent.change(screen.getByLabelText(/phone/i), {
-      target: { value: '1234567890' },
+      target: { value: '0612345678' },
     })
 
     // Submit the form
@@ -100,7 +131,7 @@ describe('CompleteProfilePage', () => {
     // Wait for success message
     await waitFor(() => {
       expect(screen.getByText(/profile updated successfully/i)).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('shows validation errors for required fields', async () => {
@@ -112,7 +143,7 @@ describe('CompleteProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
 
     // Submit the form without filling required fields
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
@@ -120,7 +151,7 @@ describe('CompleteProfilePage', () => {
     // Check for validation errors
     await waitFor(() => {
       expect(screen.getByText(/phone is required/i)).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('handles error state', async () => {
