@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/firebase'
-import { collection, query, where, orderBy, limit, startAfter, getDocs } from 'firebase/firestore'
+import { collection, query, where, orderBy, limit, startAfter, getDocs, addDoc } from 'firebase/firestore'
 import { Product } from '@/types/product'
 import { getCachedData, setCachedData, CACHE_KEYS, CACHE_TTL } from '@/lib/cache'
 
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
   try {
     const product = await request.json()
     console.log('Creating new product:', product)
-    const docRef = await db.collection('products').add({
+    const docRef = await addDoc(collection(db, 'products'), {
       ...product,
       featured: product.featured || false,
       createdAt: new Date(),
