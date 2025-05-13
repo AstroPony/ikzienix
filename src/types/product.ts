@@ -39,6 +39,7 @@ export interface Product {
   shipping: ProductShipping
   sale?: boolean
   new?: boolean
+  salePrice?: number
 }
 
 export const defaultProduct: Partial<Product> = {
