@@ -162,7 +162,7 @@ describe('ProductPage', () => {
 
   it('renders product details correctly', async () => {
     const params = { slug: 'test-product' }
-    const { container } = renderWithProviders(<ProductPage params={params} />)
+    renderWithProviders(<ProductPage params={params} />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument()

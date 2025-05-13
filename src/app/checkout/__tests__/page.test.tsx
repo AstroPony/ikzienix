@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
 import { CartProvider } from '@/lib/cart-context'
 import CheckoutPage from '../page'
@@ -116,15 +116,15 @@ describe('CheckoutPage', () => {
     })
   })
 
-  test.skip('renders the checkout page correctly', async () => {
+  it('renders the checkout page correctly', async () => {
     renderWithProviders(<CheckoutPage />)
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /shipping information/i })).toBeInTheDocument()
+      expect(screen.getByText('Checkout')).toBeInTheDocument()
     })
   })
 
-  test.skip('displays cart items correctly', async () => {
+  it('displays cart items correctly', async () => {
     renderWithProviders(<CheckoutPage />)
 
     await waitFor(() => {
@@ -133,86 +133,86 @@ describe('CheckoutPage', () => {
     })
   })
 
-  test.skip('handles shipping form submission', async () => {
+  it('handles shipping form submission', async () => {
     renderWithProviders(<CheckoutPage />)
 
     // Fill in shipping details
-    fireEvent.change(screen.getByLabelText(/full name/i), {
+    fireEvent.change(screen.getByLabelText('Full Name'), {
       target: { value: 'John Doe' },
     })
-    fireEvent.change(screen.getByLabelText(/email/i), {
+    fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'john@example.com' },
     })
-    fireEvent.change(screen.getByLabelText(/address/i), {
+    fireEvent.change(screen.getByLabelText('Address'), {
       target: { value: '123 Main St' },
     })
-    fireEvent.change(screen.getByLabelText(/city/i), {
+    fireEvent.change(screen.getByLabelText('City'), {
       target: { value: 'Test City' },
     })
-    fireEvent.change(screen.getByLabelText(/state/i), {
+    fireEvent.change(screen.getByLabelText('State'), {
       target: { value: 'Test State' },
     })
-    fireEvent.change(screen.getByLabelText(/zip code/i), {
+    fireEvent.change(screen.getByLabelText('Zip Code'), {
       target: { value: '12345' },
     })
 
     // Submit form
-    fireEvent.click(screen.getByRole('button', { name: /continue to payment/i }))
+    fireEvent.click(screen.getByText('Continue to Payment'))
 
     await waitFor(() => {
       expect(screen.getByTestId('payment-element')).toBeInTheDocument()
     })
   })
 
-  test.skip('shows validation errors for required fields', async () => {
+  it('shows validation errors for required fields', async () => {
     renderWithProviders(<CheckoutPage />)
 
     // Submit form without filling required fields
-    fireEvent.click(screen.getByRole('button', { name: /continue to payment/i }))
+    fireEvent.click(screen.getByText('Continue to Payment'))
 
     await waitFor(() => {
-      expect(screen.getByText(/full name is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/email is required/i)).toBeInTheDocument()
-      expect(screen.getByText(/address is required/i)).toBeInTheDocument()
+      expect(screen.getByText('Full name is required')).toBeInTheDocument()
+      expect(screen.getByText('Email is required')).toBeInTheDocument()
+      expect(screen.getByText('Address is required')).toBeInTheDocument()
     })
   })
 
-  test.skip('handles error state', async () => {
+  it('handles error state', async () => {
     // Mock fetch to fail
     global.fetch = jest.fn().mockRejectedValue(new Error('Failed to create payment intent'))
 
     renderWithProviders(<CheckoutPage />)
 
     // Fill in required fields
-    fireEvent.change(screen.getByLabelText(/full name/i), {
+    fireEvent.change(screen.getByLabelText('Full Name'), {
       target: { value: 'John Doe' },
     })
-    fireEvent.change(screen.getByLabelText(/email/i), {
+    fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'john@example.com' },
     })
-    fireEvent.change(screen.getByLabelText(/address/i), {
+    fireEvent.change(screen.getByLabelText('Address'), {
       target: { value: '123 Main St' },
     })
-    fireEvent.change(screen.getByLabelText(/city/i), {
+    fireEvent.change(screen.getByLabelText('City'), {
       target: { value: 'Test City' },
     })
-    fireEvent.change(screen.getByLabelText(/state/i), {
+    fireEvent.change(screen.getByLabelText('State'), {
       target: { value: 'Test State' },
     })
-    fireEvent.change(screen.getByLabelText(/zip code/i), {
+    fireEvent.change(screen.getByLabelText('Zip Code'), {
       target: { value: '12345' },
     })
 
     // Submit form
-    fireEvent.click(screen.getByRole('button', { name: /continue to payment/i }))
+    fireEvent.click(screen.getByText('Continue to Payment'))
 
     await waitFor(() => {
-      expect(screen.getByText(/error/i)).toBeInTheDocument()
-      expect(screen.getByText(/failed to create payment intent/i)).toBeInTheDocument()
+      expect(screen.getByText('Error')).toBeInTheDocument()
+      expect(screen.getByText('Failed to create payment intent')).toBeInTheDocument()
     })
   })
 
-  test.skip('redirects to sign in if not authenticated', async () => {
+  it('redirects to sign in if not authenticated', async () => {
     render(
       <SessionProvider session={null}>
         <CartProvider>
@@ -222,20 +222,20 @@ describe('CheckoutPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/please sign in to continue/i)).toBeInTheDocument()
+      expect(screen.getByText('Please sign in to continue')).toBeInTheDocument()
     })
   })
 
-  test.skip('loads saved shipping address if available', async () => {
+  it('loads saved shipping address if available', async () => {
     renderWithProviders(<CheckoutPage />)
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/full name/i)).toHaveValue('Test User')
-      expect(screen.getByLabelText(/email/i)).toHaveValue('test@example.com')
-      expect(screen.getByLabelText(/address/i)).toHaveValue('123 Main St')
-      expect(screen.getByLabelText(/city/i)).toHaveValue('Test City')
-      expect(screen.getByLabelText(/state/i)).toHaveValue('Test State')
-      expect(screen.getByLabelText(/zip code/i)).toHaveValue('12345')
+      expect(screen.getByLabelText('Full Name')).toHaveValue('Test User')
+      expect(screen.getByLabelText('Email')).toHaveValue('test@example.com')
+      expect(screen.getByLabelText('Address')).toHaveValue('123 Main St')
+      expect(screen.getByLabelText('City')).toHaveValue('Test City')
+      expect(screen.getByLabelText('State')).toHaveValue('Test State')
+      expect(screen.getByLabelText('Zip Code')).toHaveValue('12345')
     })
   })
 }) 

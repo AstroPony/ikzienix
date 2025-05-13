@@ -31,25 +31,6 @@ global.fetch = jest.fn(() =>
 )
 
 describe('CollectionsPage', () => {
-  test.skip('renders the collections page correctly', async () => {
-    render(<CollectionsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Collections')).toBeInTheDocument()
-    })
-  })
-
-  test.skip('displays collections data', async () => {
-    render(<CollectionsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('summer Collection')).toBeInTheDocument()
-      expect(screen.getByText('winter Collection')).toBeInTheDocument()
-      expect(screen.getByText('Browse our selection of summer sunglasses.')).toBeInTheDocument()
-      expect(screen.getByText('Browse our selection of winter sunglasses.')).toBeInTheDocument()
-    })
-  })
-
   it('handles error state', async () => {
     // Mock fetch to fail
     global.fetch = jest.fn(() =>

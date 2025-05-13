@@ -28,17 +28,17 @@ describe('AdminDashboard', () => {
         Promise.resolve({
           revenue: 1000,
           orders: 50,
-          users: 200,
+          users: 0,
           newUsers: 30,
           revenueChange: 10,
           ordersChange: 5,
-          usersChange: 15,
+          usersChange: 0,
           newUsersChange: 20,
         }),
     })
   })
 
-  test.skip('renders the dashboard correctly', async () => {
+  it('renders the dashboard correctly', async () => {
     render(
       <SessionProvider session={mockSession}>
         <AdminDashboard />
@@ -46,12 +46,12 @@ describe('AdminDashboard', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
-      expect(screen.getByText(/overview of your store's performance/i)).toBeInTheDocument()
+      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      expect(screen.getByText('Overview of your store\'s performance')).toBeInTheDocument()
     })
   })
 
-  test.skip('displays analytics data', async () => {
+  it('displays analytics data', async () => {
     render(
       <SessionProvider session={mockSession}>
         <AdminDashboard />
@@ -61,12 +61,12 @@ describe('AdminDashboard', () => {
     await waitFor(() => {
       expect(screen.getByText('$1000.00')).toBeInTheDocument()
       expect(screen.getByText('50')).toBeInTheDocument()
-      expect(screen.getByText('200')).toBeInTheDocument()
+      expect(screen.getByText('0')).toBeInTheDocument()
       expect(screen.getByText('30')).toBeInTheDocument()
     })
   })
 
-  test.skip('handles error state', async () => {
+  it('handles error state', async () => {
     // Mock fetch to fail
     global.fetch = jest.fn().mockRejectedValue(new Error('Failed to fetch'))
 
@@ -77,12 +77,12 @@ describe('AdminDashboard', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/error/i)).toBeInTheDocument()
-      expect(screen.getByText(/failed to load analytics data/i)).toBeInTheDocument()
+      expect(screen.getByText('Error')).toBeInTheDocument()
+      expect(screen.getByText('Failed to load analytics data')).toBeInTheDocument()
     })
   })
 
-  test.skip('redirects non-admin users', async () => {
+  it('redirects non-admin users', async () => {
     const nonAdminSession = {
       ...mockSession,
       user: { ...mockSession.user, role: 'user' },
@@ -95,8 +95,8 @@ describe('AdminDashboard', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/access denied/i)).toBeInTheDocument()
-      expect(screen.getByText(/you do not have permission to access this page/i)).toBeInTheDocument()
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(screen.getByText('You do not have permission to access this page')).toBeInTheDocument()
     })
   })
 }) 

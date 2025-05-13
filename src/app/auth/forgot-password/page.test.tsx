@@ -6,6 +6,7 @@ import { clientAuth } from '@/lib/firebase'
 // Mock firebase/auth
 jest.mock('firebase/auth', () => ({
   sendPasswordResetEmail: jest.fn(),
+  getAuth: jest.fn(() => ({})),
   clientAuth: {}
 }))
 
@@ -57,7 +58,10 @@ describe('ForgotPasswordPage', () => {
   })
 
   it('handles user not found error', async () => {
-    const error = { message: 'User not found', code: 'auth/user-not-found' }
+    const error = {
+      message: 'User not found',
+      code: 'auth/user-not-found'
+    };
     (sendPasswordResetEmail as jest.Mock).mockRejectedValueOnce(error)
 
     render(<ForgotPasswordPage />)
@@ -74,7 +78,10 @@ describe('ForgotPasswordPage', () => {
   })
 
   it('handles invalid email error', async () => {
-    const error = { message: 'Invalid email', code: 'auth/invalid-email' }
+    const error = {
+      message: 'Invalid email',
+      code: 'auth/invalid-email'
+    };
     (sendPasswordResetEmail as jest.Mock).mockRejectedValueOnce(error)
 
     render(<ForgotPasswordPage />)
