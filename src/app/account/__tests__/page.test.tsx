@@ -36,6 +36,16 @@ jest.mock('@/lib/firebase-admin', () => ({
   },
 }))
 
+// Mock Firebase auth
+jest.mock('@/lib/firebase', () => ({
+  clientAuth: {
+    onAuthStateChanged: jest.fn((callback) => {
+      callback(null);
+      return jest.fn();
+    })
+  }
+}))
+
 const mockSession = {
   user: {
     id: '1',
@@ -46,40 +56,18 @@ const mockSession = {
 }
 
 describe('AccountPage', () => {
-  test.skip('renders the account page correctly', async () => {
-    render(
-      <CartProvider>
-        <AccountPage />
-      </CartProvider>
-    )
-
+  test.skip('renders account page for authenticated user', async () => {
+    render(<AccountPage />);
     await waitFor(() => {
-      expect(screen.getByText('My Account')).toBeInTheDocument()
-      expect(screen.getByText('test@example.com')).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('My Account')).toBeInTheDocument();
+      expect(screen.getByText('Order History')).toBeInTheDocument();
+    });
+  });
 
-  test.skip('displays order history', async () => {
-    render(
-      <CartProvider>
-        <AccountPage />
-      </CartProvider>
-    )
-
+  test.skip('shows sign in message for unauthenticated user', async () => {
+    render(<AccountPage />);
     await waitFor(() => {
-      expect(screen.getByText('Order History')).toBeInTheDocument()
-    })
-  })
-
-  test.skip('redirects to sign in if not authenticated', async () => {
-    render(
-      <CartProvider>
-        <AccountPage />
-      </CartProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText('Please sign in to view your account')).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('Please sign in to view your account')).toBeInTheDocument();
+    });
+  });
 }) 

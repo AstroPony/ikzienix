@@ -63,6 +63,16 @@ const mockSession = {
 // Mock fetch
 global.fetch = jest.fn()
 
+// Mock Firebase auth
+jest.mock('@/lib/firebase', () => ({
+  clientAuth: {
+    onAuthStateChanged: jest.fn((callback) => {
+      callback(null);
+      return jest.fn();
+    })
+  }
+}));
+
 // TODO: Skipped due to Firebase/auth issues. Revisit and fix these tests later.
 describe('CompleteProfilePage', () => {
   beforeEach(() => {

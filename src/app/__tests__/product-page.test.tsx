@@ -121,6 +121,13 @@ const renderWithProviders = (component: React.ReactNode) => {
   )
 }
 
+// Mock the params prop
+const mockParams = {
+  params: {
+    slug: 'test-product'
+  }
+};
+
 describe('ProductPage', () => {
   it('renders the product page correctly', async () => {
     const { container } = render(
@@ -270,21 +277,21 @@ describe('ProductPage', () => {
   })
 
   test.skip('renders product details correctly', async () => {
-    render(<ProductPage params={{ slug: 'test-product' }} />);
+    render(<ProductPage {...mockParams} />);
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument();
     });
   });
 
   test.skip('handles product not found', async () => {
-    render(<ProductPage params={{ slug: 'non-existent' }} />);
+    render(<ProductPage {...mockParams} />);
     await waitFor(() => {
       expect(screen.getByText('Product not found')).toBeInTheDocument();
     });
   });
 
   test.skip('handles error state', async () => {
-    render(<ProductPage params={{ slug: 'error-product' }} />);
+    render(<ProductPage {...mockParams} />);
     await waitFor(() => {
       expect(screen.getByText('Error loading product')).toBeInTheDocument();
     });

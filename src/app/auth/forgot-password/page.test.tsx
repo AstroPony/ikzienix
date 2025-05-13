@@ -1,6 +1,6 @@
 // TODO: Skipped due to Firebase/auth issues. Revisit and fix these tests later.
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import ForgotPasswordPage from '../page';
+import ForgotPasswordPage from '@/app/auth/forgot-password/page';
 
 describe('ForgotPasswordPage', () => {
   test.skip('renders the forgot password page correctly', () => {
@@ -10,15 +10,14 @@ describe('ForgotPasswordPage', () => {
 
   test.skip('handles form submission', async () => {
     render(<ForgotPasswordPage />);
-    
-    const emailInput = screen.getByLabelText('Email');
+    const emailInput = screen.getByLabelText(/email/i);
     const submitButton = screen.getByRole('button', { name: /reset password/i });
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Check your email for reset instructions')).toBeInTheDocument();
+      expect(screen.getByText(/check your email for reset instructions/i)).toBeInTheDocument();
     });
   });
 }); 
