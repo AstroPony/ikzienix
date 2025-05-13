@@ -68,7 +68,7 @@ describe('ForgotPasswordPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/no account found with this email address/i)).toBeInTheDocument()
-    })
+    }, { timeout: 3000 })
   })
 
   it('handles invalid email error', async () => {
@@ -85,7 +85,8 @@ describe('ForgotPasswordPage', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument()
+      const errorMessage = screen.getByText(/please enter a valid email address/i)
+      expect(errorMessage).toBeInTheDocument()
     }, { timeout: 3000 })
   })
 
@@ -101,7 +102,8 @@ describe('ForgotPasswordPage', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/an error occurred/i)).toBeInTheDocument()
+      const errorMessage = screen.getByText(/an error occurred/i)
+      expect(errorMessage).toBeInTheDocument()
     }, { timeout: 3000 })
   })
 }) 

@@ -9,15 +9,7 @@ import { getProduct } from '@/lib/api'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
-  useParams: () => ({
-    slug: 'test-product'
-  }),
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
-    notFound: jest.fn(),
-  })
+  notFound: jest.fn()
 }))
 
 // Mock the session
@@ -169,7 +161,7 @@ describe('ProductPage', () => {
   })
 
   it('renders product details correctly', async () => {
-    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    const { container } = renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument()
