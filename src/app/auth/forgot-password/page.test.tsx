@@ -1,15 +1,28 @@
 // TODO: Skipped due to Firebase/auth issues. Revisit and fix these tests later.
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ForgotPasswordPage from '@/app/auth/forgot-password/page';
+import { SessionProvider } from 'next-auth/react';
 
 describe('ForgotPasswordPage', () => {
-  test.skip('renders the forgot password page correctly', () => {
-    render(<ForgotPasswordPage />);
-    expect(screen.getByText('Forgot Password')).toBeInTheDocument();
+  it('renders forgot password page', () => {
+    render(
+      <SessionProvider session={null}>
+        <ForgotPasswordPage />
+      </SessionProvider>
+    );
+
+    expect(screen.getByText(/forgot your password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /reset password/i })).toBeInTheDocument();
   });
 
-  test.skip('handles form submission', async () => {
-    render(<ForgotPasswordPage />);
+  it('handles form submission', async () => {
+    render(
+      <SessionProvider session={null}>
+        <ForgotPasswordPage />
+      </SessionProvider>
+    );
+
     const emailInput = screen.getByLabelText(/email/i);
     const submitButton = screen.getByRole('button', { name: /reset password/i });
 

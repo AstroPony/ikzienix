@@ -50,51 +50,54 @@ jest.mock('../complete-profile-form', () => {
   }
 })
 
-// Mock session
+// Mock Firebase auth
+jest.mock('@/lib/firebase', () => ({
+  clientAuth: {
+    onAuthStateChanged: (callback: any) => callback(null)
+  }
+}))
+
 const mockSession = {
   user: {
-    id: '1',
-    email: 'test@example.com',
-    name: 'Test User',
+    id: 'test-user-id',
+    email: 'test@example.com'
   },
-  expires: '1',
+  expires: '1'
 }
 
 // Mock fetch
 global.fetch = jest.fn()
 
-// Mock Firebase auth
-jest.mock('@/lib/firebase', () => ({
-  clientAuth: {
-    onAuthStateChanged: jest.fn((callback) => {
-      callback(null);
-      return jest.fn();
-    })
-  }
-}));
-
-// TODO: Skipped due to Firebase/auth issues. Revisit and fix these tests later.
 describe('CompleteProfilePage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  test.skip('renders the complete profile page correctly', () => {
-    render(<CompleteProfilePage />)
-    expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
+  it('renders complete profile page correctly', () => {
+    render(
+      <SessionProvider session={mockSession}>
+        <CompleteProfilePage />
+      </SessionProvider>
+    )
+
+    expect(screen.getByText(/complete your profile/i)).toBeInTheDocument()
   })
 
-  test.skip('handles form submission', async () => {
-    render(<CompleteProfilePage />)
-    
-    const phoneInput = screen.getByLabelText('Phone Number')
+  it('handles form submission', async () => {
+    render(
+      <SessionProvider session={mockSession}>
+        <CompleteProfilePage />
+      </SessionProvider>
+    )
+
+    const phoneInput = screen.getByLabelText(/phone number/i)
     const submitButton = screen.getByRole('button', { name: /save/i })
 
     fireEvent.change(phoneInput, { target: { value: '1234567890' } })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Profile updated successfully')).toBeInTheDocument()
+      expect(screen.getByText(/profile updated successfully/i)).toBeInTheDocument()
     })
   })
 

@@ -121,18 +121,15 @@ const renderWithProviders = (component: React.ReactNode) => {
   )
 }
 
-// Mock the params prop
 const mockParams = {
-  params: {
-    slug: 'test-product'
-  }
-};
+  slug: 'test-product'
+}
 
 describe('ProductPage', () => {
   it('renders the product page correctly', async () => {
     const { container } = render(
       <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
+        <ProductPage params={mockParams} />
       </SessionProvider>
     )
 
@@ -148,7 +145,7 @@ describe('ProductPage', () => {
   it('handles add to cart', async () => {
     const { container } = render(
       <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
+        <ProductPage params={mockParams} />
       </SessionProvider>
     )
 
@@ -171,7 +168,7 @@ describe('ProductPage', () => {
 
     const { container } = render(
       <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
+        <ProductPage params={mockParams} />
       </SessionProvider>
     )
 
@@ -201,7 +198,7 @@ describe('ProductPage', () => {
 
     const { container } = render(
       <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
+        <ProductPage params={mockParams} />
       </SessionProvider>
     )
 
@@ -215,7 +212,7 @@ describe('ProductPage', () => {
   it('displays product details correctly', async () => {
     const { container } = render(
       <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
+        <ProductPage params={mockParams} />
       </SessionProvider>
     )
 
@@ -232,7 +229,7 @@ describe('ProductPage', () => {
   it('displays loading state', async () => {
     const { container } = render(
       <SessionProvider session={mockSession}>
-        <ProductPage params={{ slug: 'test-product' }} />
+        <ProductPage params={mockParams} />
       </SessionProvider>
     )
 
@@ -245,7 +242,7 @@ describe('ProductPage', () => {
   })
 
   it('displays product specifications', async () => {
-    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     // Wait for specifications to load
     await waitFor(() => {
@@ -259,7 +256,7 @@ describe('ProductPage', () => {
   })
 
   it('displays related products', async () => {
-    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     // Wait for related products to load
     await waitFor(() => {
@@ -268,7 +265,7 @@ describe('ProductPage', () => {
   })
 
   it('shows product reviews', async () => {
-    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    renderWithProviders(<ProductPage params={mockParams} />)
 
     // Wait for reviews to load
     await waitFor(() => {
@@ -276,24 +273,39 @@ describe('ProductPage', () => {
     })
   })
 
-  test.skip('renders product details correctly', async () => {
-    render(<ProductPage {...mockParams} />);
-    await waitFor(() => {
-      expect(screen.getByText('Test Product')).toBeInTheDocument();
-    });
-  });
+  it('renders product details', async () => {
+    render(
+      <SessionProvider session={null}>
+        <ProductPage params={mockParams} />
+      </SessionProvider>
+    )
 
-  test.skip('handles product not found', async () => {
-    render(<ProductPage {...mockParams} />);
     await waitFor(() => {
-      expect(screen.getByText('Product not found')).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText(/test product/i)).toBeInTheDocument()
+    })
+  })
 
-  test.skip('handles error state', async () => {
-    render(<ProductPage {...mockParams} />);
+  it('handles product not found', async () => {
+    render(
+      <SessionProvider session={null}>
+        <ProductPage params={mockParams} />
+      </SessionProvider>
+    )
+
     await waitFor(() => {
-      expect(screen.getByText('Error loading product')).toBeInTheDocument();
-    });
-  });
+      expect(screen.getByText(/product not found/i)).toBeInTheDocument()
+    })
+  })
+
+  it('handles error state', async () => {
+    render(
+      <SessionProvider session={null}>
+        <ProductPage params={mockParams} />
+      </SessionProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(/error loading product/i)).toBeInTheDocument()
+    })
+  })
 }) 
