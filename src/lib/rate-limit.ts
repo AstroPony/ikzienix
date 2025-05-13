@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Cache } from './cache'
-
-const tokenCache = new Cache<number>()
+import { getCachedData, setCachedData } from './cache'
 
 const rateLimit = (options: {
   uniqueTokenPerInterval?: number
@@ -11,7 +9,10 @@ const rateLimit = (options: {
 
   return async function handler(request: NextRequest) {
     const ip = request.ip ?? '127.0.0.1'
-    const tokenCount = (tokenCache.get(ip) || 0) + 1
+    const key = `ratelimit:${ip}`
+    
+    const currentCount = await getCachedData<number>(key) || 0
+    const tokenCount = currentCount + 1
 
     if (tokenCount > uniqueTokenPerInterval) {
       return NextResponse.json(
@@ -20,7 +21,7 @@ const rateLimit = (options: {
       )
     }
 
-    tokenCache.set(ip, tokenCount)
+    await setCachedData(key, tokenCount, interval / 1000)
     return null
   }
 }

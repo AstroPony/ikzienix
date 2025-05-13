@@ -15,6 +15,20 @@ export const CACHE_TTL = {
   REVIEWS: 1800, // 30 minutes
   USER_PROFILE: 300, // 5 minutes
   INSTAGRAM_POSTS: 1800, // 30 minutes
+  ANALYTICS: 300, // 5 minutes
+}
+
+// Cache instances
+export const analyticsCache = {
+  get: async <T>(key: string) => getCachedData<T>(`analytics:${key}`),
+  set: async <T>(key: string, data: T) => setCachedData(`analytics:${key}`, data, CACHE_TTL.ANALYTICS),
+  invalidate: async (pattern: string) => invalidateCache(`analytics:${pattern}`)
+}
+
+export const ordersCache = {
+  get: async <T>(key: string) => getCachedData<T>(`orders:${key}`),
+  set: async <T>(key: string, data: T) => setCachedData(`orders:${key}`, data, CACHE_TTL.ORDERS),
+  invalidate: async (pattern: string) => invalidateCache(`orders:${pattern}`)
 }
 
 export async function getCachedData<T>(key: string): Promise<T | null> {
