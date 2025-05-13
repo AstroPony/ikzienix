@@ -1,36 +1,30 @@
 "use client";
 
-import { useEffect, useState } from 'react'
-
-interface Review {
-  id: string
-  userId: string
-  productId: string
-  rating: number
-  comment: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface ReviewStats {
-  average: number
-  total: number
-  distribution: {
-    [key: number]: number
-  }
-}
-
-interface ReviewsResponse {
-  stats: ReviewStats
-  reviews: Review[]
-}
+import { useState, useEffect } from 'react'
+import { Review } from '@/types/review'
 
 interface ProductReviewsProps {
   productId: string
 }
 
+interface ReviewsResponse {
+  reviews: Review[]
+  stats: {
+    total: number
+    average: number
+    distribution: {
+      [key: number]: number
+    }
+  }
+}
+
 export default function ProductReviews({ productId }: ProductReviewsProps) {
-  const [reviews, setReviews] = useState<ReviewsResponse | null>(null)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [stats, setStats] = useState<ReviewsResponse['stats']>({
+    total: 0,
+    average: 0,
+    distribution: {},
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,8 +35,9 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
         if (!response.ok) {
           throw new Error('Failed to fetch reviews')
         }
-        const data = await response.json()
-        setReviews(data)
+        const data: ReviewsResponse = await response.json()
+        setReviews(data.reviews)
+        setStats(data.stats)
       } catch (err) {
         setError('Error loading reviews')
       } finally {
@@ -54,61 +49,98 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   }, [productId])
 
   if (loading) {
-    return <div>Loading reviews...</div>
+    return (
+      <div className="text-center py-8">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    )
   }
 
   if (error) {
-    return <div className="text-red-600">{error}</div>
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted">{error}</p>
+      </div>
+    )
   }
 
-  if (!reviews) {
-    return null
+  if (stats.total === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted">No reviews yet</p>
+        <p className="text-muted small mt-2">Be the first to review this product!</p>
+      </div>
+    )
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-6">Customer Reviews</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-        <div className="text-center">
-          <div className="text-4xl font-bold mb-2">{reviews.stats.average.toFixed(1)}</div>
-          <div className="text-gray-600">Average Rating</div>
-        </div>
-        <div className="text-center">
-          <div className="text-4xl font-bold mb-2">{reviews.stats.total}</div>
-          <div className="text-gray-600">Total Reviews</div>
-        </div>
-        <div>
-          {Object.entries(reviews.stats.distribution).reverse().map(([rating, count]) => (
-            <div key={rating} className="flex items-center gap-2 mb-2">
-              <div className="w-12 text-gray-600">{rating} stars</div>
-              <div className="flex-1 h-2 bg-gray-200 rounded-full">
-                <div
-                  className="h-full bg-yellow-400 rounded-full"
-                  style={{ width: `${(count / reviews.stats.total) * 100}%` }}
-                />
+    <div className="product-reviews">
+      <h3 className="h4 mb-4">Customer Reviews</h3>
+      <div className="row">
+        <div className="col-md-4">
+          <div className="card mb-4">
+            <div className="card-body text-center">
+              <h4 className="h1 mb-0">{stats.average.toFixed(1)}</h4>
+              <div className="text-warning mb-2">
+                {[...Array(5)].map((_, i) => (
+                  <i
+                    key={i}
+                    className={`bi bi-star${i < Math.floor(stats.average) ? '-fill' : ''}`}
+                  />
+                ))}
               </div>
-              <div className="w-12 text-gray-600">{count}</div>
+              <p className="text-muted mb-0">{stats.total} reviews</p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        {reviews.reviews.map((review) => (
-          <div key={review.id} className="border-b pb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="text-yellow-400">
-                {'★'.repeat(review.rating)}
-                {'☆'.repeat(5 - review.rating)}
-              </div>
-              <div className="text-gray-600">
-                {new Date(review.createdAt).toLocaleDateString()}
-              </div>
-            </div>
-            <p className="text-gray-700">{review.comment}</p>
           </div>
-        ))}
+          <div className="mb-4">
+            {[5, 4, 3, 2, 1].map((rating) => (
+              <div key={rating} className="d-flex align-items-center mb-2">
+                <div className="text-warning me-2">
+                  {rating} <i className="bi bi-star-fill" />
+                </div>
+                <div className="progress flex-grow-1" style={{ height: '8px' }}>
+                  <div
+                    className="progress-bar bg-warning"
+                    role="progressbar"
+                    style={{
+                      width: `${((stats.distribution[rating] || 0) / stats.total) * 100}%`,
+                    }}
+                  />
+                </div>
+                <div className="ms-2 text-muted small">
+                  {stats.distribution[rating] || 0}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="col-md-8">
+          <div className="reviews-list">
+            {reviews.map((review) => (
+              <div key={review.id} className="card mb-3">
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h5 className="card-title mb-0">{review.user.name}</h5>
+                    <div className="text-warning">
+                      {[...Array(5)].map((_, i) => (
+                        <i
+                          key={i}
+                          className={`bi bi-star${i < review.rating ? '-fill' : ''}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-muted small mb-2">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="card-text">{review.comment}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

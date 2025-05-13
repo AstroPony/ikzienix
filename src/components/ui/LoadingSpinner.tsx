@@ -1,24 +1,30 @@
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
   className?: string
+  text?: string
 }
 
-export default function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerProps) {
+export default function LoadingSpinner({ 
+  size = 'md', 
+  className = '',
+  text = 'Loading...'
+}: LoadingSpinnerProps) {
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12'
+    sm: 'spinner-border-sm',
+    md: '',
+    lg: 'spinner-border-lg'
   }
 
   return (
-    <div className={`flex justify-center items-center ${className}`}>
+    <div className={`d-flex align-items-center justify-content-center ${className}`}>
       <div
-        className={`${sizeClasses[size]} border-4 border-gray-200 border-t-primary rounded-full animate-spin`}
+        className={`spinner-border text-primary ${sizeClasses[size]}`}
         role="status"
-        aria-label="Loading"
+        aria-label={text}
       >
-        <span className="sr-only">Loading...</span>
+        <span className="visually-hidden">{text}</span>
       </div>
+      {text && <span className="ms-2 text-muted">{text}</span>}
     </div>
   )
 } 

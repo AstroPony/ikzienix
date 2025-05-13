@@ -1,3 +1,5 @@
+'use client'
+
 import { ProductSpecifications as ProductSpecs } from '@/types/product'
 
 interface ProductSpecificationsProps {
@@ -6,42 +8,46 @@ interface ProductSpecificationsProps {
 
 export default function ProductSpecifications({ specifications }: ProductSpecificationsProps) {
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">Specifications</h2>
-      <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <dt className="font-medium text-gray-600">Frame Material</dt>
-          <dd className="text-gray-900">{specifications.frameMaterial}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-600">Lens Material</dt>
-          <dd className="text-gray-900">{specifications.lensMaterial}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-600">Lens Width</dt>
-          <dd className="text-gray-900">{specifications.lensWidth}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-600">Bridge Width</dt>
-          <dd className="text-gray-900">{specifications.bridgeWidth}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-600">Temple Length</dt>
-          <dd className="text-gray-900">{specifications.templeLength}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-600">Weight</dt>
-          <dd className="text-gray-900">{specifications.weight}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-600">UV Protection</dt>
-          <dd className="text-gray-900">{specifications.uvProtection}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-600">Polarization</dt>
-          <dd className="text-gray-900">{specifications.polarization ? 'Yes' : 'No'}</dd>
-        </div>
-      </dl>
+    <div className="mb-6">
+      <h3 className="h5 mb-3">Specifications</h3>
+      <div className="table-responsive">
+        <table className="table table-sm">
+          <tbody>
+            <tr>
+              <th className="text-muted">Frame Material</th>
+              <td>{specifications.frameMaterial}</td>
+            </tr>
+            <tr>
+              <th className="text-muted">Lens Material</th>
+              <td>{specifications.lensMaterial}</td>
+            </tr>
+            <tr>
+              <th className="text-muted">Lens Width</th>
+              <td>{specifications.lensWidth}</td>
+            </tr>
+            <tr>
+              <th className="text-muted">Bridge Width</th>
+              <td>{specifications.bridgeWidth}</td>
+            </tr>
+            <tr>
+              <th className="text-muted">Temple Length</th>
+              <td>{specifications.templeLength}</td>
+            </tr>
+            <tr>
+              <th className="text-muted">Weight</th>
+              <td>{specifications.weight}</td>
+            </tr>
+            <tr>
+              <th className="text-muted">UV Protection</th>
+              <td>{specifications.uvProtection}</td>
+            </tr>
+            <tr>
+              <th className="text-muted">Polarized</th>
+              <td>{specifications.polarization ? 'Yes' : 'No'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 } 

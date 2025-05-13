@@ -1,68 +1,113 @@
 'use client'
 
-import { Product } from '@/types/product'
-import { useCart } from '@/lib/cart-context'
-import { useComparison } from '@/lib/comparison-context'
-import Image from 'next/image'
 import Link from 'next/link'
-import AddToCartButton from './AddToCartButton'
-import CompareButton from './CompareButton'
-import WishlistButton from './WishlistButton'
-import ProductBadge from './ProductBadge'
-import ProductPrice from './ProductPrice'
+import Image from 'next/image'
+import { Product } from '@/types/product'
+import { useCart } from '@/hooks/useCart'
+import { useComparison } from '@/hooks/useComparison'
+import { useWishlist } from '@/hooks/useWishlist'
 
 interface ProductCardProps {
   product: Product
-  className?: string
 }
 
-export default function ProductCard({ product, className = '' }: ProductCardProps) {
-  const { dispatch } = useCart()
+export default function ProductCard({ product }: ProductCardProps) {
+  const { addToCart, isAddingToCart } = useCart()
   const { addToComparison, isInComparison } = useComparison()
+  const { addToWishlist, isInWishlist } = useWishlist()
 
-  const handleAddToCart = () => {
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: { product }
-    })
+  const handleAddToCart = async () => {
+    const defaultColor = product.colors.length > 0 ? product.colors[0] : 'Default'
+    await addToCart(product.id, defaultColor)
+  }
+
+  const handleAddToComparison = () => {
+    addToComparison(product)
+  }
+
+  const handleAddToWishlist = () => {
+    addToWishlist(product)
   }
 
   return (
-    <div className={`card h-100 ${className}`}>
-      <div className="position-relative">
-        <Link href={`/products/${product.slug}`}>
-          <div className="position-relative" style={{ height: '200px' }}>
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-fit-contain"
-            />
-          </div>
-        </Link>
-        <div className="position-absolute top-0 end-0 p-2">
-          <WishlistButton product={product} />
-        </div>
-        {product.featured && (
-          <div className="position-absolute top-0 start-0 p-2">
-            <ProductBadge type="new" />
-          </div>
-        )}
-      </div>
-      <div className="card-body">
-        <h3 className="h5 mb-2">
-          <Link href={`/products/${product.slug}`} className="text-decoration-none">
-            {product.name}
-          </Link>
-        </h3>
-        <ProductPrice product={product} />
-        <p className="text-muted small mb-3">{product.category}</p>
-        <div className="d-flex gap-2">
-          <AddToCartButton
-            product={product}
-            className="flex-grow-1"
+    <div className="product-card">
+      <Link href={`/products/${product.slug}`} className="text-decoration-none">
+        <div className="position-relative ratio ratio-1x1 rounded-3 overflow-hidden mb-3">
+          <Image
+            src={product.images[0].url}
+            alt={product.images[0].alt}
+            fill
+            className="object-fit-cover"
+            sizes="(max-width: 768px) 50vw, 25vw"
           />
-          <CompareButton product={product} />
+          {product.sale && (
+            <span className="position-absolute top-0 start-0 badge bg-danger m-2">Sale</span>
+          )}
+          {product.new && (
+            <span className="position-absolute top-0 end-0 badge bg-primary m-2">New</span>
+          )}
+        </div>
+        <h3 className="h6 mb-2 text-dark">{product.name}</h3>
+        <div className="d-flex align-items-center mb-2">
+          <div className="text-warning me-2">
+            {[...Array(5)].map((_, i) => (
+              <i
+                key={i}
+                className={`bi bi-star${i < Math.floor(product.rating) ? '-fill' : ''}`}
+              />
+            ))}
+          </div>
+          <span className="text-muted small">({product.reviewCount})</span>
+        </div>
+        <div className="mb-3">
+          {product.sale ? (
+            <div>
+              <span className="text-decoration-line-through text-muted me-2">
+                ${product.price.toFixed(2)}
+              </span>
+              <span className="text-danger">${product.salePrice?.toFixed(2)}</span>
+            </div>
+          ) : (
+            <span>${product.price.toFixed(2)}</span>
+          )}
+        </div>
+      </Link>
+      <div className="d-grid gap-2">
+        <button
+          className="btn btn-primary"
+          onClick={handleAddToCart}
+          disabled={isAddingToCart || !product.inStock}
+        >
+          {isAddingToCart ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              />
+              Adding...
+            </>
+          ) : product.inStock ? (
+            'Add to Cart'
+          ) : (
+            'Out of Stock'
+          )}
+        </button>
+        <div className="d-flex gap-2">
+          <button
+            className="btn btn-outline-secondary flex-grow-1"
+            onClick={handleAddToComparison}
+            disabled={isInComparison(product.id)}
+          >
+            {isInComparison(product.id) ? 'In Comparison' : 'Compare'}
+          </button>
+          <button
+            className="btn btn-outline-secondary"
+            onClick={handleAddToWishlist}
+            disabled={isInWishlist(product.id)}
+          >
+            <i className={`bi bi-heart${isInWishlist(product.id) ? '-fill' : ''}`} />
+          </button>
         </div>
       </div>
     </div>

@@ -1,102 +1,48 @@
 'use client'
 
 import { useState } from 'react'
-import { Product } from '@/types/product'
-import ProductBadge from './ProductBadge'
-import OptimizedImage from '../common/OptimizedImage'
+import Image from 'next/image'
+import { ProductImage } from '@/types/product'
 
 interface ProductGalleryProps {
-  product: Product
-  className?: string
+  images: ProductImage[]
+  productName: string
 }
 
-export default function ProductGallery({ product, className = '' }: ProductGalleryProps) {
-  const [activeIndex, setActiveIndex] = useState(0)
-  
-  // Combine main image with additional images
-  const allImages = [product.image, ...(product.images || [])].filter(Boolean)
-  
-  if (allImages.length === 0) {
-    return (
-      <div className={`bg-light rounded-3 p-4 text-center ${className}`}>
-        <p className="mb-0">No image available</p>
-      </div>
-    )
-  }
+export default function ProductGallery({ images, productName }: ProductGalleryProps) {
+  const [selectedImage, setSelectedImage] = useState(images[0])
 
   return (
-    <div className={className}>
-      {/* Main Image Carousel */}
-      <div id="productCarousel" className="carousel slide mb-3" data-bs-ride="carousel">
-        <div className="carousel-inner rounded-3">
-          {allImages.map((image, index) => (
-            <div
-              key={index}
-              className={`carousel-item ${index === activeIndex ? 'active' : ''}`}
-            >
-              <div className="position-relative" style={{ paddingTop: '100%' }}>
-                <OptimizedImage
-                  src={image}
-                  alt={`${product.name} - Image ${index + 1}`}
-                  fill
-                  className="object-fit-cover rounded-3"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  priority={index === 0}
-                  quality={90}
-                />
-                {index === 0 && product.sale && <ProductBadge type="sale" />}
-                {index === 0 && product.new && <ProductBadge type="new" />}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {allImages.length > 1 && (
-          <>
-            <button
-              className="carousel-control-prev"
-              type="button"
-              data-bs-target="#productCarousel"
-              data-bs-slide="prev"
-              onClick={() => setActiveIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1))}
-            >
-              <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span className="visually-hidden">Previous</span>
-            </button>
-            <button
-              className="carousel-control-next"
-              type="button"
-              data-bs-target="#productCarousel"
-              data-bs-slide="next"
-              onClick={() => setActiveIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1))}
-            >
-              <span className="carousel-control-next-icon" aria-hidden="true"></span>
-              <span className="visually-hidden">Next</span>
-            </button>
-          </>
-        )}
+    <div className="product-gallery">
+      <div className="position-relative ratio ratio-1x1 rounded-3 overflow-hidden mb-3">
+        <Image
+          src={selectedImage.url}
+          alt={`${productName} - ${selectedImage.alt}`}
+          fill
+          className="object-fit-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority
+        />
       </div>
-
-      {/* Thumbnail Navigation */}
-      {allImages.length > 1 && (
-        <div className="d-flex gap-2 overflow-auto">
-          {allImages.map((image, index) => (
-            <button
-              key={index}
-              className={`border-0 p-0 rounded-3 overflow-hidden ${index === activeIndex ? 'border border-primary' : ''}`}
-              style={{ width: '80px', height: '80px' }}
-              onClick={() => setActiveIndex(index)}
-            >
-              <OptimizedImage
-                src={image}
-                alt={`${product.name} - Thumbnail ${index + 1}`}
-                width={80}
-                height={80}
-                className="object-fit-cover"
-                style={{ width: '100%', height: '100%' }}
-                quality={75}
-              />
-            </button>
+      {images.length > 1 && (
+        <div className="row g-2">
+          {images.map((image) => (
+            <div key={image.id} className="col-3">
+              <button
+                className={`position-relative ratio ratio-1x1 rounded-3 overflow-hidden border-0 p-0 ${
+                  selectedImage.id === image.id ? 'border-primary' : 'border-secondary'
+                }`}
+                onClick={() => setSelectedImage(image)}
+              >
+                <Image
+                  src={image.url}
+                  alt={`${productName} - ${image.alt}`}
+                  fill
+                  className="object-fit-cover"
+                  sizes="(max-width: 768px) 25vw, 12vw"
+                />
+              </button>
+            </div>
           ))}
         </div>
       )}

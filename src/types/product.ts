@@ -1,3 +1,9 @@
+export interface ProductImage {
+  id: string
+  url: string
+  alt: string
+}
+
 export interface ProductSpecifications {
   frameMaterial: string
   lensMaterial: string
@@ -18,35 +24,34 @@ export interface ProductShipping {
 export interface Product {
   id: string
   name: string
-  price: number
-  image: string
-  images: string[]
+  slug: string
   description: string
+  price: number
+  salePrice?: number
+  images: ProductImage[]
+  specifications: ProductSpecifications
   category: string
-  rating: number
-  reviews: number
-  featured: boolean
-  colors: string[]
+  brand: string
   inStock: boolean
+  featured: boolean
+  new: boolean
+  sale: boolean
+  rating: number
+  reviewCount: number
   createdAt: string
   updatedAt: string
   sku: string
-  slug: string
-  specifications: ProductSpecifications
+  colors: string[]
   features: string[]
   careInstructions: string[]
   warranty: string
   shipping: ProductShipping
-  sale?: boolean
-  new?: boolean
-  salePrice?: number
 }
 
 export const defaultProduct: Partial<Product> = {
   images: [],
   colors: [],
   rating: 0,
-  reviews: 0,
   specifications: {
     frameMaterial: '',
     lensMaterial: '',

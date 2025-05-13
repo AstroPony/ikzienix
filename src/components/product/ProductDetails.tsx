@@ -2,207 +2,144 @@
 
 import { useState } from 'react'
 import { Product } from '@/types/product'
+import ProductGallery from './ProductGallery'
+import ProductSpecifications from './ProductSpecifications'
+import ProductReviews from './ProductReviews'
+import RelatedProducts from './RelatedProducts'
+import { useCart } from '@/hooks/useCart'
+import { useComparison } from '@/hooks/useComparison'
+import { useWishlist } from '@/hooks/useWishlist'
 
 interface ProductDetailsProps {
   product: Product
-  className?: string
 }
 
-export default function ProductDetails({ product, className = '' }: ProductDetailsProps) {
-  const [activeTab, setActiveTab] = useState('shipping')
+export default function ProductDetails({ product }: ProductDetailsProps) {
+  const [selectedColor, setSelectedColor] = useState(product.colors[0])
+  const { addToCart, isAddingToCart } = useCart()
+  const { addToComparison, isInComparison } = useComparison()
+  const { addToWishlist, isInWishlist } = useWishlist()
 
-  const hasSpecifications = product.specifications && Object.keys(product.specifications).length > 0
-  const hasFeatures = product.features && product.features.length > 0
-  const hasCareInstructions = product.careInstructions && product.careInstructions.length > 0
-  const hasWarranty = product.warranty && product.warranty.length > 0
-  const hasShipping = product.shipping && Object.keys(product.shipping).length > 0
+  const handleAddToCart = async () => {
+    await addToCart(product.id, selectedColor)
+  }
+
+  const handleAddToComparison = () => {
+    addToComparison(product)
+  }
+
+  const handleAddToWishlist = () => {
+    addToWishlist(product)
+  }
 
   return (
-    <div className={className}>
-      <ul className="nav nav-tabs mb-3" role="tablist">
-        {hasSpecifications && (
-          <li className="nav-item" role="presentation">
-            <button
-              className={`nav-link ${activeTab === 'specifications' ? 'active' : ''}`}
-              onClick={() => setActiveTab('specifications')}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'specifications'}
-            >
-              Specifications
-            </button>
-          </li>
-        )}
-        {hasFeatures && (
-          <li className="nav-item" role="presentation">
-            <button
-              className={`nav-link ${activeTab === 'features' ? 'active' : ''}`}
-              onClick={() => setActiveTab('features')}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'features'}
-            >
-              Features
-            </button>
-          </li>
-        )}
-        {hasCareInstructions && hasWarranty && (
-          <li className="nav-item" role="presentation">
-            <button
-              className={`nav-link ${activeTab === 'care' ? 'active' : ''}`}
-              onClick={() => setActiveTab('care')}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'care'}
-            >
-              Care & Warranty
-            </button>
-          </li>
-        )}
-        {hasShipping && (
-          <li className="nav-item" role="presentation">
-            <button
-              className={`nav-link ${activeTab === 'shipping' ? 'active' : ''}`}
-              onClick={() => setActiveTab('shipping')}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'shipping'}
-            >
-              Shipping
-            </button>
-          </li>
-        )}
-      </ul>
-
-      <div className="tab-content">
-        {hasSpecifications && (
-          <div
-            className={`tab-pane fade ${activeTab === 'specifications' ? 'show active' : ''}`}
-            role="tabpanel"
-          >
-            <div className="row g-3">
-              {product.specifications?.frameMaterial && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">Frame Material</p>
-                  <p className="mb-0">{product.specifications.frameMaterial}</p>
+    <div className="product-details">
+      <div className="row">
+        <div className="col-md-6">
+          <ProductGallery images={product.images} productName={product.name} />
+        </div>
+        <div className="col-md-6">
+          <div className="product-info">
+            <h1 className="h2 mb-2">{product.name}</h1>
+            <div className="d-flex align-items-center mb-3">
+              <div className="text-warning me-2">
+                {[...Array(5)].map((_, i) => (
+                  <i
+                    key={i}
+                    className={`bi bi-star${i < Math.floor(product.rating) ? '-fill' : ''}`}
+                  />
+                ))}
+              </div>
+              <span className="text-muted">
+                {product.rating.toFixed(1)} ({product.reviewCount} reviews)
+              </span>
+            </div>
+            <div className="mb-3">
+              {product.sale ? (
+                <div>
+                  <span className="text-decoration-line-through text-muted me-2">
+                    ${product.price.toFixed(2)}
+                  </span>
+                  <span className="h3 text-danger mb-0">
+                    ${product.salePrice?.toFixed(2)}
+                  </span>
                 </div>
-              )}
-              {product.specifications?.lensMaterial && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">Lens Material</p>
-                  <p className="mb-0">{product.specifications.lensMaterial}</p>
-                </div>
-              )}
-              {product.specifications?.lensWidth && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">Lens Width</p>
-                  <p className="mb-0">{product.specifications.lensWidth}mm</p>
-                </div>
-              )}
-              {product.specifications?.bridgeWidth && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">Bridge Width</p>
-                  <p className="mb-0">{product.specifications.bridgeWidth}mm</p>
-                </div>
-              )}
-              {product.specifications?.templeLength && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">Temple Length</p>
-                  <p className="mb-0">{product.specifications.templeLength}mm</p>
-                </div>
-              )}
-              {product.specifications?.weight && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">Weight</p>
-                  <p className="mb-0">{product.specifications.weight}g</p>
-                </div>
-              )}
-              {product.specifications?.uvProtection && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">UV Protection</p>
-                  <p className="mb-0">{product.specifications.uvProtection}</p>
-                </div>
-              )}
-              {product.specifications?.polarization && (
-                <div className="col-6">
-                  <p className="mb-1 text-muted">Polarization</p>
-                  <p className="mb-0">{product.specifications.polarization ? 'Yes' : 'No'}</p>
-                </div>
+              ) : (
+                <span className="h3 mb-0">${product.price.toFixed(2)}</span>
               )}
             </div>
-          </div>
-        )}
-
-        {hasFeatures && (
-          <div
-            className={`tab-pane fade ${activeTab === 'features' ? 'show active' : ''}`}
-            role="tabpanel"
-          >
-            <ul className="list-unstyled mb-0">
-              {product.features?.map((feature, index) => (
-                <li key={index} className="d-flex align-items-center mb-2">
-                  <i className="bi bi-check-circle-fill text-primary me-2"></i>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {hasCareInstructions && hasWarranty && (
-          <div
-            className={`tab-pane fade ${activeTab === 'care' ? 'show active' : ''}`}
-            role="tabpanel"
-          >
+            <p className="mb-4">{product.description}</p>
             <div className="mb-4">
-              <h6 className="mb-3">Care Instructions</h6>
-              <ul className="list-unstyled mb-0">
-                {Array.isArray(product.careInstructions) 
-                  ? product.careInstructions.map((instruction, index) => (
-                      <li key={index} className="d-flex align-items-center mb-2">
-                        <i className="bi bi-dot me-2"></i>
-                        {instruction}
-                      </li>
-                    ))
-                  : (
-                      <li className="d-flex align-items-center mb-2">
-                        <i className="bi bi-dot me-2"></i>
-                        {product.careInstructions}
-                      </li>
-                    )
-                }
-              </ul>
+              <label className="form-label">Color</label>
+              <div className="d-flex gap-2">
+                {product.colors.map((color) => (
+                  <button
+                    key={color}
+                    className={`btn btn-outline-secondary ${
+                      selectedColor === color ? 'active' : ''
+                    }`}
+                    onClick={() => setSelectedColor(color)}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div>
-              <h6 className="mb-3">Warranty</h6>
-              <p className="mb-0">{product.warranty}</p>
+            <div className="d-grid gap-2">
+              <button
+                className="btn btn-primary"
+                onClick={handleAddToCart}
+                disabled={isAddingToCart || !product.inStock}
+              >
+                {isAddingToCart ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    />
+                    Adding...
+                  </>
+                ) : product.inStock ? (
+                  'Add to Cart'
+                ) : (
+                  'Out of Stock'
+                )}
+              </button>
+              <div className="d-flex gap-2">
+                <button
+                  className="btn btn-outline-secondary flex-grow-1"
+                  onClick={handleAddToComparison}
+                  disabled={isInComparison(product.id)}
+                >
+                  {isInComparison(product.id) ? 'In Comparison' : 'Compare'}
+                </button>
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={handleAddToWishlist}
+                  disabled={isInWishlist(product.id)}
+                >
+                  <i className={`bi bi-heart${isInWishlist(product.id) ? '-fill' : ''}`} />
+                </button>
+              </div>
             </div>
           </div>
-        )}
-
-        {hasShipping && (
-          <div
-            className={`tab-pane fade ${activeTab === 'shipping' ? 'show active' : ''}`}
-            role="tabpanel"
-          >
-            <div className="row g-3">
-              <div className="col-12">
-                <p className="mb-1 text-muted">Shipping</p>
-                <p className="mb-0">
-                  {product.shipping?.freeShipping ? 'Free Shipping' : 'Standard Shipping'}
-                </p>
-              </div>
-              <div className="col-12">
-                <p className="mb-1 text-muted">Estimated Delivery</p>
-                <p className="mb-0">{product.shipping?.estimatedDelivery}</p>
-              </div>
-              <div className="col-12">
-                <p className="mb-1 text-muted">Return Policy</p>
-                <p className="mb-0">{product.shipping?.returnPolicy}</p>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
+      </div>
+      <div className="row mt-5">
+        <div className="col-12">
+          <ProductSpecifications specifications={product.specifications} />
+        </div>
+      </div>
+      <div className="row mt-5">
+        <div className="col-12">
+          <ProductReviews productId={product.id} />
+        </div>
+      </div>
+      <div className="row mt-5">
+        <div className="col-12">
+          <RelatedProducts category={product.category} currentProductId={product.id} />
+        </div>
       </div>
     </div>
   )

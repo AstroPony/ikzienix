@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { Product } from '@/types/product'
-import ProductCard from '@/components/product/ProductCard'
+import ProductCard from './ProductCard'
 
 interface RelatedProductsProps {
-  productId: string
+  category: string
+  currentProductId: string
 }
 
-export default function RelatedProducts({ productId }: RelatedProductsProps) {
+export default function RelatedProducts({ category, currentProductId }: RelatedProductsProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -16,12 +17,16 @@ export default function RelatedProducts({ productId }: RelatedProductsProps) {
   useEffect(() => {
     async function fetchRelatedProducts() {
       try {
-        const response = await fetch(`/api/products/${productId}/related`)
+        const response = await fetch(`/api/products?category=${category}&limit=4`)
         if (!response.ok) {
           throw new Error('Failed to fetch related products')
         }
         const data = await response.json()
-        setProducts(data)
+        // Filter out the current product
+        const filteredProducts = data.products.filter(
+          (product: Product) => product.id !== currentProductId
+        )
+        setProducts(filteredProducts)
       } catch (err) {
         setError('Error loading related products')
       } finally {
@@ -30,14 +35,24 @@ export default function RelatedProducts({ productId }: RelatedProductsProps) {
     }
 
     fetchRelatedProducts()
-  }, [productId])
+  }, [category, currentProductId])
 
   if (loading) {
-    return <div>Loading related products...</div>
+    return (
+      <div className="text-center py-8">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    )
   }
 
   if (error) {
-    return <div className="text-red-600">{error}</div>
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted">{error}</p>
+      </div>
+    )
   }
 
   if (products.length === 0) {
@@ -45,11 +60,13 @@ export default function RelatedProducts({ productId }: RelatedProductsProps) {
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-6">You May Also Like</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="related-products">
+      <h3 className="h4 mb-4">Related Products</h3>
+      <div className="row g-4">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div key={product.id} className="col-6 col-md-3">
+            <ProductCard product={product} />
+          </div>
         ))}
       </div>
     </div>
