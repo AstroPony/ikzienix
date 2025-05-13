@@ -5,6 +5,7 @@ import { Product } from '@/types/product'
 import { CartProvider } from '@/lib/cart-context'
 import { ComparisonProvider } from '@/lib/comparison-context'
 import { WishlistProvider } from '@/context/WishlistContext'
+import { getProduct } from '@/lib/api'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -14,7 +15,8 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
-    prefetch: jest.fn()
+    prefetch: jest.fn(),
+    notFound: jest.fn(),
   })
 }))
 
@@ -107,6 +109,37 @@ jest.mock('@/lib/api', () => ({
   getReviews: () => mockGetReviews()
 }))
 
+// Mock the product components
+jest.mock('@/components/product/ProductGallery', () => {
+  return function MockProductGallery() {
+    return <div data-testid="product-gallery">Product Gallery</div>
+  }
+})
+
+jest.mock('@/components/product/ProductSpecifications', () => {
+  return function MockProductSpecifications() {
+    return <div data-testid="product-specifications">Product Specifications</div>
+  }
+})
+
+jest.mock('@/components/product/ProductFeatures', () => {
+  return function MockProductFeatures() {
+    return <div data-testid="product-features">Product Features</div>
+  }
+})
+
+jest.mock('@/components/product/ProductReviews', () => {
+  return function MockProductReviews() {
+    return <div data-testid="product-reviews">Product Reviews</div>
+  }
+})
+
+jest.mock('@/components/product/RelatedProducts', () => {
+  return function MockRelatedProducts() {
+    return <div data-testid="related-products">Related Products</div>
+  }
+})
+
 const renderWithProviders = (component: React.ReactNode) => {
   return render(
     <SessionProvider session={mockSession}>
@@ -126,20 +159,45 @@ const mockParams = {
 }
 
 describe('ProductPage', () => {
-  it('renders the product page correctly', async () => {
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(getProduct as jest.Mock).mockResolvedValue(mockProduct)
+  })
+
+  it('renders product details correctly', async () => {
+    render(<ProductPage params={{ slug: 'test-product' }} />)
 
     await waitFor(() => {
-      expect(container).toBeInTheDocument()
+      expect(screen.getByText('Test Product')).toBeInTheDocument()
+      expect(screen.getByText('$99.99')).toBeInTheDocument()
+      expect(screen.getByText('Test Description')).toBeInTheDocument()
+      expect(screen.getByTestId('product-gallery')).toBeInTheDocument()
+      expect(screen.getByTestId('product-specifications')).toBeInTheDocument()
+      expect(screen.getByTestId('product-features')).toBeInTheDocument()
+      expect(screen.getByTestId('product-reviews')).toBeInTheDocument()
+      expect(screen.getByTestId('related-products')).toBeInTheDocument()
     })
+  })
 
-    expect(screen.getByText('Test Product')).toBeInTheDocument()
-    expect(screen.getByText('Test Description')).toBeInTheDocument()
-    expect(screen.getByText('$100.00')).toBeInTheDocument()
+  it('handles product not found', async () => {
+    ;(getProduct as jest.Mock).mockResolvedValue(null)
+
+    render(<ProductPage params={{ slug: 'non-existent-product' }} />)
+
+    await waitFor(() => {
+      expect(require('next/navigation').notFound).toHaveBeenCalled()
+    })
+  })
+
+  it('handles error state', async () => {
+    ;(getProduct as jest.Mock).mockRejectedValue(new Error('Failed to fetch product'))
+
+    render(<ProductPage params={{ slug: 'test-product' }} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Error loading product')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
+    })
   })
 
   it('handles add to cart', async () => {
@@ -159,25 +217,6 @@ describe('ProductPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Added to cart')).toBeInTheDocument()
     })
-  })
-
-  it('handles error state', async () => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
-      Promise.reject(new Error('Failed to fetch product'))
-    )
-
-    const { container } = render(
-      <SessionProvider session={mockSession}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(container).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('Error')).toBeInTheDocument()
-    expect(screen.getByText('Failed to load product')).toBeInTheDocument()
   })
 
   it('handles out of stock state', async () => {
@@ -282,30 +321,6 @@ describe('ProductPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/test product/i)).toBeInTheDocument()
-    })
-  })
-
-  it('handles product not found', async () => {
-    render(
-      <SessionProvider session={null}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/product not found/i)).toBeInTheDocument()
-    })
-  })
-
-  it('handles error state', async () => {
-    render(
-      <SessionProvider session={null}>
-        <ProductPage params={mockParams} />
-      </SessionProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/error loading product/i)).toBeInTheDocument()
     })
   })
 }) 
