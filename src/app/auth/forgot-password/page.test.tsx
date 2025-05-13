@@ -12,11 +12,11 @@ describe('ForgotPasswordPage', () => {
     render(<ForgotPasswordPage />);
     
     const emailInput = screen.getByLabelText('Email');
+    const submitButton = screen.getByRole('button', { name: /reset password/i });
+
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    
-    const submitButton = screen.getByRole('button', { name: 'Reset Password' });
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Check your email for reset instructions')).toBeInTheDocument();
     });

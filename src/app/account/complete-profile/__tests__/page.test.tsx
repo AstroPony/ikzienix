@@ -69,41 +69,22 @@ describe('CompleteProfilePage', () => {
     jest.clearAllMocks()
   })
 
-  test.skip('renders the complete profile page correctly', async () => {
-    render(
-      <CartProvider>
-        <CompleteProfilePage />
-      </CartProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
-    })
+  test.skip('renders the complete profile page correctly', () => {
+    render(<CompleteProfilePage />)
+    expect(screen.getByText('Complete Your Profile')).toBeInTheDocument()
   })
 
   test.skip('handles form submission', async () => {
-    render(
-      <CartProvider>
-        <CompleteProfilePage />
-      </CartProvider>
-    )
+    render(<CompleteProfilePage />)
+    
+    const phoneInput = screen.getByLabelText('Phone Number')
+    const submitButton = screen.getByRole('button', { name: /save/i })
 
-    // Fill out the form
-    fireEvent.change(screen.getByLabelText(/first name/i), {
-      target: { value: 'John' },
-    })
-    fireEvent.change(screen.getByLabelText(/last name/i), {
-      target: { value: 'Doe' },
-    })
-    fireEvent.change(screen.getByLabelText(/phone/i), {
-      target: { value: '1234567890' },
-    })
-
-    // Submit the form
-    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    fireEvent.change(phoneInput, { target: { value: '1234567890' } })
+    fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/profile updated successfully/i)).toBeInTheDocument()
+      expect(screen.getByText('Profile updated successfully')).toBeInTheDocument()
     })
   })
 
