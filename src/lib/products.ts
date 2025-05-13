@@ -1,14 +1,5 @@
 import { placeholderImages } from './placeholder-images'
-import { Product } from '@/types/product'
-
-export interface Product {
-  id: string
-  name: string
-  description: string
-  price: number
-  image: string
-  category: string
-}
+import { Product, defaultProduct } from '@/types/product'
 
 export const products: Product[] = [
   {
@@ -17,7 +8,35 @@ export const products: Product[] = [
     description: 'Timeless black sunglasses with UV400 protection and lightweight frame.',
     price: 29.99,
     image: placeholderImages['classic-black'],
-    category: 'classic'
+    images: [],
+    category: 'classic',
+    rating: 0,
+    reviews: 0,
+    featured: false,
+    colors: [],
+    inStock: true,
+    createdAt: '',
+    updatedAt: '',
+    sku: '',
+    slug: '',
+    specifications: {
+      frameMaterial: '',
+      lensMaterial: '',
+      lensWidth: '',
+      bridgeWidth: '',
+      templeLength: '',
+      weight: '',
+      uvProtection: '',
+      polarization: false
+    },
+    features: [],
+    careInstructions: [],
+    warranty: '',
+    shipping: {
+      freeShipping: false,
+      estimatedDelivery: '3-5 business days',
+      returnPolicy: '30 days return policy'
+    }
   },
   {
     id: '2',
@@ -25,7 +44,35 @@ export const products: Product[] = [
     description: 'Vintage-inspired round sunglasses perfect for any occasion.',
     price: 34.99,
     image: placeholderImages['retro-round'],
-    category: 'retro'
+    images: [],
+    category: 'retro',
+    rating: 0,
+    reviews: 0,
+    featured: false,
+    colors: [],
+    inStock: true,
+    createdAt: '',
+    updatedAt: '',
+    sku: '',
+    slug: '',
+    specifications: {
+      frameMaterial: '',
+      lensMaterial: '',
+      lensWidth: '',
+      bridgeWidth: '',
+      templeLength: '',
+      weight: '',
+      uvProtection: '',
+      polarization: false
+    },
+    features: [],
+    careInstructions: [],
+    warranty: '',
+    shipping: {
+      freeShipping: false,
+      estimatedDelivery: '3-5 business days',
+      returnPolicy: '30 days return policy'
+    }
   },
   {
     id: '3',
@@ -33,7 +80,35 @@ export const products: Product[] = [
     description: 'Performance sunglasses designed for active lifestyles.',
     price: 39.99,
     image: placeholderImages['sport-shield'],
-    category: 'sport'
+    images: [],
+    category: 'sport',
+    rating: 0,
+    reviews: 0,
+    featured: false,
+    colors: [],
+    inStock: true,
+    createdAt: '',
+    updatedAt: '',
+    sku: '',
+    slug: '',
+    specifications: {
+      frameMaterial: '',
+      lensMaterial: '',
+      lensWidth: '',
+      bridgeWidth: '',
+      templeLength: '',
+      weight: '',
+      uvProtection: '',
+      polarization: false
+    },
+    features: [],
+    careInstructions: [],
+    warranty: '',
+    shipping: {
+      freeShipping: false,
+      estimatedDelivery: '3-5 business days',
+      returnPolicy: '30 days return policy'
+    }
   },
   {
     id: '4',
@@ -41,7 +116,35 @@ export const products: Product[] = [
     description: 'Classic aviator style with gold-tone frame and mirrored lenses.',
     price: 44.99,
     image: placeholderImages['aviator-gold'],
-    category: 'aviator'
+    images: [],
+    category: 'aviator',
+    rating: 0,
+    reviews: 0,
+    featured: false,
+    colors: [],
+    inStock: true,
+    createdAt: '',
+    updatedAt: '',
+    sku: '',
+    slug: '',
+    specifications: {
+      frameMaterial: '',
+      lensMaterial: '',
+      lensWidth: '',
+      bridgeWidth: '',
+      templeLength: '',
+      weight: '',
+      uvProtection: '',
+      polarization: false
+    },
+    features: [],
+    careInstructions: [],
+    warranty: '',
+    shipping: {
+      freeShipping: false,
+      estimatedDelivery: '3-5 business days',
+      returnPolicy: '30 days return policy'
+    }
   },
   {
     id: '5',
@@ -49,7 +152,35 @@ export const products: Product[] = [
     description: 'Feminine cat-eye sunglasses with a modern twist.',
     price: 32.99,
     image: placeholderImages['cat-eye'],
-    category: 'cat-eye'
+    images: [],
+    category: 'cat-eye',
+    rating: 0,
+    reviews: 0,
+    featured: false,
+    colors: [],
+    inStock: true,
+    createdAt: '',
+    updatedAt: '',
+    sku: '',
+    slug: '',
+    specifications: {
+      frameMaterial: '',
+      lensMaterial: '',
+      lensWidth: '',
+      bridgeWidth: '',
+      templeLength: '',
+      weight: '',
+      uvProtection: '',
+      polarization: false
+    },
+    features: [],
+    careInstructions: [],
+    warranty: '',
+    shipping: {
+      freeShipping: false,
+      estimatedDelivery: '3-5 business days',
+      returnPolicy: '30 days return policy'
+    }
   },
   {
     id: '6',
@@ -57,7 +188,35 @@ export const products: Product[] = [
     description: 'Iconic wayfarer design with polarized lenses.',
     price: 37.99,
     image: placeholderImages['wayfarer'],
-    category: 'wayfarer'
+    images: [],
+    category: 'wayfarer',
+    rating: 0,
+    reviews: 0,
+    featured: false,
+    colors: [],
+    inStock: true,
+    createdAt: '',
+    updatedAt: '',
+    sku: '',
+    slug: '',
+    specifications: {
+      frameMaterial: '',
+      lensMaterial: '',
+      lensWidth: '',
+      bridgeWidth: '',
+      templeLength: '',
+      weight: '',
+      uvProtection: '',
+      polarization: false
+    },
+    features: [],
+    careInstructions: [],
+    warranty: '',
+    shipping: {
+      freeShipping: false,
+      estimatedDelivery: '3-5 business days',
+      returnPolicy: '30 days return policy'
+    }
   }
 ]
 
