@@ -37,12 +37,12 @@ export interface Product {
   careInstructions: string[]
   warranty: string
   shipping: ProductShipping
+  sale?: boolean
 }
 
 export const defaultProduct: Partial<Product> = {
   images: [],
   colors: [],
-  sizes: [],
   rating: 0,
   reviews: 0,
   specifications: {
