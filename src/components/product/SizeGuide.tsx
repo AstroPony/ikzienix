@@ -41,7 +41,8 @@ export default function SizeGuide({ className = '' }: SizeGuideProps) {
                   src="/images/size-guide-frame.png"
                   alt="Sunglasses frame measurements"
                   fill
-                  className="object-fit-contain"
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
             </div>
@@ -99,7 +100,8 @@ export default function SizeGuide({ className = '' }: SizeGuideProps) {
                   src="/images/size-guide-fit.png"
                   alt="Face shape guide"
                   fill
-                  className="object-fit-contain"
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
             </div>

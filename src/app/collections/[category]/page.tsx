@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/types/product';
 import { collectionImages, collectionDescriptions } from '@/lib/collections';
-import ProductCard from '@/components/ProductCard'
+import ProductCard from '@/components/product/ProductCard'
 
 export default function CollectionPage() {
   const params = useParams();
@@ -119,14 +119,14 @@ export default function CollectionPage() {
   return (
     <div>
       {/* Hero Section */}
-      <div className="position-relative">
+      <div className="position-relative" style={{ height: '400px' }}>
         <Image
           src={heroImage}
           alt={categoryName}
-          width={1200}
-          height={600}
-          className="w-100"
-          style={{ objectFit: 'cover', height: '400px' }}
+          fill
+          priority
+          className="object-cover"
+          sizes="(max-width: 1200px) 100vw, 1200px"
         />
         <div className="position-absolute top-50 start-50 translate-middle text-center text-white">
           <h1 className="display-4 fw-bold">{categoryName}</h1>

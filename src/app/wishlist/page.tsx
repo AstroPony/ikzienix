@@ -1,7 +1,7 @@
 'use client'
 
 import { useWishlist } from '@/context/WishlistContext'
-import ProductCard from '@/components/ProductCard'
+import ProductCard from '@/components/product/ProductCard'
 import Link from 'next/link'
 
 export default function WishlistPage() {

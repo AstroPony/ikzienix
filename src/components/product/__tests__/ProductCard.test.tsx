@@ -8,7 +8,6 @@ const mockProduct = {
   id: '1',
   name: 'Test Product',
   price: 99.99,
-  image: '/test-image.jpg',
   slug: 'test-product',
   description: 'Test description',
   category: 'test-category',
@@ -16,9 +15,17 @@ const mockProduct = {
   sizes: ['S', 'M', 'L'],
   colors: ['Red', 'Blue'],
   rating: 4.5,
-  reviews: 10,
+  reviewCount: 10,
   createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
+  updatedAt: new Date().toISOString(),
+  images: [
+    {
+      url: '/test-image.jpg',
+      alt: 'Test Product Image'
+    }
+  ],
+  sale: false,
+  new: false
 }
 
 describe('ProductCard', () => {
