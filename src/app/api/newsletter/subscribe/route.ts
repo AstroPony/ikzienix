@@ -69,4 +69,4 @@ async function handler(request: NextRequest) {
 }
 
 // Rate limit: 3 subscription attempts per hour
-export const POST = withRateLimit(handler, 3, 3600) 
+export const POST = withRateLimit(handler, 3) 
