@@ -171,7 +171,7 @@ describe('CompleteProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/error loading profile/i)).toBeInTheDocument()
-    }, { timeout: 3000 })
+    })
   })
 
   it('handles unauthorized access', async () => {

@@ -161,7 +161,8 @@ describe('ProductPage', () => {
   })
 
   it('renders product details correctly', async () => {
-    const { container } = renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    const params = { slug: 'test-product' }
+    const { container } = renderWithProviders(<ProductPage params={params} />)
 
     await waitFor(() => {
       expect(screen.getByText('Test Product')).toBeInTheDocument()
@@ -177,8 +178,9 @@ describe('ProductPage', () => {
 
   it('handles product not found', async () => {
     mockGetProduct.mockResolvedValue(null)
+    const params = { slug: 'test-product' }
 
-    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    renderWithProviders(<ProductPage params={params} />)
 
     await waitFor(() => {
       expect(require('next/navigation').notFound).toHaveBeenCalled()
@@ -187,8 +189,9 @@ describe('ProductPage', () => {
 
   it('handles error state', async () => {
     mockGetProduct.mockRejectedValue(new Error('Failed to fetch product'))
+    const params = { slug: 'test-product' }
 
-    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    renderWithProviders(<ProductPage params={params} />)
 
     await waitFor(() => {
       expect(screen.getByText('Error loading product')).toBeInTheDocument()
@@ -197,10 +200,11 @@ describe('ProductPage', () => {
   })
 
   it('handles add to cart', async () => {
-    renderWithProviders(<ProductPage params={{ slug: 'test-product' }} />)
+    const params = { slug: 'test-product' }
+    renderWithProviders(<ProductPage params={params} />)
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /add to cart/i })).toBeInTheDocument()
+      expect(screen.getByText('Test Product')).toBeInTheDocument()
     })
 
     const addToCartButton = screen.getByRole('button', { name: /add to cart/i })
