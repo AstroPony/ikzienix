@@ -16,9 +16,10 @@ async function handler(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     return NextResponse.json(userDoc.data());
-  } catch (error: any) {
-    console.error('Error fetching user profile:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch profile' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch profile';
+    console.error('Error fetching user profile:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

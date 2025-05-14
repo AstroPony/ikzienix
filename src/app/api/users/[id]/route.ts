@@ -38,12 +38,13 @@ export async function GET(
     }
 
     return NextResponse.json(user)
-  } catch (error: any) {
-    console.error('Error fetching user:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch user';
+    console.error('Error fetching user:', message);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch user' },
+      { error: message },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -113,12 +114,13 @@ export async function PUT(
     }
 
     return NextResponse.json(user)
-  } catch (error: any) {
-    console.error('Error updating user:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to update user';
+    console.error('Error updating user:', message);
     return NextResponse.json(
-      { error: error.message || 'Failed to update user' },
+      { error: message },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -167,11 +169,12 @@ export async function DELETE(
     await db.collection('users').doc(params.id).delete()
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
-    console.error('Error deleting user:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to delete user';
+    console.error('Error deleting user:', message);
     return NextResponse.json(
-      { error: error.message || 'Failed to delete user' },
+      { error: message },
       { status: 500 }
-    )
+    );
   }
 } 

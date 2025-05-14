@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import ReviewStars from './ReviewStars'
 import Image from 'next/image'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 interface ReviewFormProps {
   productId: string
@@ -14,30 +17,35 @@ interface ReviewFormProps {
   }) => void
 }
 
+const reviewSchema = z.object({
+  rating: z.number().min(1, 'Rating is required'),
+  title: z.string().min(3, 'Title must be at least 3 characters').max(100),
+  comment: z.string().min(10, 'Review must be at least 10 characters').max(1000),
+  images: z.array(z.string()).optional(),
+})
+
+type ReviewFormData = z.infer<typeof reviewSchema>
+
 export default function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
-  const [rating, setRating] = useState(0)
-  const [title, setTitle] = useState('')
-  const [comment, setComment] = useState('')
-  const [images, setImages] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<ReviewFormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: { rating: 0, title: '', comment: '', images: [] },
+  })
+  const images = watch('images') || []
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (rating === 0) return
-
+  const onFormSubmit = async (data: ReviewFormData) => {
     setIsSubmitting(true)
     try {
-      await onSubmit({
-        rating,
-        title,
-        comment,
-        images: images.length > 0 ? images : undefined
-      })
-      // Reset form
-      setRating(0)
-      setTitle('')
-      setComment('')
-      setImages([])
+      await onSubmit(data)
+      reset()
     } catch (error) {
       console.error('Failed to submit review:', error)
     } finally {
@@ -48,25 +56,23 @@ export default function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
-
-    // Here you would typically upload the images to your storage service
-    // and get back URLs. For now, we'll just create object URLs
     const newImages = Array.from(files).map(file => URL.createObjectURL(file))
-    setImages(prev => [...prev, ...newImages])
+    setValue('images', [...images, ...newImages])
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Rating
         </label>
         <ReviewStars
-          rating={rating}
+          rating={watch('rating')}
           size="lg"
           interactive
-          onChange={setRating}
+          onChange={val => setValue('rating', val, { shouldValidate: true })}
         />
+        {errors.rating && <div className="text-danger small">{errors.rating.message}</div>}
       </div>
 
       <div>
@@ -76,13 +82,10 @@ export default function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
         <input
           type="text"
           id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-          required
-          minLength={3}
-          maxLength={100}
+          {...register('title')}
+          className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${errors.title ? 'is-invalid' : ''}`}
         />
+        {errors.title && <div className="text-danger small">{errors.title.message}</div>}
       </div>
 
       <div>
@@ -91,14 +94,11 @@ export default function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
         </label>
         <textarea
           id="comment"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          {...register('comment')}
+          className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${errors.comment ? 'is-invalid' : ''}`}
           rows={4}
-          required
-          minLength={10}
-          maxLength={1000}
         />
+        {errors.comment && <div className="text-danger small">{errors.comment.message}</div>}
       </div>
 
       <div>
@@ -116,7 +116,7 @@ export default function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
               />
               <button
                 type="button"
-                onClick={() => setImages(prev => prev.filter((_, i) => i !== index))}
+                onClick={() => setValue('images', images.filter((_, i) => i !== index))}
                 className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
               >
                 <svg
@@ -164,7 +164,7 @@ export default function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
 
       <button
         type="submit"
-        disabled={isSubmitting || rating === 0}
+        disabled={isSubmitting || watch('rating') === 0}
         className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? 'Submitting...' : 'Submit Review'}

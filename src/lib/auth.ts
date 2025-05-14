@@ -102,9 +102,10 @@ export const authOptions: NextAuthOptions = {
             })
           }
           return true
-        } catch (error) {
-          console.error('Error in signIn callback:', error)
-          return false
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          console.error('Error in signIn callback:', message);
+          return false;
         }
       }
       return true

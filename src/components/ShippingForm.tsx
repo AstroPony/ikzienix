@@ -5,10 +5,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+// ─── Schema & Types ─────────────────────────────────────────────
 const shippingSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  phone: z.string().regex(/^\+?[\d\s-]{10,}$/, 'Please enter a valid phone number'),
+  phone: z.string().regex(/^[\d\s-]{10,}$/, 'Please enter a valid phone number'),
   line1: z.string().min(5, 'Address must be at least 5 characters'),
   line2: z.string().optional(),
   city: z.string().min(2, 'City must be at least 2 characters'),
@@ -25,6 +26,7 @@ interface ShippingFormProps {
   initialValues?: Partial<ShippingFormData>;
 }
 
+// ─── Component ─────────────────────────────────────────────────
 export default function ShippingForm({ onSubmit, initialValues }: ShippingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export default function ShippingForm({ onSubmit, initialValues }: ShippingFormPr
     }
   });
 
+  // ─── Event Handlers ──────────────────────────────────────────
   const onFormSubmit = async (data: ShippingFormData) => {
     setIsSubmitting(true);
     setError(null);
@@ -62,6 +65,7 @@ export default function ShippingForm({ onSubmit, initialValues }: ShippingFormPr
     }
   };
 
+  // ─── Render ─────────────────────────────────────────────────
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="card p-4">
       {error && (

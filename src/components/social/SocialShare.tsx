@@ -57,42 +57,42 @@ export default function SocialShare({
       <button
         onClick={() => handleShare('facebook')}
         className="btn btn-outline-primary"
-        title="Share on Facebook"
+        title="Flex this on Facebook 🕶️"
       >
         <i className="bi bi-facebook" />
       </button>
       <button
         onClick={() => handleShare('twitter')}
         className="btn btn-outline-info"
-        title="Share on Twitter"
+        title="Tweet this drip 💧"
       >
         <i className="bi bi-twitter" />
       </button>
       <button
         onClick={() => handleShare('pinterest')}
         className="btn btn-outline-danger"
-        title="Share on Pinterest"
+        title="Pin this steez 📌"
       >
         <i className="bi bi-pinterest" />
       </button>
       <button
         onClick={() => handleShare('whatsapp')}
         className="btn btn-outline-success"
-        title="Share on WhatsApp"
+        title="Drop in the group chat 😂"
       >
         <i className="bi bi-whatsapp" />
       </button>
       <button
         onClick={() => handleShare('email')}
         className="btn btn-outline-secondary"
-        title="Share via Email"
+        title="Send to your grandma 💌"
       >
         <i className="bi bi-envelope" />
       </button>
       <button
         onClick={handleCopyLink}
         className="btn btn-outline-dark"
-        title="Copy Link"
+        title={isCopied ? "Link copied! 🚀" : "Copy link to flex"}
       >
         {isCopied ? (
           <i className="bi bi-check2" />

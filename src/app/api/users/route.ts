@@ -21,12 +21,13 @@ export async function GET(req: NextRequest) {
     }))
 
     return NextResponse.json(users)
-  } catch (error: any) {
-    console.error('Error fetching users:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch users';
+    console.error('Error fetching users:', message);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch users' },
+      { error: message },
       { status: 500 }
-    )
+    );
   }
 }
 

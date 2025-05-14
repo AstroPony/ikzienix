@@ -3,16 +3,32 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Confirm password is required'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'New passwords do not match.',
+  path: ['confirmPassword'],
+})
+type PasswordFormData = z.infer<typeof passwordSchema>
 
 export default function ChangePasswordPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema),
+  });
 
   if (status === "loading") return null;
   if (status === "unauthenticated") {
@@ -20,38 +36,23 @@ export default function ChangePasswordPage() {
     return null;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const onFormSubmit = async (data: PasswordFormData) => {
     setSuccess(false);
-    if (newPassword.length < 6) {
-      setError("New password must be at least 6 characters.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
-      return;
-    }
-    setLoading(true);
     try {
       const res = await fetch("/api/account/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentPassword,
-          newPassword,
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to change password");
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to change password");
       setSuccess(true);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      reset();
+    } catch (err) {
+      // error handled by react-hook-form
     }
   };
 
@@ -62,45 +63,40 @@ export default function ChangePasswordPage() {
           <div className="card shadow">
             <div className="card-body">
               <h1 className="display-5 mb-4">Change Password</h1>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit(onFormSubmit)}>
                 <div className="mb-3">
                   <label htmlFor="currentPassword" className="form-label">Current Password</label>
                   <input
                     type="password"
-                    className="form-control"
+                    className={`form-control ${errors.currentPassword ? 'is-invalid' : ''}`}
                     id="currentPassword"
-                    value={currentPassword}
-                    onChange={e => setCurrentPassword(e.target.value)}
-                    required
+                    {...register('currentPassword')}
                   />
+                  {errors.currentPassword && <div className="invalid-feedback">{errors.currentPassword.message}</div>}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="newPassword" className="form-label">New Password</label>
                   <input
                     type="password"
-                    className="form-control"
+                    className={`form-control ${errors.newPassword ? 'is-invalid' : ''}`}
                     id="newPassword"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
+                    {...register('newPassword')}
                   />
+                  {errors.newPassword && <div className="invalid-feedback">{errors.newPassword.message}</div>}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
                   <input
                     type="password"
-                    className="form-control"
+                    className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
                     id="confirmPassword"
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    required
+                    {...register('confirmPassword')}
                   />
+                  {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword.message}</div>}
                 </div>
-                {error && <div className="alert alert-danger">{error}</div>}
                 {success && <div className="alert alert-success">Password changed successfully!</div>}
-                <button type="submit" className="btn btn-primary btn-lg w-100" disabled={loading}>
-                  {loading ? "Saving..." : "Change Password"}
+                <button type="submit" className="btn btn-primary btn-lg w-100">
+                  Change Password
                 </button>
               </form>
             </div>

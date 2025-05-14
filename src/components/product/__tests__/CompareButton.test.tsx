@@ -62,7 +62,7 @@ const renderWithProvider = (component: React.ReactNode) => {
 describe('CompareButton', () => {
   it('renders the CompareButton correctly', () => {
     renderWithProvider(<CompareButton product={mockProduct} />)
-    const button = screen.getByTitle('Add to comparison')
+    const button = screen.getByTitle('Start a flex-off 🔥')
     expect(button).toBeInTheDocument()
   })
 }) 

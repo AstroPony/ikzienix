@@ -55,7 +55,7 @@ export default function ComparePage() {
                     <button
                       onClick={() => removeFromComparison(product.id)}
                       className="btn btn-sm btn-outline-danger position-absolute top-0 end-0"
-                      title="Remove from comparison"
+                      title="Remove from the flex-off 😎"
                     >
                       <i className="bi bi-x" />
                     </button>

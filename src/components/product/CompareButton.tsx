@@ -29,7 +29,7 @@ export default function CompareButton({ product, className = '' }: CompareButton
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`btn btn-sm ${isComparing ? 'btn-primary' : 'btn-outline-primary'} ${className}`}
-      title={isComparing ? 'Remove from comparison' : 'Add to comparison'}
+      title={isComparing ? 'Stop the flex-off 😎' : 'Start a flex-off 🔥'}
     >
       <i className={`bi ${isComparing ? 'bi-check-lg' : 'bi-arrow-left-right'} me-1`} />
       {isHovered || isComparing ? (isComparing ? 'Remove' : 'Compare') : ''}

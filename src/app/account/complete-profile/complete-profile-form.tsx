@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/lib/i18n/context'
 import { getAuth } from 'firebase/auth'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 interface Address {
   line1: string;
@@ -41,101 +44,54 @@ interface ProfileFormProps {
   submitLabel?: string;
 }
 
+const addressSchema = z.object({
+  line1: z.string().min(2, 'Address line 1 is required'),
+  line2: z.string().optional(),
+  city: z.string().min(2, 'City is required'),
+  state: z.string().optional(),
+  postalCode: z.string().regex(/^[1-9][0-9]{3}\s?[A-Z]{2}$/i, 'Invalid Dutch postal code'),
+  country: z.string().min(2, 'Country is required'),
+})
+const profileSchema = z.object({
+  phone: z.string().regex(/^(06\d{8}|0\d{8})$/, 'Invalid Dutch phone number'),
+  shippingAddress: addressSchema,
+  billingAddress: addressSchema,
+  sameAsShipping: z.boolean(),
+})
+type ProfileFormData = z.infer<typeof profileSchema>
+
 export default function ProfileForm({ userId, initialValues, title = 'Complete Your Profile', submitLabel }: ProfileFormProps) {
   const router = useRouter()
   const { t } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [formData, setFormData] = useState<FormData>(
-    initialValues || {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: initialValues || {
       phone: '',
-      shippingAddress: {
-        line1: '',
-        line2: '',
-        city: '',
-        postalCode: '',
-        country: 'NL',
-      },
-      billingAddress: {
-        line1: '',
-        line2: '',
-        city: '',
-        postalCode: '',
-        country: 'NL',
-      },
+      shippingAddress: { line1: '', line2: '', city: '', state: '', postalCode: '', country: 'NL' },
+      billingAddress: { line1: '', line2: '', city: '', state: '', postalCode: '', country: 'NL' },
       sameAsShipping: true,
-    }
-  )
+    },
+  })
+  const sameAsShipping = watch('sameAsShipping')
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!isValidDutchPhoneNumber(formData.phone)) {
-      newErrors.phone = t('address.invalidPhone')
-    }
-
-    if (!isValidDutchPostalCode(formData.shippingAddress.postalCode)) {
-      newErrors['shipping.postalCode'] = t('address.invalidPostalCode')
-    }
-
-    if (!formData.sameAsShipping && !isValidDutchPostalCode(formData.billingAddress.postalCode)) {
-      newErrors['billing.postalCode'] = t('address.invalidPostalCode')
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    if (name.startsWith('shipping.') || name.startsWith('billing.')) {
-      const [address, field] = name.split('.')
-      const addressKey = address === 'shipping' ? 'shippingAddress' : 'billingAddress'
-      setFormData(prev => ({
-        ...prev,
-        [addressKey]: {
-          ...prev[addressKey],
-          [field]: value
-        }
-      }))
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }))
-    }
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
-    }
-  }
-
-  const handleSameAsShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      sameAsShipping: checked,
-      billingAddress: checked ? prev.shippingAddress : prev.billingAddress
-    }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
-
+  const onFormSubmit = async (data: ProfileFormData) => {
     setIsLoading(true)
-
-    // Debug logs
-    console.log('userId prop:', userId)
     try {
-      // Submit to API route
       const response = await fetch('/api/account/update-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone: formData.phone,
-          shippingAddress: formData.shippingAddress,
-          billingAddress: formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress,
+          phone: data.phone,
+          shippingAddress: data.shippingAddress,
+          billingAddress: data.sameAsShipping ? data.shippingAddress : data.billingAddress,
           profileCompleted: true
         })
       })
@@ -152,7 +108,7 @@ export default function ProfileForm({ userId, initialValues, title = 'Complete Y
   }
 
   return (
-    <form onSubmit={handleSubmit} className="needs-validation" noValidate>
+    <form onSubmit={handleSubmit(onFormSubmit)} className="needs-validation" noValidate>
       {/* Phone Number */}
       <div className="mb-4">
         <label htmlFor="phone" className="form-label">{t('account.phone')}</label>
@@ -160,13 +116,10 @@ export default function ProfileForm({ userId, initialValues, title = 'Complete Y
           type="tel"
           className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
           id="phone"
-          name="phone"
-          value={formData.phone}
-          onChange={handleInputChange}
+          {...register('phone')}
           placeholder="06 12345678"
-          required
         />
-        {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
+        {errors.phone && <div className="invalid-feedback">{errors.phone.message}</div>}
       </div>
 
       {/* Shipping Address */}
@@ -176,13 +129,11 @@ export default function ProfileForm({ userId, initialValues, title = 'Complete Y
           <label htmlFor="shipping.line1" className="form-label">{t('address.line1')}</label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.shippingAddress?.line1 ? 'is-invalid' : ''}`}
             id="shipping.line1"
-            name="shipping.line1"
-            value={formData.shippingAddress.line1}
-            onChange={handleInputChange}
-            required
+            {...register('shippingAddress.line1')}
           />
+          {errors.shippingAddress?.line1 && <div className="invalid-feedback">{errors.shippingAddress.line1.message}</div>}
         </div>
         <div className="col-12">
           <label htmlFor="shipping.line2" className="form-label">{t('address.line2')}</label>
@@ -190,74 +141,77 @@ export default function ProfileForm({ userId, initialValues, title = 'Complete Y
             type="text"
             className="form-control"
             id="shipping.line2"
-            name="shipping.line2"
-            value={formData.shippingAddress.line2}
-            onChange={handleInputChange}
+            {...register('shippingAddress.line2')}
           />
         </div>
         <div className="col-md-6">
           <label htmlFor="shipping.city" className="form-label">{t('address.city')}</label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.shippingAddress?.city ? 'is-invalid' : ''}`}
             id="shipping.city"
-            name="shipping.city"
-            value={formData.shippingAddress.city}
-            onChange={handleInputChange}
-            required
+            {...register('shippingAddress.city')}
+          />
+          {errors.shippingAddress?.city && <div className="invalid-feedback">{errors.shippingAddress.city.message}</div>}
+        </div>
+        <div className="col-md-6">
+          <label htmlFor="shipping.state" className="form-label">{t('address.state')}</label>
+          <input
+            type="text"
+            className="form-control"
+            id="shipping.state"
+            {...register('shippingAddress.state')}
           />
         </div>
         <div className="col-md-6">
           <label htmlFor="shipping.postalCode" className="form-label">{t('address.postalCode')}</label>
           <input
             type="text"
-            className={`form-control ${errors['shipping.postalCode'] ? 'is-invalid' : ''}`}
+            className={`form-control ${errors.shippingAddress?.postalCode ? 'is-invalid' : ''}`}
             id="shipping.postalCode"
-            name="shipping.postalCode"
-            value={formData.shippingAddress.postalCode}
-            onChange={handleInputChange}
-            placeholder="1234 AB"
-            required
+            {...register('shippingAddress.postalCode')}
           />
-          {errors['shipping.postalCode'] && (
-            <div className="invalid-feedback">{errors['shipping.postalCode']}</div>
-          )}
+          {errors.shippingAddress?.postalCode && <div className="invalid-feedback">{errors.shippingAddress.postalCode.message}</div>}
+        </div>
+        <div className="col-md-6">
+          <label htmlFor="shipping.country" className="form-label">{t('address.country')}</label>
+          <input
+            type="text"
+            className={`form-control ${errors.shippingAddress?.country ? 'is-invalid' : ''}`}
+            id="shipping.country"
+            {...register('shippingAddress.country')}
+          />
+          {errors.shippingAddress?.country && <div className="invalid-feedback">{errors.shippingAddress.country.message}</div>}
         </div>
       </div>
 
       {/* Same as Shipping Checkbox */}
-      <div className="mb-4">
-        <div className="form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            id="sameAsShipping"
-            name="sameAsShipping"
-            checked={formData.sameAsShipping}
-            onChange={handleSameAsShippingChange}
-          />
-          <label className="form-check-label" htmlFor="sameAsShipping">
-            {t('address.sameAsShipping')}
-          </label>
-        </div>
+      <div className="form-check mt-3 mb-4">
+        <input
+          className="form-check-input"
+          type="checkbox"
+          id="sameAsShipping"
+          {...register('sameAsShipping')}
+        />
+        <label className="form-check-label" htmlFor="sameAsShipping">
+          {t('account.sameAsShipping')}
+        </label>
       </div>
 
       {/* Billing Address */}
-      {!formData.sameAsShipping && (
-        <div className="mb-4">
+      {!sameAsShipping && (
+        <>
           <h3 className="h5 mb-3">{t('account.billingAddress')}</h3>
           <div className="row g-3">
             <div className="col-12">
               <label htmlFor="billing.line1" className="form-label">{t('address.line1')}</label>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${errors.billingAddress?.line1 ? 'is-invalid' : ''}`}
                 id="billing.line1"
-                name="billing.line1"
-                value={formData.billingAddress.line1}
-                onChange={handleInputChange}
-                required
+                {...register('billingAddress.line1')}
               />
+              {errors.billingAddress?.line1 && <div className="invalid-feedback">{errors.billingAddress.line1.message}</div>}
             </div>
             <div className="col-12">
               <label htmlFor="billing.line2" className="form-label">{t('address.line2')}</label>
@@ -265,52 +219,55 @@ export default function ProfileForm({ userId, initialValues, title = 'Complete Y
                 type="text"
                 className="form-control"
                 id="billing.line2"
-                name="billing.line2"
-                value={formData.billingAddress.line2}
-                onChange={handleInputChange}
+                {...register('billingAddress.line2')}
               />
             </div>
             <div className="col-md-6">
               <label htmlFor="billing.city" className="form-label">{t('address.city')}</label>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${errors.billingAddress?.city ? 'is-invalid' : ''}`}
                 id="billing.city"
-                name="billing.city"
-                value={formData.billingAddress.city}
-                onChange={handleInputChange}
-                required
+                {...register('billingAddress.city')}
+              />
+              {errors.billingAddress?.city && <div className="invalid-feedback">{errors.billingAddress.city.message}</div>}
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="billing.state" className="form-label">{t('address.state')}</label>
+              <input
+                type="text"
+                className="form-control"
+                id="billing.state"
+                {...register('billingAddress.state')}
               />
             </div>
             <div className="col-md-6">
               <label htmlFor="billing.postalCode" className="form-label">{t('address.postalCode')}</label>
               <input
                 type="text"
-                className={`form-control ${errors['billing.postalCode'] ? 'is-invalid' : ''}`}
+                className={`form-control ${errors.billingAddress?.postalCode ? 'is-invalid' : ''}`}
                 id="billing.postalCode"
-                name="billing.postalCode"
-                value={formData.billingAddress.postalCode}
-                onChange={handleInputChange}
-                placeholder="1234 AB"
-                required
+                {...register('billingAddress.postalCode')}
               />
-              {errors['billing.postalCode'] && (
-                <div className="invalid-feedback">{errors['billing.postalCode']}</div>
-              )}
+              {errors.billingAddress?.postalCode && <div className="invalid-feedback">{errors.billingAddress.postalCode.message}</div>}
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="billing.country" className="form-label">{t('address.country')}</label>
+              <input
+                type="text"
+                className={`form-control ${errors.billingAddress?.country ? 'is-invalid' : ''}`}
+                id="billing.country"
+                {...register('billingAddress.country')}
+              />
+              {errors.billingAddress?.country && <div className="invalid-feedback">{errors.billingAddress.country.message}</div>}
             </div>
           </div>
-        </div>
+        </>
       )}
 
-      <div className="d-grid">
-        <button
-          type="submit"
-          className="btn btn-primary btn-lg w-100"
-          disabled={isLoading}
-        >
-          {isLoading ? t('common.saving') : (submitLabel || t('common.save'))}
-        </button>
-      </div>
+      <button type="submit" className="btn btn-primary mt-4" disabled={isLoading}>
+        {isLoading ? t('common.saving') : (submitLabel || t('common.save'))}
+      </button>
     </form>
   )
 } 

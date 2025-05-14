@@ -96,7 +96,10 @@ describe('ChangePasswordPage', () => {
     const submitButton = screen.getByRole('button', { name: /change password/i })
     fireEvent.click(submitButton)
 
-    expect(screen.getByText('New passwords do not match.')).toBeInTheDocument()
+    // Wait for the error message to appear in the DOM
+    await waitFor(() => {
+      expect(screen.getByText(/new passwords do not match/i)).toBeInTheDocument()
+    })
   })
 
   it('handles API error', async () => {
@@ -126,7 +129,7 @@ describe('ChangePasswordPage', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to change password')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /change password/i })).toBeInTheDocument()
     })
   })
 

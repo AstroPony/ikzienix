@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm run lint || {
+  echo "❌ Linting failed. Please fix lint errors before committing."
+  exit 1
+}
+
+npm test || {
+  echo "❌ Tests failed. Please fix test errors before committing."
+  exit 1
+}
+
+echo "✅ Lint and tests passed! Proceeding with commit..." 
