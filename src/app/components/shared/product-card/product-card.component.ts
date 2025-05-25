@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Product } from '../../../services/product.service';
+import { CartService } from '../../../services/cart.service';
 
 @Component({
   selector: 'app-product-card',
@@ -34,9 +35,17 @@ import { Product } from '../../../services/product.service';
         <p class="card-text text-muted mb-3 flex-grow-1 description">{{ product.description }}</p>
         <div class="d-flex justify-content-between align-items-center mt-auto">
           <span class="fs-4 text-cyber-yellow price">&euro;{{ product.price.toFixed(2) }}</span>
-          <button class="btn cta-future pulse" [disabled]="product.stock === 0">
+          <button class="btn cta-future pulse" [disabled]="product.stock === 0" (click)="addToCart($event)">
             <i class="bi bi-cart-plus me-2"></i>Add
           </button>
+        </div>
+        <div *ngIf="showToast" class="toast product-toast-top show align-items-center text-bg-success border-0 fade-in" role="alert">
+          <div class="d-flex">
+            <div class="toast-body">
+              Added to cart!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close" (click)="showToast = false"></button>
+          </div>
         </div>
       </div>
     </div>
@@ -118,8 +127,32 @@ import { Product } from '../../../services/product.service';
       .card-title { font-size: 1.1rem; }
       .description { font-size: 0.85rem; -webkit-line-clamp: 2; }
     }
+    .product-toast-top {
+      position: absolute;
+      top: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      min-width: 180px;
+      max-width: 90%;
+      pointer-events: auto;
+      box-shadow: 0 4px 24px 0 rgba(0,255,136,0.18);
+      border-radius: 1rem;
+      opacity: 0.98;
+    }
   `]
 })
 export class ProductCardComponent {
   @Input() product!: Product;
+  showToast = false;
+  constructor(private cartService: CartService) {}
+
+  addToCart(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+    if (this.product.stock === 0) return;
+    this.cartService.addToCart(this.product);
+    this.showToast = true;
+    setTimeout(() => (this.showToast = false), 1500);
+  }
 } 

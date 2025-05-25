@@ -195,7 +195,7 @@
 .newsletter-section {
   width: 100vw;
   min-height: 320px;
-  background: #222;
+  background: url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -204,6 +204,81 @@
   position: relative;
   overflow: hidden;
 }
+.newsletter-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 30, 0.65);
+  z-index: 1;
+}
+.newsletter-form {
+  position: relative;
+  z-index: 2;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  max-width: 420px;
+  width: 100%;
+  margin: 2rem auto;
+  text-align: center;
+}
+.newsletter-title {
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+.newsletter-desc {
+  font-size: 1.1rem;
+  color: #bbb;
+  margin-bottom: 1.5rem;
+}
+.newsletter-input {
+  border-radius: 2rem 0 0 2rem;
+  border: 1.5px solid #FFD400;
+  background: rgba(20,20,30,0.92);
+  color: #FFD400;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.2rem;
+  outline: none;
+  box-shadow: 0 0 8px #FFD40022;
+}
+.newsletter-input:focus {
+  border-color: #9F00FF;
+  box-shadow: 0 0 16px #9F00FF44;
+}
+.newsletter-btn {
+  border-radius: 0 2rem 2rem 0;
+  font-size: 1.1rem;
+  padding: 0.8rem 2rem;
+  font-family: 'Orbitron', Arial, sans-serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FFD400 60%, #9F00FF 100%);
+  color: #0A0A0A;
+  border: none;
+  box-shadow: 0 0 12px #FFD40055;
+  transition: background 0.2s, color 0.2s;
+}
+.newsletter-btn:hover, .newsletter-btn:focus {
+  background: #FFD400;
+  color: #0A0A0A;
+}
+@media (max-width: 600px) {
+  .newsletter-form {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+    max-width: 98vw;
+  }
+  .newsletter-title {
+    font-size: 1.2rem;
+  }
+  .newsletter-desc {
+    font-size: 0.95rem;
+  }
+}
+
+/* Make logo in navbar half height */
+.h-60 { height: 60px; }
+.h-30 { height: 30px; }
 
 .banner-center-content {
   position: absolute;
@@ -242,6 +317,8 @@
   box-shadow: 0 0 24px #FFD40055;
   margin-top: 0.5rem;
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  pointer-events: auto;
+  z-index: 30;
 }
 .banner-cta:hover, .banner-cta:focus {
   background: #FFD400;

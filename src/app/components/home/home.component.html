@@ -14,7 +14,7 @@
   <!-- Centered Slogan and CTA -->
   <div class="banner-center-content">
     <h1 class="banner-slogan">See the Future. <span class="text-electric-purple">Wear the Future.</span></h1>
-    <button class="cta-future banner-cta">get'em</button>
+    <a routerLink="/products" class="cta-future banner-cta">get'em</a>
   </div>
 
   <div class="gallery-arrows">
@@ -58,5 +58,15 @@
 
 <!-- Newsletter section will go here -->
 <section class="newsletter-section">
-  <!-- Content will be added in the next step -->
+  <form class="newsletter-form" (ngSubmit)="subscribe()" #newsletterForm="ngForm">
+    <h2 class="newsletter-title font-orbitron text-cyber-yellow mb-2">Stay in the Loop</h2>
+    <p class="newsletter-desc text-muted mb-3">Sign up for exclusive drops, futuristic deals, and more.</p>
+    <div class="input-group mb-3">
+      <input type="email" class="form-control newsletter-input" placeholder="Your email address" name="email" [(ngModel)]="newsletterEmail" required email>
+      <button class="btn cta-future newsletter-btn" type="submit">Subscribe</button>
+    </div>
+    <div *ngIf="newsletterSuccess" class="alert alert-success mt-2 mb-0 py-2 px-3 rounded-pill text-center fade-in">
+      Thanks for subscribing!
+    </div>
+  </form>
 </section>

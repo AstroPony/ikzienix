@@ -10,7 +10,7 @@ import { CartService } from './services/cart.service';
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-electric-purple z-1100">
       <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2 font-orbitron text-cyber-yellow" routerLink="/">
-          <img src="assets/logo-yellow.svg" alt="Ikzienix Logo" class="h-60 img-contain">
+          <img src="assets/logo-yellow.svg" alt="Ikzienix Logo" height="30" class="img-contain">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
