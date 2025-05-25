@@ -1,0 +1,228 @@
+@use "../../../../_variables.scss" as variables;
+
+.glassy-card {
+  background: linear-gradient(135deg, rgba(20,20,30,0.95) 80%, rgba(159,0,255,0.12) 100%);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  transition: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card {
+  transition: none;
+  &:hover, &:focus-within {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.cta-future {
+  transition: none;
+  &:hover, &:focus {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(120deg, rgba(10, 10, 10, 0.9) 80%, rgba(159, 0, 255, 0.2) 100%);
+  z-index: 1;
+}
+
+.hero-section .row {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-section h1 {
+  text-shadow: 0 2px 24px var(--electric-purple)99;
+}
+
+.hero-section .btn {
+  transition: none;
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// Modern Filter Bar Styles
+.filter-bar {
+  background: transparent;
+  border-radius: 2rem;
+  box-shadow: none;
+  border: none;
+  align-items: center;
+  position: relative;
+  min-height: 64px;
+  border-bottom: 1.5px solid rgba(159, 0, 255, 0.18);
+  margin-bottom: 1.5rem;
+}
+.filter-icon {
+  font-size: 1.5rem;
+  color: var(--electric-purple);
+  position: relative;
+  top: 1px;
+}
+.filter-input, .filter-select {
+  background: rgba(20,20,30,0.92);
+  color: var(--cyber-yellow);
+  border: 1.5px solid rgba(159, 0, 255, 0.18);
+  border-radius: 2rem;
+  box-shadow: 0 0 8px #9F00FF22;
+  min-height: 48px;
+  font-size: 1.1em;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.filter-input:focus, .filter-select:focus {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 16px #00FF8822;
+  outline: none;
+}
+.filter-divider {
+  height: 2.5rem;
+  background: linear-gradient(180deg, #9F00FF 0%, #FFD400 100%);
+  width: 3px;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 0.5rem;
+    border-radius: 1.2rem;
+  }
+  .filter-divider {
+    display: none;
+  }
+}
+// Remove old search-filter-section styles
+.search-filter-section { display: none !important; }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.pagination {
+  justify-content: center;
+}
+
+.page-link {
+  background: rgba(159, 0, 255, 0.1);
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  color: var(--cyber-yellow);
+  margin: 0 0.25rem;
+  border-radius: 0.5rem;
+  transition: none;
+}
+
+.page-link:hover {
+  background: rgba(159, 0, 255, 0.2);
+  border-color: rgba(159, 0, 255, 0.3);
+  color: var(--cyber-yellow);
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #9F00FF 0%, #FFD400 100%);
+  border-color: transparent;
+  color: black;
+}
+
+.page-item.disabled .page-link {
+  background: rgba(159, 0, 255, 0.05);
+  border-color: rgba(159, 0, 255, 0.1);
+  color: #666;
+}
+
+.angled-divider {
+  margin-top: -2px;
+  margin-bottom: -1.5rem;
+  width: 100%;
+  z-index: 2;
+  position: relative;
+  line-height: 0;
+}
+@media (max-width: 768px) {
+  .angled-divider {
+    height: 40px;
+    margin-bottom: -0.75rem;
+  }
+}
+
+.badge-electric-purple, .badge-neon-green {
+  position: relative;
+  animation: badgeGlow 1.8s infinite alternate;
+}
+@keyframes badgeGlow {
+  0% { box-shadow: 0 0 8px 2px var(--electric-purple); }
+  100% { box-shadow: 0 0 24px 6px var(--electric-purple), 0 0 16px 4px var(--neon-green); }
+}
+
+.product-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.btn-outline-neon-green {
+  color: variables.$color-neon-green;
+  border: 2px solid #{variables.$color-neon-green};
+  background: transparent;
+  transition: box-shadow 0.2s, color 0.2s, border-color 0.2s;
+  &:hover, &:focus {
+    color: #0A0A0A;
+    background: #{variables.$color-neon-green};
+    box-shadow: 0 0 12px #{variables.$color-neon-green};
+    border-color: #{variables.$color-neon-green};
+  }
+}
+
+.btn-outline-electric-purple {
+  color: variables.$color-electric-purple;
+  border: 2px solid #{variables.$color-electric-purple};
+  background: transparent;
+  transition: box-shadow 0.2s, color 0.2s, border-color 0.2s;
+  &:hover, &:focus {
+    color: #fff;
+    background: #{variables.$color-electric-purple};
+    box-shadow: 0 0 12px #{variables.$color-electric-purple};
+    border-color: #{variables.$color-electric-purple};
+  }
+}
+
+* {
+  &:hover, &:focus {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.filter-input::placeholder {
+  color: #FFD400;
+  opacity: 1;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}

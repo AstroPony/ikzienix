@@ -1,0 +1,44 @@
+<div class="container-fluid px-0 bg-midnight-black bg-gradient-purple">
+  <section class="container py-5 mb-4 position-relative hero-section">
+    <div class="row align-items-center">
+      <div class="col-12 col-md-7 mb-4 mb-md-0">
+        <h1 class="display-4 font-orbitron text-cyber-yellow headline mb-3 text-glow">Futuristic Eyewear for the Bold</h1>
+        <h2 class="h5 font-space-grotesk text-electric-purple subheading mb-3">Shop the latest drops, limited editions, and sci-fi inspired styles.</h2>
+        <p class="body-text text-muted mb-4">Step into tomorrow with our curated collection of statement glasses and accessories. Designed for those who lead, not follow.</p>
+        <a routerLink="/cart" class="btn cta-future px-4 py-2">Go to Cart</a>
+      </div>
+      <div class="col-12 col-md-5 text-center">
+        <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=500&q=80" alt="Futuristic eyewear" class="img-fluid rounded-4 shadow-electric-purple img-glow">
+      </div>
+    </div>
+  </section>
+  <!-- Angled divider -->
+  <div class="angled-divider">
+    <svg viewBox="0 0 1920 80" width="100%" height="80" preserveAspectRatio="none" class="d-block">
+      <polygon points="0,80 1920,0 1920,80" fill="#0A0A0A"/>
+      <polygon points="0,80 0,0 1920,0" fill="#9F00FF22"/>
+    </svg>
+  </div>
+  <div class="container py-4">
+    <!-- Filter Bar -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="filter-bar d-flex flex-row align-items-center gap-3 position-relative py-3 px-2 px-md-4">
+          <i class="bi bi-funnel-fill text-electric-purple fs-15 me-3 filter-icon" aria-label="Filter"></i>
+          <input type="text" class="form-control filter-input rounded-pill px-4 me-2 flex-grow-1" placeholder="Search products..." [(ngModel)]="searchTerm" (input)="onSearch()" style="max-width: 320px;">
+          <span class="vr mx-2 d-none d-md-block filter-divider"></span>
+          <select class="form-select filter-select rounded-pill px-4 flex-grow-1" [(ngModel)]="selectedCategory" (change)="onCategoryChange()" style="max-width: 220px;">
+            <option value="">All Categories</option>
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- Product Grid -->
+    <div class="product-grid">
+      <app-product-card *ngFor="let product of paginatedProducts" [product]="product"></app-product-card>
+    </div>
+    <nav *ngIf="totalPages > 1" class="mt-3 pagination">
+    </nav>
+  </div>
+</div>

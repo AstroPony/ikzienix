@@ -1,0 +1,441 @@
+@use "bootstrap/scss/bootstrap" as *;
+@use "./_variables.scss" as variables;
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@700&family=Space+Grotesk:wght@500;700&display=swap');
+
+/* You can add global styles to this file, and also import other style files */
+
+// Color variables
+:root {
+  --midnight-black: #{variables.$color-midnight-black};
+  --cyber-yellow: #{variables.$color-cyber-yellow};
+  --electric-purple: #{variables.$color-electric-purple};
+  --neon-green: #{variables.$color-neon-green};
+  --muted-white: #{variables.$color-muted-white};
+  --transition-speed: #{variables.$transition-speed};
+  --border-radius: #{variables.$border-radius};
+  --background: #{variables.$color-midnight-black};
+  --foreground: #fff;
+}
+
+// Typography utility classes
+.font-orbitron {
+  font-family: 'Orbitron', Arial, sans-serif !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.font-space-grotesk {
+  font-family: 'Space Grotesk', Arial, sans-serif !important;
+  text-transform: uppercase;
+}
+.font-inter {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+// Headline styles
+h1, h2, h3, .headline {
+  font-family: 'Orbitron', Arial, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: variables.$font-size-h1;
+}
+// Subheading styles
+h4, h5, h6, .subheading {
+  font-family: 'Space Grotesk', Arial, sans-serif;
+  text-transform: uppercase;
+  font-size: variables.$font-size-h4;
+}
+// Body text
+body, .body-text, p, li, td, th, input, textarea, select, button {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: variables.$font-size-base;
+}
+
+// Utility classes
+.text-cyber-yellow {
+  color: variables.$color-cyber-yellow !important;
+}
+.bg-cyber-yellow {
+  background-color: variables.$color-cyber-yellow !important;
+}
+.text-electric-purple {
+  color: variables.$color-electric-purple !important;
+}
+.bg-electric-purple {
+  background-color: variables.$color-electric-purple !important;
+}
+.text-neon-green {
+  color: variables.$color-neon-green !important;
+}
+.bg-neon-green {
+  background-color: variables.$color-neon-green !important;
+}
+.bg-midnight-black {
+  background-color: variables.$color-midnight-black !important;
+}
+.text-midnight-black {
+  color: variables.$color-midnight-black !important;
+}
+.text-glow {
+  text-shadow: variables.$shadow-glow !important;
+}
+.img-glow {
+  filter: brightness(0.85) contrast(1.1) drop-shadow(variables.$shadow-glow);
+}
+.bg-gradient-purple {
+  background: linear-gradient(120deg, #{variables.$color-midnight-black} 80%, #{variables.$color-electric-purple}22 100%) !important;
+}
+.min-vh-100 {
+  min-height: 100vh !important;
+}
+.max-w-380 {
+  max-width: variables.$max-w-380 !important;
+}
+.cursor-pointer {
+  cursor: pointer !important;
+}
+.z-1100 {
+  z-index: variables.$z-1100 !important;
+}
+
+// Global styles
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+main {
+  flex: 1;
+  padding: variables.$container-padding-y 0;
+}
+
+// Navbar & Footer
+.navbar, .footer, footer, .bg-dark {
+  background-color: variables.$color-midnight-black !important;
+  color: variables.$color-cyber-yellow !important;
+  font-size: variables.$font-size-11 !important;
+}
+
+.card, .modal-content {
+  background: rgba(10,10,10,0.98);
+  color: variables.$color-muted-white;
+  border-radius: variables.$border-radius;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+
+// Accent borders
+.border-electric-purple {
+  border-color: rgba(159, 0, 255, 0.2) !important;
+}
+.border-neon-green {
+  border-color: variables.$color-neon-green !important;
+}
+
+// Accent shadows
+.shadow-electric-purple {
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08) !important;
+}
+.shadow-neon-green {
+  box-shadow: variables.$shadow-neon-green !important;
+}
+
+// Accent badges
+.badge-electric-purple {
+  background: variables.$color-electric-purple;
+  color: #fff;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+.badge-neon-green {
+  background: variables.$color-neon-green;
+  color: variables.$color-midnight-black;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn variables.$transition-speed ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn variables.$transition-speed ease-out;
+}
+
+// Form styles
+.form-control, .form-select {
+  transition: border-color variables.$transition-speed ease-in-out,
+              box-shadow variables.$transition-speed ease-in-out;
+  &:focus {
+    border-color: variables.$color-cyber-yellow;
+    box-shadow: 0 0 0 0.2rem rgba(255, 211, 0, 0.25);
+  }
+}
+
+// Button styles
+.btn, a {
+  transition: none;
+  &:hover, &:focus {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// Card styles
+.card {
+  transition: none;
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// Table styles
+.table {
+  th {
+    position: sticky;
+    top: 0;
+    z-index: variables.$z-1;
+    background-color: #f8f9fa;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: variables.$font-size-sm;
+  }
+  .btn-group {
+    .btn {
+      padding: variables.$gap-1 variables.$gap-2;
+      font-size: variables.$font-size-075;
+    }
+  }
+  .card {
+    margin-bottom: variables.$gap-3;
+  }
+  .container {
+    padding-left: variables.$container-padding-x;
+    padding-right: variables.$container-padding-x;
+  }
+}
+
+// Print styles
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .table {
+    th, td {
+      border-color: #dee2e6 !important;
+    }
+  }
+}
+
+// Card and glassy backgrounds adapt
+.glassy-card {
+  background: rgba(20, 20, 30, 0.92);
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+  border-radius: #{variables.$border-radius-lg};
+  backdrop-filter: blur(8px) saturate(1.2);
+  transition: none;
+}
+
+// Buttons and badges
+.cta-future {
+  background: linear-gradient(90deg, variables.$color-cyber-yellow 60%, variables.$color-electric-purple 100%);
+  color: variables.$color-midnight-black;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+  transition: none;
+}
+.cta-future:hover, .cta-future:focus {
+  transform: none;
+  box-shadow: none;
+}
+
+.badge-electric-purple {
+  background: variables.$color-electric-purple;
+  color: #fff;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+.badge-neon-green {
+  background: variables.$color-neon-green;
+  color: variables.$color-midnight-black;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+
+// Border utility
+.border-electric-purple {
+  border-color: rgba(159, 0, 255, 0.2) !important;
+}
+
+// Toast fade-in
+.fade-in {
+  animation: fadeIn 0.5s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+.navbar {
+  font-size: variables.$font-size-11;
+  padding-top: variables.$gap-4;
+  padding-bottom: variables.$gap-4;
+}
+.navbar .navbar-brand {
+  font-size: variables.$font-size-xl;
+  padding-right: variables.$gap-4;
+}
+.navbar .nav-link {
+  font-size: variables.$font-size-11;
+  padding: variables.$gap-2 variables.$gap-3;
+}
+.footer, footer {
+  font-size: variables.$font-size-11;
+  padding-top: variables.$container-padding-y;
+  padding-bottom: variables.$container-padding-y;
+}
+.footer .font-space-grotesk, footer .font-space-grotesk {
+  font-size: variables.$font-size-11;
+}
+@media (max-width: 768px) {
+  .navbar {
+    font-size: variables.$font-size-md;
+    padding-top: variables.$gap-2;
+    padding-bottom: variables.$gap-2;
+  }
+  .navbar .navbar-brand {
+    font-size: variables.$font-size-lg;
+    padding-right: variables.$gap-2;
+  }
+  .navbar .nav-link {
+    font-size: variables.$font-size-md;
+    padding: variables.$gap-1 variables.$gap-2;
+  }
+  .footer, footer {
+    font-size: variables.$font-size-md;
+    padding-top: variables.$gap-2;
+    padding-bottom: variables.$gap-2;
+  }
+  .footer .font-space-grotesk, footer .font-space-grotesk {
+    font-size: variables.$font-size-md;
+  }
+}
+
+// Image utilities
+.img-cover {
+  object-fit: cover !important;
+}
+.img-contain {
+  object-fit: contain !important;
+}
+.img-thumbnail-glow {
+  border-radius: variables.$border-radius-sm;
+  transition: transform variables.$transition-speed;
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// Text utilities
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Spacing utilities
+.gap-1 { gap: variables.$gap-1 !important; }
+.gap-2 { gap: variables.$gap-2 !important; }
+.gap-3 { gap: variables.$gap-3 !important; }
+.gap-4 { gap: variables.$gap-4 !important; }
+
+// Z-index utilities
+.z-1 { z-index: variables.$z-1 !important; }
+.z-2 { z-index: variables.$z-2 !important; }
+.z-3 { z-index: variables.$z-3 !important; }
+
+// Height utilities
+.h-220 { height: variables.$h-220 !important; }
+.h-320 { height: variables.$h-320 !important; }
+.min-h-48 { min-height: variables.$min-h-48 !important; }
+
+// Font size utilities
+.fs-075 { font-size: variables.$font-size-075 !important; }
+.fs-085 { font-size: variables.$font-size-085 !important; }
+.fs-11 { font-size: variables.$font-size-11 !important; }
+.fs-15 { font-size: variables.$font-size-15 !important; }
+.fs-165 { font-size: variables.$font-size-165 !important; }
+// Card title
+.card-title, .card-title a {
+  font-size: variables.$font-size-165;
+}
+// Card text
+.card-text {
+  font-size: variables.$font-size-11;
+}
+// Footer, navbar, and other elements
+.navbar, .footer, footer, .bg-dark {
+  font-size: variables.$font-size-11 !important;
+}
+.footer .font-space-grotesk, footer .font-space-grotesk {
+  font-size: variables.$font-size-11;
+}
+// Responsive adjustments
+@media (max-width: 768px) {
+  .navbar {
+    font-size: variables.$font-size-md;
+  }
+  .navbar .navbar-brand {
+    font-size: variables.$font-size-lg;
+  }
+  .navbar .nav-link {
+    font-size: variables.$font-size-md;
+  }
+  .footer, footer {
+    font-size: variables.$font-size-md;
+  }
+  .footer .font-space-grotesk, footer .font-space-grotesk {
+    font-size: variables.$font-size-md;
+  }
+}
+
+// Utility classes for colors
+.text-cyber-yellow { color: var(--cyber-yellow) !important; }
+.text-electric-purple { color: var(--electric-purple) !important; }
+.text-neon-green { color: var(--neon-green) !important; }
+.bg-midnight-black { background: var(--midnight-black) !important; }
+
+.text-muted {
+  color: variables.$color-muted-dark !important;
+}

@@ -1,0 +1,25 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-dark text-cyber-yellow">
+          <h3 class="mb-0">Admin Panel</h3>
+        </div>
+        <div class="card-body">
+          <h5 class="font-orbitron text-electric-purple mb-4">Feature Flags</h5>
+          <div class="row g-3">
+            <div class="col-12 col-md-6 col-lg-4 mb-2" *ngFor="let flag of featureFlags">
+              <div class="d-flex align-items-center justify-content-between glassy-card p-3">
+                <span class="font-space-grotesk text-cyber-yellow">{{ readableFlagName(flag.name) }}</span>
+                <label class="switch-neon mb-0">
+                  <input type="checkbox" [(ngModel)]="flag.enabled" (change)="toggleFlag(flag)" [attr.aria-label]="'Toggle ' + readableFlagName(flag.name)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

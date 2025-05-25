@@ -1,0 +1,149 @@
+:host {
+  display: block;
+}
+
+.card {
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  
+  .card-header {
+    border-bottom: 1px solid rgba(159, 0, 255, 0.2);
+  }
+}
+
+.table {
+  th {
+    white-space: nowrap;
+    background-color: #f8f9fa;
+    
+    i {
+      margin-left: 0.5rem;
+    }
+  }
+  
+  td {
+    vertical-align: middle;
+  }
+}
+
+.img-thumbnail {
+  border-radius: 4px;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.form-control, .form-select {
+  &:focus {
+    border-color: var(--cyber-yellow);
+    box-shadow: 0 0 0 0.2rem rgba(255, 211, 0, 0.25);
+  }
+}
+
+.btn, a {
+  transition: none;
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.cta-future {
+  transition: none;
+  &:hover, &:focus {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// Remove general hover effects
+* {
+  &:hover, &:focus {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.badge {
+  font-size: 0.875rem;
+  padding: 0.35em 0.65em;
+}
+
+.offcanvas-lg {
+  background: linear-gradient(135deg, rgba(20,20,30,0.98) 80%, rgba(159,0,255,0.12) 100%) !important;
+  border-right: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+  border-radius: 1.5rem 0 0 1.5rem;
+  min-height: 80vh;
+  position: sticky;
+  top: 2rem;
+  z-index: 1040;
+}
+
+@media (max-width: 991.98px) {
+  .offcanvas-lg {
+    border-radius: 1.5rem;
+    position: static;
+    top: unset;
+    min-height: unset;
+    margin-bottom: 2rem;
+  }
+}
+
+.glassy-card {
+  background: rgba(20, 20, 30, 0.92);
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(8px) saturate(1.2);
+}
+
+.cta-future {
+  background: linear-gradient(90deg, var(--cyber-yellow) 60%, var(--electric-purple) 100%);
+  color: #0A0A0A;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(159, 0, 255, 0.2);
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+
+// Utility for border
+.border-electric-purple {
+  border-color: var(--electric-purple) !important;
+}
+
+// Toast fade-in
+.fade-in {
+  animation: fadeIn 0.5s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+// Neon badge
+.badge-electric-purple {
+  background: var(--electric-purple);
+  color: #fff;
+  box-shadow: 0 0 8px var(--electric-purple);
+}
+.badge-neon-green {
+  background: var(--neon-green);
+  color: #0A0A0A;
+  box-shadow: 0 0 8px var(--neon-green);
+}
+
+// Shadow for image preview
+.shadow-electric-purple {
+  box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.08), 0 1.5px 8px 0 rgba(0, 255, 136, 0.08);
+}
+
+// Responsive tweaks for admin area
+@media (max-width: 991.98px) {
+  .glassy-card {
+    border-radius: 1.5rem;
+  }
+}

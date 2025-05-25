@@ -1,0 +1,184 @@
+<div class="container-fluid px-0 bg-midnight-black min-vh-100 bg-gradient-purple">
+  <div class="container py-5">
+    <div class="row">
+      <!-- Sidebar for admin controls -->
+      <div class="col-12 col-lg-4 mb-4 mb-lg-0">
+        <div class="offcanvas-lg offcanvas-start show position-static border-end glassy-card p-4 w-100 max-w-380 bg-gradient-purple shadow-electric-purple" tabindex="-1">
+          <div class="offcanvas-header pb-0 d-flex justify-content-between align-items-center">
+            <h4 class="offcanvas-title font-orbitron text-cyber-yellow">Product Management</h4>
+            <button class="btn btn-outline-light btn-sm ms-2" (click)="toggleTheme()" title="Toggle theme">
+              <i class="bi" [ngClass]="isDarkTheme ? 'bi-sun-fill text-cyber-yellow' : 'bi-moon-fill text-electric-purple'"></i>
+            </button>
+          </div>
+          <div class="offcanvas-body pt-2">
+            <form (ngSubmit)="editIndex === null ? addProduct() : saveEdit()" class="row g-3 align-items-end mb-0">
+              <div class="col-12 mb-2">
+                <label class="form-label font-space-grotesk text-cyber-yellow">Name</label>
+                <input type="text" class="form-control bg-midnight-black text-cyber-yellow border-electric-purple" [(ngModel)]="newProduct.name" name="name" required>
+                <div class="text-danger small" *ngIf="formErrors.name">{{ formErrors.name }}</div>
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label font-space-grotesk text-cyber-yellow">Category</label>
+                <select class="form-select bg-midnight-black text-cyber-yellow border-electric-purple" [(ngModel)]="newProduct.category" name="category" required>
+                  <option *ngFor="let category of categories" [value]="category">{{category}}</option>
+                </select>
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label font-space-grotesk text-cyber-yellow">Price</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-midnight-black text-cyber-yellow border-electric-purple">&euro;</span>
+                  <input type="number" class="form-control bg-midnight-black text-cyber-yellow border-electric-purple" [(ngModel)]="newProduct.price" name="price" required min="0" step="0.01">
+                </div>
+                <div class="text-danger small" *ngIf="formErrors.price">{{ formErrors.price }}</div>
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label font-space-grotesk text-cyber-yellow">Stock</label>
+                <input type="number" class="form-control bg-midnight-black text-cyber-yellow border-electric-purple" [(ngModel)]="newProduct.stock" name="stock" required min="0">
+                <div class="text-danger small" *ngIf="formErrors.stock">{{ formErrors.stock }}</div>
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label font-space-grotesk text-cyber-yellow">Image URL</label>
+                <input type="text" class="form-control bg-midnight-black text-cyber-yellow border-electric-purple" [(ngModel)]="newProduct.image" name="image" required (input)="updateImagePreview()">
+                <div class="text-danger small" *ngIf="formErrors.image">{{ formErrors.image }}</div>
+              </div>
+              <div class="col-12 mb-2">
+                <label class="form-label font-space-grotesk text-cyber-yellow">Description</label>
+                <textarea class="form-control bg-midnight-black text-cyber-yellow border-electric-purple" [(ngModel)]="newProduct.description" name="description" rows="3" required></textarea>
+                <div class="text-danger small" *ngIf="formErrors.description">{{ formErrors.description }}</div>
+              </div>
+              <div class="col-12 mb-2">
+                <div class="card glassy-card mb-2" *ngIf="imagePreview">
+                  <div class="card-header font-space-grotesk text-cyber-yellow">Image Preview</div>
+                  <div class="card-body text-center">
+                    <img [src]="imagePreview" [alt]="newProduct.name" class="img-fluid h-220 img-contain">
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 mb-2">
+                <div class="d-flex gap-2 justify-content-end">
+                  <button type="submit" class="btn cta-future" *ngIf="editIndex === null">Add Product</button>
+                  <div *ngIf="editIndex !== null" class="d-flex gap-2">
+                    <button type="submit" class="btn cta-future">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Main area for product list -->
+      <div class="col-12 col-lg-8">
+        <div class="card p-4 glassy-card">
+          <div class="card-header bg-dark text-cyber-yellow mb-3 font-orbitron fs-5 border-electric-purple">
+            <h5 class="mb-0 font-orbitron">Product List</h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive mb-3">
+              <table class="table table-striped mb-0 text-white">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th (click)="sort('name')" class="cursor-pointer">
+                      Name
+                      <i class="bi" [ngClass]="{
+                        'bi-sort-alpha-down': sortField === 'name' && sortDirection === 'asc',
+                        'bi-sort-alpha-up': sortField === 'name' && sortDirection === 'desc'
+                      }"></i>
+                    </th>
+                    <th (click)="sort('category')" class="cursor-pointer">
+                      Category
+                      <i class="bi" [ngClass]="{
+                        'bi-sort-alpha-down': sortField === 'category' && sortDirection === 'asc',
+                        'bi-sort-alpha-up': sortField === 'category' && sortDirection === 'desc'
+                      }"></i>
+                    </th>
+                    <th (click)="sort('price')" class="cursor-pointer">
+                      Price
+                      <i class="bi" [ngClass]="{
+                        'bi-sort-numeric-down': sortField === 'price' && sortDirection === 'asc',
+                        'bi-sort-numeric-up': sortField === 'price' && sortDirection === 'desc'
+                      }"></i>
+                    </th>
+                    <th (click)="sort('stock')" class="cursor-pointer">
+                      Stock
+                      <i class="bi" [ngClass]="{
+                        'bi-sort-numeric-down': sortField === 'stock' && sortDirection === 'asc',
+                        'bi-sort-numeric-up': sortField === 'stock' && sortDirection === 'desc'
+                      }"></i>
+                    </th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let product of paginatedProducts; let i = index">
+                    <td><img [src]="product.image" [alt]="product.name" width="50" class="img-thumbnail-glow shadow-electric-purple"></td>
+                    <td class="text-cyber-yellow font-orbitron">{{ product.name }}</td>
+                    <td class="text-electric-purple font-space-grotesk">{{ product.category }}</td>
+                    <td class="text-cyber-yellow">&euro;{{ product.price.toFixed(2) }}</td>
+                    <td>
+                      <span [class]="'badge ' + (product.stock > 10 ? 'bg-success' : product.stock > 0 ? 'bg-warning text-dark' : 'bg-danger')">
+                        {{ product.stock }}
+                      </span>
+                    </td>
+                    <td class="text-truncate-2">{{ product.description }}</td>
+                    <td>
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-primary" (click)="startEdit(i)">Edit</button>
+                        <button class="btn btn-sm btn-danger" (click)="confirmDelete(i)">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Pagination Controls -->
+            <nav *ngIf="totalPages > 1" class="mt-3">
+              <ul class="pagination justify-content-center">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <button class="page-link" (click)="setPage(page - 1)" [disabled]="page === 1">&laquo;</button>
+                </li>
+                <li class="page-item" *ngFor="let p of [].constructor(totalPages); let idx = index" [class.active]="page === idx + 1">
+                  <button class="page-link" (click)="setPage(idx + 1)">{{ idx + 1 }}</button>
+                </li>
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <button class="page-link" (click)="setPage(page + 1)" [disabled]="page === totalPages">&raquo;</button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade show" tabindex="-1" [ngStyle]="{display: showDeleteModal ? 'block' : 'none', background: showDeleteModal ? 'rgba(0,0,0,0.5)' : 'transparent'}" [class.show]="showDeleteModal" *ngIf="showDeleteModal">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glassy-card p-3">
+              <div class="modal-header">
+                <h5 class="modal-title font-orbitron text-cyber-yellow">Confirm Delete</h5>
+                <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ deleteProductName }}</strong>?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+                <button type="button" class="btn btn-danger" (click)="proceedDelete()">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Toast Notifications -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3 z-1100">
+          <div *ngFor="let toast of toasts" class="toast show align-items-center text-bg-{{toast.type === 'success' ? 'success' : 'danger'}} border-0 mb-2 fade-in" role="alert">
+            <div class="d-flex">
+              <div class="toast-body">
+                {{ toast.message }}
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close" (click)="toasts.shift()"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
