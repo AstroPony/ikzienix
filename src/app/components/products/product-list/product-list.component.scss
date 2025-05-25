@@ -12,18 +12,10 @@
 
 .product-card {
   transition: none;
-  &:hover, &:focus-within {
-    transform: none;
-    box-shadow: none;
-  }
 }
 
 .cta-future {
   transition: none;
-  &:hover, &:focus {
-    transform: none;
-    box-shadow: none;
-  }
 }
 
 .hero-section {
@@ -55,10 +47,6 @@
 
 .hero-section .btn {
   transition: none;
-  &:hover {
-    transform: none;
-    box-shadow: none;
-  }
 }
 
 // Modern Filter Bar Styles
@@ -192,12 +180,6 @@
   border: 2px solid #{variables.$color-neon-green};
   background: transparent;
   transition: box-shadow 0.2s, color 0.2s, border-color 0.2s;
-  &:hover, &:focus {
-    color: #0A0A0A;
-    background: #{variables.$color-neon-green};
-    box-shadow: 0 0 12px #{variables.$color-neon-green};
-    border-color: #{variables.$color-neon-green};
-  }
 }
 
 .btn-outline-electric-purple {
@@ -205,12 +187,6 @@
   border: 2px solid #{variables.$color-electric-purple};
   background: transparent;
   transition: box-shadow 0.2s, color 0.2s, border-color 0.2s;
-  &:hover, &:focus {
-    color: #fff;
-    background: #{variables.$color-electric-purple};
-    box-shadow: 0 0 12px #{variables.$color-electric-purple};
-    border-color: #{variables.$color-electric-purple};
-  }
 }
 
 * {

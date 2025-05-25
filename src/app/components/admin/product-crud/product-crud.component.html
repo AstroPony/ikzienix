@@ -6,9 +6,6 @@
         <div class="offcanvas-lg offcanvas-start show position-static border-end glassy-card p-4 w-100 max-w-380 bg-gradient-purple shadow-electric-purple" tabindex="-1">
           <div class="offcanvas-header pb-0 d-flex justify-content-between align-items-center">
             <h4 class="offcanvas-title font-orbitron text-cyber-yellow">Product Management</h4>
-            <button class="btn btn-outline-light btn-sm ms-2" (click)="toggleTheme()" title="Toggle theme">
-              <i class="bi" [ngClass]="isDarkTheme ? 'bi-sun-fill text-cyber-yellow' : 'bi-moon-fill text-electric-purple'"></i>
-            </button>
           </div>
           <div class="offcanvas-body pt-2">
             <form (ngSubmit)="editIndex === null ? addProduct() : saveEdit()" class="row g-3 align-items-end mb-0">

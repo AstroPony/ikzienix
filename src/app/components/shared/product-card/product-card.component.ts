@@ -9,22 +9,18 @@ import { Product } from '../../../services/product.service';
   imports: [CommonModule, RouterModule],
   template: `
     <div class="product-card glassy-card position-relative d-flex flex-column">
-      <!-- Badges -->
-      <div class="badge-stack">
-        <span *ngIf="product.isNew" class="badge badge-electric-purple animate-glow">NEW</span>
-        <span *ngIf="product.isLimited" class="badge badge-neon-green animate-glow">LIMITED</span>
-      </div>
-
+      <!-- Product Image with Badges Overlayed -->
+      <a [routerLink]="['/products', product.id]" class="image-link position-relative">
+        <div class="badge-stack">
+          <span *ngIf="product.isNew" class="badge badge-electric-purple animate-glow">NEW</span>
+          <span *ngIf="product.isLimited" class="badge badge-neon-green animate-glow">LIMITED</span>
+        </div>
+        <img [src]="product.imageUrl" [alt]="product.title" class="product-image" />
+      </a>
       <!-- Wishlist Button -->
       <button class="wishlist-btn" title="Add to Wishlist">
         <i class="bi bi-heart"></i>
       </button>
-
-      <!-- Product Image -->
-      <a [routerLink]="['/products', product.id]" class="image-link">
-        <img [src]="product.imageUrl" [alt]="product.title" class="product-image" />
-      </a>
-
       <!-- Info -->
       <div class="card-body d-flex flex-column flex-grow-1 p-3">
         <a [routerLink]="['/products', product.id]" class="text-decoration-none">
@@ -52,15 +48,19 @@ import { Product } from '../../../services/product.service';
       border-radius: 1.5rem;
       box-shadow: 0 0 32px 0 rgba(159, 0, 255, 0.12), 0 2px 12px 0 rgba(0, 255, 136, 0.10);
       overflow: hidden;
-      transition: box-shadow 0.3s, transform 0.3s;
+      transition: background-image 1s cubic-bezier(0.77,0,0.175,1);
       min-height: 520px;
       max-width: 370px;
       margin: auto;
       position: relative;
+      display: flex;
+      align-items: stretch;
     }
-    .product-card:hover {
-      box-shadow: 0 0 48px 8px #9F00FF55, 0 2px 16px 0 #00FF8855;
-      transform: translateY(-6px) scale(1.03);
+    .image-link {
+      display: block; width: 100%; height: 260px; overflow: hidden; border-radius: 1.2rem 1.2rem 0 0;
+      box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.10);
+      margin-bottom: 0.5rem;
+      position: relative;
     }
     .badge-stack {
       position: absolute;
@@ -79,19 +79,11 @@ import { Product } from '../../../services/product.service';
       position: absolute; top: 1rem; right: 1rem; z-index: 2;
       background: rgba(20,20,30,0.7); border: none; border-radius: 50%;
       color: var(--electric-purple); font-size: 1.3rem; padding: 0.5rem;
-      transition: background 0.2s;
-    }
-    .wishlist-btn:hover { background: var(--electric-purple); color: #fff; }
-    .image-link {
-      display: block; width: 100%; height: 260px; overflow: hidden; border-radius: 1.2rem 1.2rem 0 0;
-      box-shadow: 0 4px 24px 0 rgba(159, 0, 255, 0.10);
-      margin-bottom: 0.5rem;
+      transition: background 0.2s, color 0.2s;
     }
     .product-image {
       width: 100%; height: 100%; object-fit: cover; display: block;
-      transition: transform 0.3s;
     }
-    .image-link:hover .product-image { transform: scale(1.04); }
     .category-tag {
       font-size: 0.95rem; font-weight: 600; letter-spacing: 0.02em;
       display: flex; align-items: center; gap: 0.3em;
