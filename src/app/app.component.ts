@@ -28,6 +28,11 @@ import { CartService } from './services/cart.service';
               </a>
             </li>
             <li class="nav-item">
+              <a class="nav-link font-space-grotesk text-electric-purple" routerLink="/wishlist">
+                <i class="bi bi-heart"></i> Wishlist
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link font-space-grotesk text-electric-purple" routerLink="/admin">Admin</a>
             </li>
           </ul>

@@ -439,3 +439,15 @@ main {
 .text-muted {
   color: variables.$color-muted-dark !important;
 }
+
+.table-dark thead th {
+  background-color: var(--midnight-black) !important;
+  color: var(--cyber-yellow) !important;
+  border-color: var(--electric-purple) !important;
+}
+.table-dark tbody tr {
+  background-color: var(--midnight-black) !important;
+}
+.table-dark.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #181828 !important;
+}

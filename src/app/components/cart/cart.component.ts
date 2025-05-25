@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
         <h2 class="mb-4 font-orbitron text-cyber-yellow">Shopping Cart</h2>
         <div *ngIf="items.length; else emptyCart">
           <div class="card glassy-card p-4 mb-4">
-            <table class="table align-middle mb-4 text-white">
+            <table class="table table-dark align-middle mb-4 text-cyber-yellow bg-midnight-black border-electric-purple">
               <thead>
                 <tr>
                   <th>Product</th>

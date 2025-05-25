@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Product } from '../../../services/product.service';
 import { CartService } from '../../../services/cart.service';
+import { WishlistService } from '../../../services/wishlist.service';
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
   imports: [CommonModule, RouterModule],
+  providers: [WishlistService],
   template: `
     <div class="product-card glassy-card position-relative d-flex flex-column">
       <!-- Product Image with Badges Overlayed -->
@@ -19,8 +21,8 @@ import { CartService } from '../../../services/cart.service';
         <img [src]="product.imageUrl" [alt]="product.title" class="product-image" />
       </a>
       <!-- Wishlist Button -->
-      <button class="wishlist-btn" title="Add to Wishlist">
-        <i class="bi bi-heart"></i>
+      <button class="wishlist-btn" title="Add to Wishlist" (click)="toggleWishlist($event)">
+        <i class="bi" [ngClass]="isWishlisted() ? 'bi-heart-fill text-neon-green' : 'bi-heart'"></i>
       </button>
       <!-- Info -->
       <div class="card-body d-flex flex-column flex-grow-1 p-3">
@@ -42,7 +44,7 @@ import { CartService } from '../../../services/cart.service';
         <div *ngIf="showToast" class="toast product-toast-top show align-items-center text-bg-success border-0 fade-in" role="alert">
           <div class="d-flex">
             <div class="toast-body">
-              Added to cart!
+              {{ toastMessage }}
             </div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close" (click)="showToast = false"></button>
           </div>
@@ -60,6 +62,7 @@ import { CartService } from '../../../services/cart.service';
       transition: background-image 1s cubic-bezier(0.77,0,0.175,1);
       min-height: 520px;
       max-width: 370px;
+      width: 340px;
       margin: auto;
       position: relative;
       display: flex;
@@ -122,6 +125,7 @@ import { CartService } from '../../../services/cart.service';
       .product-card {
         min-height: 420px;
         max-width: 100%;
+        width: 100%;
       }
       .image-link { height: 180px; }
       .card-title { font-size: 1.1rem; }
@@ -145,14 +149,34 @@ import { CartService } from '../../../services/cart.service';
 export class ProductCardComponent {
   @Input() product!: Product;
   showToast = false;
-  constructor(private cartService: CartService) {}
+  toastMessage = '';
+  constructor(private cartService: CartService, private wishlistService: WishlistService) {}
 
   addToCart(event: Event) {
     event.stopPropagation();
     event.preventDefault();
     if (this.product.stock === 0) return;
     this.cartService.addToCart(this.product);
+    this.toastMessage = 'Added to cart!';
     this.showToast = true;
     setTimeout(() => (this.showToast = false), 1500);
+  }
+
+  toggleWishlist(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+    if (this.isWishlisted()) {
+      this.wishlistService.removeFromWishlist(this.product.id);
+      this.toastMessage = 'Removed from wishlist!';
+    } else {
+      this.wishlistService.addToWishlist(this.product);
+      this.toastMessage = 'Added to wishlist!';
+    }
+    this.showToast = true;
+    setTimeout(() => (this.showToast = false), 1200);
+  }
+
+  isWishlisted(): boolean {
+    return this.wishlistService.isWishlisted(this.product.id);
   }
 } 
