@@ -1,0 +1,33 @@
+.featured-products {
+  width: 100%;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.featured-title {
+  font-size: 2.2rem;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 24px #9F00FF99;
+  margin-bottom: 2rem;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1200px;
+  justify-items: center;
+}
+
+@media (max-width: 900px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .featured-title {
+    font-size: 1.5rem;
+  }
+}
