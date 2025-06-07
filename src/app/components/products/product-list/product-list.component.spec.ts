@@ -31,7 +31,7 @@ describe('ProductListComponent', () => {
   it('should display product name and price', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     component.products.forEach(product => {
-      expect(compiled.textContent).toContain(product.name);
+      expect(compiled.textContent).toContain(product.title);
       expect(compiled.textContent).toContain(product.price.toFixed(2));
     });
   });
