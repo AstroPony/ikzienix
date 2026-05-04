@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk } from 'next/font/google';
+import { unstable_cache } from 'next/cache';
 import { CartProvider } from '@/contexts/CartContext';
 import BetaBanner from '@/components/ui/BetaBanner';
 import Navbar from '@/components/layout/Navbar';
@@ -67,10 +68,15 @@ export const metadata: Metadata = {
   },
 };
 
-async function getTotalStock() {
-  const products = await prisma.product.findMany({ select: { stock: true } });
-  return products.reduce((sum, p) => sum + p.stock, 0);
-}
+// Cache stock check for 60s — avoids a DB call on every single page render
+const getTotalStock = unstable_cache(
+  async () => {
+    const products = await prisma.product.findMany({ select: { stock: true } });
+    return products.reduce((sum, p) => sum + p.stock, 0);
+  },
+  ['total-stock'],
+  { revalidate: 60 }
+);
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const totalStock = await getTotalStock();
@@ -89,6 +95,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Bootstrap JS — needed for navbar collapse on mobile */}
         <script
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmfEHpOdV+Y4mCt9+KqFovnloQ2"
+          crossOrigin="anonymous"
           defer
         />
       </body>

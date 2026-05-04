@@ -2,7 +2,12 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
 const COOKIE_NAME = 'ikzienix-admin';
-const ALLOWED_EMAILS = ['nightmedow@gmail.com', 'admin@ikzienix.nl'];
+
+// Fallback to hardcoded defaults if env var not set
+const ALLOWED_EMAILS = (process.env.ADMIN_EMAILS ?? 'nightmedow@gmail.com,admin@ikzienix.nl')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
 
 function getSecret() {
   const s = process.env.ADMIN_SECRET;
@@ -17,6 +22,7 @@ export function isAllowedEmail(email: string) {
 export async function signAdminToken(email: string) {
   return new SignJWT({ email })
     .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
     .setExpirationTime('7d')
     .sign(getSecret());
 }

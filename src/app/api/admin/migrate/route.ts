@@ -17,10 +17,8 @@ async function runMigration() {
 function isAuthorized(req: NextRequest): boolean {
   const secret = process.env.ADMIN_SECRET;
   if (!secret) return false;
-  // Accept either ?secret= query param or x-admin-secret header
-  const param = req.nextUrl.searchParams.get('secret');
-  const header = req.headers.get('x-admin-secret');
-  return param === secret || header === secret;
+  // Header only — never accept secret in URL query params (shows up in server logs)
+  return req.headers.get('x-admin-secret') === secret;
 }
 
 export async function GET(req: NextRequest) {

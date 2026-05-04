@@ -30,7 +30,18 @@ export default async function AdminProductEditPage({ params }: Props) {
             </span>
           )}
         </h1>
-        <ProductEditor product={product} />
+        <ProductEditor product={{
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          price: product.price,
+          stock: product.stock,
+          category: product.category,
+          isLimited: product.isLimited,
+          pairNumber: product.pairNumber,
+          images: product.images,
+        }} />
       </div>
     </div>
   );
