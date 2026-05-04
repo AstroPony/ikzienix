@@ -101,7 +101,7 @@ export default async function HomePage() {
             </div>
             <div className="row g-3">
               {featured.map((product) => (
-                <div key={product.id} className="col-6 col-md-3">
+                <div key={product.id} className="col-12 col-sm-6 col-md-3">
                   <ProductCard product={product} />
                 </div>
               ))}

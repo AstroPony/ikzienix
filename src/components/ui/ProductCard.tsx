@@ -46,6 +46,7 @@ export default function ProductCard({ product, totalPairs = 25 }: Props) {
             width={600}
             height={600}
             className="product-card-img"
+            style={{ width: '100%', height: 'auto' }}
           />
         </Link>
 

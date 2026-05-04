@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -34,9 +33,17 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container-fluid px-3 py-5 text-center" style={{ maxWidth: 500, margin: '0 auto' }}>
-        <p className="text-secondary font-monospace mb-4">{'// nothing to checkout'}</p>
-        <Link href="/shop" className="btn btn-accent fw-bold px-5">Back to shop</Link>
+      <div
+        className="d-flex flex-column align-items-center justify-content-center text-center px-3"
+        style={{ minHeight: 'calc(100svh - 200px)', gap: '1.25rem' }}
+      >
+        <p className="font-monospace text-secondary small mb-0">{'// cart is empty'}</p>
+        <p className="text-secondary" style={{ maxWidth: 320, fontSize: '0.9rem' }}>
+          Nothing to check out. Head back and find your pair.
+        </p>
+        <Link href="/shop" className="btn btn-accent fw-bold px-5">
+          Back to the drop
+        </Link>
       </div>
     );
   }
@@ -67,7 +74,6 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      // Redirect to Mollie hosted checkout
       window.location.href = json.checkoutUrl;
     } catch {
       setError('Connection error. Check your internet and try again.');
@@ -78,126 +84,161 @@ export default function CheckoutPage() {
 
   return (
     <div className="container-fluid px-3 px-md-4 py-5">
-      <div className="row g-5 justify-content-center" style={{ maxWidth: 1000, margin: '0 auto' }}>
-        {/* Form */}
+      <div className="row g-5 justify-content-center" style={{ maxWidth: 960, margin: '0 auto' }}>
+
+        {/* Form column */}
         <div className="col-12 col-md-7">
+          <p className="checkout-section-label mb-1">{'// step 1 of 1'}</p>
           <h1 className="fw-bold h3 mb-5">Shipping details</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <div className="row g-3">
               <div className="col-6">
-                <label className="form-label small text-secondary">First name</label>
+                <label className="form-label">First name</label>
                 <input
                   {...register('firstName')}
-                  className={`form-control bg-transparent text-white border-secondary ${errors.firstName ? 'is-invalid' : ''}`}
+                  autoComplete="given-name"
+                  className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
                 />
                 {errors.firstName && (
                   <div className="invalid-feedback">{errors.firstName.message}</div>
                 )}
               </div>
+
               <div className="col-6">
-                <label className="form-label small text-secondary">Last name</label>
+                <label className="form-label">Last name</label>
                 <input
                   {...register('lastName')}
-                  className={`form-control bg-transparent text-white border-secondary ${errors.lastName ? 'is-invalid' : ''}`}
+                  autoComplete="family-name"
+                  className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
                 />
                 {errors.lastName && (
                   <div className="invalid-feedback">{errors.lastName.message}</div>
                 )}
               </div>
+
               <div className="col-12">
-                <label className="form-label small text-secondary">Email</label>
+                <label className="form-label">Email</label>
                 <input
                   {...register('email')}
                   type="email"
-                  className={`form-control bg-transparent text-white border-secondary ${errors.email ? 'is-invalid' : ''}`}
+                  autoComplete="email"
+                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                 />
                 {errors.email && (
                   <div className="invalid-feedback">{errors.email.message}</div>
                 )}
               </div>
+
               <div className="col-12">
-                <label className="form-label small text-secondary">Address</label>
+                <label className="form-label">Address</label>
                 <input
                   {...register('address')}
-                  className={`form-control bg-transparent text-white border-secondary ${errors.address ? 'is-invalid' : ''}`}
+                  autoComplete="street-address"
+                  className={`form-control ${errors.address ? 'is-invalid' : ''}`}
                 />
                 {errors.address && (
                   <div className="invalid-feedback">{errors.address.message}</div>
                 )}
               </div>
+
               <div className="col-5">
-                <label className="form-label small text-secondary">Postal code</label>
+                <label className="form-label">Postal code</label>
                 <input
                   {...register('postalCode')}
-                  className={`form-control bg-transparent text-white border-secondary ${errors.postalCode ? 'is-invalid' : ''}`}
+                  autoComplete="postal-code"
+                  className={`form-control ${errors.postalCode ? 'is-invalid' : ''}`}
                 />
                 {errors.postalCode && (
                   <div className="invalid-feedback">{errors.postalCode.message}</div>
                 )}
               </div>
+
               <div className="col-7">
-                <label className="form-label small text-secondary">City</label>
+                <label className="form-label">City</label>
                 <input
                   {...register('city')}
-                  className={`form-control bg-transparent text-white border-secondary ${errors.city ? 'is-invalid' : ''}`}
+                  autoComplete="address-level2"
+                  className={`form-control ${errors.city ? 'is-invalid' : ''}`}
                 />
                 {errors.city && (
                   <div className="invalid-feedback">{errors.city.message}</div>
                 )}
               </div>
+
               <div className="col-12">
-                <label className="form-label small text-secondary">Country</label>
+                <label className="form-label">Country</label>
                 <select
                   {...register('country')}
-                  className="form-select bg-transparent text-white border-secondary"
-                  style={{ color: 'white' }}
+                  autoComplete="country"
+                  className="form-select"
                 >
-                  <option value="NL" style={{ background: '#111' }}>Netherlands</option>
-                  <option value="BE" style={{ background: '#111' }}>Belgium</option>
-                  <option value="DE" style={{ background: '#111' }}>Germany</option>
+                  <option value="NL">Netherlands</option>
+                  <option value="BE">Belgium</option>
+                  <option value="DE">Germany</option>
                 </select>
               </div>
             </div>
 
             {error && (
-              <div className="alert alert-danger mt-4 small">{error}</div>
+              <div className="alert alert-danger mt-4">{error}</div>
             )}
 
             <button
               type="submit"
-              className="btn btn-accent w-100 btn-lg fw-bold mt-4"
+              className="btn btn-accent w-100 btn-lg fw-bold mt-5"
               disabled={submitting}
             >
-              {submitting ? 'Redirecting to payment…' : `Pay ${formatPrice(totalPrice)}`}
+              {submitting
+                ? '↗ Connecting to Stripe…'
+                : `Pay ${formatPrice(totalPrice)} — secure checkout`}
             </button>
-            <p className="text-secondary small text-center mt-2">
-              You&apos;ll be taken to Stripe to complete payment securely.
+
+            <p className="text-center mt-3 mb-0" style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
+              iDEAL · Card · Stripe encrypted
             </p>
           </form>
         </div>
 
         {/* Order summary */}
         <div className="col-12 col-md-5">
-          <div className="p-4" style={{ background: '#111', border: '1px solid #222' }}>
-            <h2 className="h6 fw-bold text-uppercase text-secondary mb-4">Order summary</h2>
+          <div className="order-summary-card">
+            <p className="order-summary-label">Order summary</p>
             <div className="d-flex flex-column gap-3 mb-4">
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="d-flex justify-content-between small">
                   <span>
                     {product.name}
-                    <span className="text-secondary ms-1">×{quantity}</span>
+                    {quantity > 1 && (
+                      <span className="text-secondary ms-1 font-monospace" style={{ fontSize: '0.75rem' }}>
+                        ×{quantity}
+                      </span>
+                    )}
                   </span>
-                  <span>{formatPrice(product.price * quantity)}</span>
+                  <span className="text-secondary">{formatPrice(product.price * quantity)}</span>
                 </div>
               ))}
             </div>
-            <div className="border-top border-dark pt-3 d-flex justify-content-between">
+
+            <div className="d-flex justify-content-between small mb-2">
+              <span className="text-secondary">Shipping</span>
+              <span className="font-monospace" style={{ color: 'var(--color-accent)', fontSize: '0.78rem' }}>free</span>
+            </div>
+
+            <div className="border-top pt-3 mt-1 d-flex justify-content-between" style={{ borderColor: '#222 !important' }}>
               <span className="fw-bold">Total</span>
               <span className="fw-bold">{formatPrice(totalPrice)}</span>
             </div>
-            <p className="text-secondary small mt-2 mb-0">Free shipping in NL</p>
+
+            <p className="mt-4 mb-0" style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'monospace', lineHeight: 1.6 }}>
+              Beta drop — one of 25.<br />
+              No restocks. No logo yet.
+            </p>
           </div>
+
+          <Link href="/cart" className="d-block text-center mt-3" style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
+            ← edit cart
+          </Link>
         </div>
       </div>
     </div>

@@ -10,9 +10,14 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container-fluid px-3 px-md-4 py-5 text-center" style={{ maxWidth: 600, margin: '0 auto' }}>
-        <p className="font-monospace text-secondary mb-4">{'// cart is empty'}</p>
-        <h1 className="h3 fw-bold mb-4">Nothing here yet.</h1>
+      <div
+        className="d-flex flex-column align-items-center justify-content-center text-center px-3"
+        style={{ minHeight: 'calc(100svh - 200px)', gap: '1.25rem' }}
+      >
+        <p className="font-monospace text-secondary small mb-0">{'// cart is empty'}</p>
+        <p className="text-secondary" style={{ maxWidth: 320, fontSize: '0.9rem' }}>
+          25 pairs. Not one in your cart yet.
+        </p>
         <Link href="/shop" className="btn btn-accent px-5 fw-bold">
           Back to the drop
         </Link>
@@ -22,6 +27,7 @@ export default function CartPage() {
 
   return (
     <div className="container-fluid px-3 px-md-4 py-5" style={{ maxWidth: 800, margin: '0 auto' }}>
+      <p className="checkout-section-label mb-1">{'// your selection'}</p>
       <h1 className="fw-bold h3 mb-5">Your cart</h1>
 
       <div className="d-flex flex-column gap-4 mb-5">
@@ -86,20 +92,23 @@ export default function CartPage() {
       </div>
 
       {/* Summary + CTA */}
-      <div className="border-top border-dark pt-4">
-        <div className="d-flex justify-content-between mb-2">
+      <div className="border-top pt-4" style={{ borderColor: '#222 !important' }}>
+        <div className="d-flex justify-content-between mb-2 small">
           <span className="text-secondary">Subtotal</span>
-          <span className="fw-bold">{formatPrice(totalPrice)}</span>
+          <span>{formatPrice(totalPrice)}</span>
         </div>
-        <div className="d-flex justify-content-between mb-4">
-          <span className="text-secondary small">Shipping</span>
-          <span className="text-secondary small">Free in NL</span>
+        <div className="d-flex justify-content-between mb-1 small">
+          <span className="text-secondary">Shipping</span>
+          <span className="font-monospace" style={{ color: 'var(--color-accent)', fontSize: '0.75rem' }}>free</span>
         </div>
+        <p className="text-secondary mb-4" style={{ fontSize: '0.7rem', textAlign: 'right', fontFamily: 'monospace' }}>
+          Netherlands only
+        </p>
         <Link href="/checkout" className="btn btn-accent w-100 btn-lg fw-bold">
-          Checkout
+          Go to checkout → {formatPrice(totalPrice)}
         </Link>
-        <Link href="/shop" className="btn btn-link w-100 text-secondary mt-2 small">
-          Continue shopping
+        <Link href="/shop" className="btn btn-link w-100 text-secondary mt-2 small p-0" style={{ opacity: 0.5 }}>
+          ← Continue shopping
         </Link>
       </div>
     </div>

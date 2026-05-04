@@ -2,8 +2,14 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About — ikzienix β',
-  description: 'ik zie niks. But we see everything.',
+  title: 'About',
+  description: 'ikzienix is a Dutch streetwear label. First drop: 25 unbranded sunglasses. No logo yet. ik zie niks.',
+  alternates: { canonical: 'https://www.ikzienix.nl/about' },
+  openGraph: {
+    title: 'About — ikzienix β',
+    description: 'First drop from the ik universe. 25 pairs. No logo yet. ik zie niks.',
+    url: 'https://www.ikzienix.nl/about',
+  },
 };
 
 export default function AboutPage() {
