@@ -4,6 +4,8 @@ import { CartProvider } from '@/contexts/CartContext';
 import BetaBanner from '@/components/ui/BetaBanner';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import WaitlistPopup from '@/components/ui/WaitlistPopup';
+import { prisma } from '@/lib/prisma';
 import '@/styles/globals.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -65,7 +67,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+async function getStockInfo() {
+  const products = await prisma.product.findMany({ select: { stock: true } });
+  const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
+  return { totalStock, totalProducts: products.length };
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { totalStock, totalProducts } = await getStockInfo();
+
   return (
     <html lang="nl" className={spaceGrotesk.variable}>
       <body>
@@ -74,6 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           <main>{children}</main>
           <Footer />
+          <WaitlistPopup totalStock={totalStock} totalProducts={totalProducts} />
         </CartProvider>
 
         {/* Bootstrap JS — needed for navbar collapse on mobile */}

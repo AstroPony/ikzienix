@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { formatPrice } from '@/lib/format';
 import AddToCartButton from '@/components/shop/AddToCartButton';
+import ImageGallery from '@/components/shop/ImageGallery';
 import type { Metadata } from 'next';
 
 interface Props {
@@ -79,7 +79,6 @@ export default async function ProductPage({ params }: Props) {
   const product = await prisma.product.findUnique({ where: { slug: params.slug } });
   if (!product) notFound();
 
-  const thumbnail = product.images[0] ?? '/images/placeholder.jpg';
   const isSoldOut = product.stock === 0;
   const priceFormatted = (product.price / 100).toFixed(2);
 
@@ -115,47 +114,20 @@ export default async function ProductPage({ params }: Props) {
 
           {/* Image column */}
           <div className="col-12 col-md-6">
-            <div className="position-relative" style={{ aspectRatio: '1/1', background: '#0d0d0d' }}>
-              <Image
-                src={thumbnail}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                style={{ objectFit: 'cover' }}
-                priority
-              />
+            <div className="position-relative">
               {product.pairNumber != null && (
-                <span className="pair-badge">
+                <span className="pair-badge" style={{ zIndex: 5 }}>
                   #{product.pairNumber}
                   <span className="pair-badge-total"> of {TOTAL_PAIRS}</span>
                 </span>
               )}
               {isSoldOut && (
-                <div className="claimed-overlay">
+                <div className="claimed-overlay" style={{ zIndex: 5 }}>
                   <span className="claimed-label">claimed</span>
                 </div>
               )}
+              <ImageGallery images={product.images} productName={product.name} />
             </div>
-
-            {product.images.length > 1 && (
-              <div className="d-flex gap-2 mt-2">
-                {product.images.slice(1).map((img, i) => (
-                  <div
-                    key={i}
-                    className="position-relative flex-shrink-0"
-                    style={{ width: 72, height: 72, background: '#0d0d0d' }}
-                  >
-                    <Image
-                      src={img}
-                      alt={`${product.name} view ${i + 2}`}
-                      fill
-                      sizes="72px"
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Info column */}

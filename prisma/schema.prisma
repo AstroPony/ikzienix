@@ -57,3 +57,10 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
 }
+
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("popup") // popup | footer | etc
+  createdAt DateTime @default(now())
+}
