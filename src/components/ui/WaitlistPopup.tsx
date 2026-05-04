@@ -8,10 +8,9 @@ type Trigger = 'soldout' | 'low';
 
 interface Props {
   totalStock: number;
-  totalProducts: number;
 }
 
-export default function WaitlistPopup({ totalStock, totalProducts }: Props) {
+export default function WaitlistPopup({ totalStock }: Props) {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);

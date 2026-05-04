@@ -67,14 +67,13 @@ export const metadata: Metadata = {
   },
 };
 
-async function getStockInfo() {
+async function getTotalStock() {
   const products = await prisma.product.findMany({ select: { stock: true } });
-  const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
-  return { totalStock, totalProducts: products.length };
+  return products.reduce((sum, p) => sum + p.stock, 0);
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { totalStock, totalProducts } = await getStockInfo();
+  const totalStock = await getTotalStock();
 
   return (
     <html lang="nl" className={spaceGrotesk.variable}>
@@ -84,7 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Navbar />
           <main>{children}</main>
           <Footer />
-          <WaitlistPopup totalStock={totalStock} totalProducts={totalProducts} />
+          <WaitlistPopup totalStock={totalStock} />
         </CartProvider>
 
         {/* Bootstrap JS — needed for navbar collapse on mobile */}

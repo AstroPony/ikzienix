@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 
 interface Props {
@@ -44,11 +44,11 @@ export default function ImageGallery({ images, productName }: Props) {
   }, [lightboxOpen, closeLightbox, prev, next]);
 
   // Touch swipe
-  let touchStartX = 0;
-  const onTouchStart = (e: React.TouchEvent) => { touchStartX = e.touches[0].clientX; };
+  const touchStartX = useRef(0);
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const onTouchEnd = (e: React.TouchEvent) => {
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(dx) > 50) dx < 0 ? next() : prev();
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 50) { if (dx < 0) next(); else prev(); }
   };
 
   const mainImage = images[active] ?? '/images/placeholder.jpg';
