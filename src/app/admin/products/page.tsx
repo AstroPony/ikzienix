@@ -43,11 +43,13 @@ export default async function AdminProductsPage() {
           {'// products'}
         </p>
 
+        <style>{`.admin-row:hover { background: #111 !important; }`}</style>
         <div style={{ border: '1px solid #1e1e1e' }}>
           {products.map((p, i) => (
             <Link
               key={p.id}
               href={`/admin/products/${p.id}`}
+              className="admin-row"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '2.5rem 1fr 6rem 5rem 5rem 4rem',
@@ -60,8 +62,6 @@ export default async function AdminProductsPage() {
                 textDecoration: 'none',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#111')}
-              onMouseLeave={e => (e.currentTarget.style.background = '#0a0a0a')}
             >
               <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#c8f135', opacity: 0.8 }}>
                 #{p.pairNumber ?? '—'}
