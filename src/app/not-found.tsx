@@ -12,7 +12,7 @@ export default function NotFound() {
       style={{ minHeight: 'calc(100svh - 200px)', gap: '1.5rem' }}
     >
       <p className="font-monospace text-secondary small text-uppercase mb-0">
-        // error 404
+        {'// error 404'}
       </p>
       <h1 className="fw-bold mb-0" style={{ fontSize: 'clamp(4rem, 16vw, 10rem)', lineHeight: 1 }}>
         <span className="text-accent">4</span>0<span className="text-accent">4</span>
