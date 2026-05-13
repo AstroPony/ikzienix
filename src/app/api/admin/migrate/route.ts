@@ -11,6 +11,7 @@ async function runMigration() {
       CONSTRAINT "WaitlistEntry_pkey" PRIMARY KEY ("id")
     );
     CREATE UNIQUE INDEX IF NOT EXISTS "WaitlistEntry_email_key" ON "WaitlistEntry"("email");
+    ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "isVisible" BOOLEAN NOT NULL DEFAULT true;
   `);
 }
 

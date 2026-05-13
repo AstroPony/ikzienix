@@ -63,15 +63,18 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
+    icon: [
+      { url: '/images/ikzienix-pm-icon.png', type: 'image/png' },
+    ],
+    shortcut: '/images/ikzienix-pm-icon.png',
+    apple: '/images/ikzienix-pm-icon.png',
   },
 };
 
 // Cache stock check for 60s — avoids a DB call on every single page render
 const getTotalStock = unstable_cache(
   async () => {
-    const products = await prisma.product.findMany({ select: { stock: true } });
+    const products = await prisma.product.findMany({ where: { isVisible: true }, select: { stock: true } });
     return products.reduce((sum, p) => sum + p.stock, 0);
   },
   ['total-stock'],
@@ -92,13 +95,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <WaitlistPopup totalStock={totalStock} />
         </CartProvider>
 
-        {/* Bootstrap JS — needed for navbar collapse on mobile */}
-        <script
-          src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmfEHpOdV+Y4mCt9+KqFovnloQ2"
-          crossOrigin="anonymous"
-          defer
-        />
       </body>
     </html>
   );

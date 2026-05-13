@@ -39,12 +39,20 @@ export default async function AdminProductsPage() {
         </div>
 
         {/* Product table */}
-        <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '1rem' }}>
-          {'// products'}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', margin: 0 }}>
+            {'// products'}
+          </p>
+          <Link
+            href="/admin/products/new"
+            style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#050505', background: '#c8f135', padding: '0.4rem 1rem', fontWeight: 700, textDecoration: 'none', letterSpacing: '0.04em' }}
+          >
+            + New product
+          </Link>
+        </div>
 
         <style>{`.admin-row:hover { background: #111 !important; }`}</style>
-        <div style={{ border: '1px solid #1e1e1e' }}>
+        <div className="admin-product-grid" style={{ border: '1px solid #1e1e1e' }}>
           {products.map((p, i) => (
             <Link
               key={p.id}

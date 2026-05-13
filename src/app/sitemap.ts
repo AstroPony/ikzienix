@@ -5,6 +5,7 @@ const BASE = 'https://www.ikzienix.nl';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await prisma.product.findMany({
+    where: { isVisible: true },
     select: { slug: true, updatedAt: true },
   });
 

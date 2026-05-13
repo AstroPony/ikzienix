@@ -224,6 +224,9 @@ a {
 .footer-link {
   transition: color 0.15s ease, opacity 0.15s ease;
   opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px; // touch target
 
   &:hover {
     color: var(--color-white) !important;
@@ -353,4 +356,46 @@ input:-webkit-autofill:focus {
 // ── Custom cursor for sold-out cards ─────────────────────────────
 .product-card--claimed {
   cursor: not-allowed;
+}
+
+// ── Mobile overrides (≤375px) ─────────────────────────────────────
+@media (max-width: 375px) {
+  .pair-badge,
+  .urgency-badge,
+  .beta-badge,
+  .limited-badge {
+    font-size: 0.62rem;
+  }
+
+  .form-label {
+    font-size: 0.82rem;
+  }
+}
+
+// ── Navbar collapse animation ─────────────────────────────────────
+.navbar-collapse {
+  &.show {
+    display: block !important;
+    border-top: 1px solid #1a1a1a;
+    margin-top: 0.5rem;
+    padding-bottom: 0.5rem;
+
+    @media (min-width: 768px) {
+      border-top: none;
+      margin-top: 0;
+      padding-bottom: 0;
+    }
+  }
+}
+
+// ── Admin responsive ──────────────────────────────────────────────
+@media (max-width: 767px) {
+  .admin-product-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-editor-grid {
+    grid-template-columns: 1fr !important;
+  }
 }

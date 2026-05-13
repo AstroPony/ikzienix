@@ -1,87 +1,65 @@
-/**
- * update-photos.ts
- *
- * Scans public/images/products/ for image files, matches them to products
- * by slug, and updates the database images array.
- *
- * Run with: npm run photos:update
- */
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
-import 'dotenv/config';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { PrismaClient } from '../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+const connStr = process.env.ikzienix_db_POSTGRES_PRISMA_URL ?? process.env.DATABASE_URL;
+const pool = new Pool({ connectionString: connStr, ssl: { rejectUnauthorized: false } });
+const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
-const PRODUCTS_DIR = path.join(process.cwd(), 'public', 'images', 'products');
-const SUPPORTED = ['.jpg', '.jpeg', '.png', '.webp'];
+const PRODUCTS_DIR = path.resolve(process.cwd(), '..', 'Products');
+const PUBLIC_DIR = path.resolve(process.cwd(), 'public', 'images', 'products');
 
-function getImagesForSlug(slug: string): string[] {
-  if (!fs.existsSync(PRODUCTS_DIR)) return [];
+async function run() {
+  fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 
-  const files = fs.readdirSync(PRODUCTS_DIR);
-
-  // Hero image: exact slug match (e.g. shadow-classic.jpg)
-  // Extra images: slug-2.jpg, slug-3.jpg, etc.
-  const matched = files
-    .filter((f) => {
-      const ext = path.extname(f).toLowerCase();
-      const base = path.basename(f, ext);
-      return SUPPORTED.includes(ext) && (base === slug || base.match(new RegExp(`^${slug}-\\d+$`)));
-    })
-    .sort((a, b) => {
-      // Hero first, then numbered extras
-      const baseA = path.basename(a, path.extname(a));
-      const baseB = path.basename(b, path.extname(b));
-      if (baseA === slug) return -1;
-      if (baseB === slug) return 1;
-      return baseA.localeCompare(baseB);
-    })
-    .map((f) => `/images/products/${f}`);
-
-  return matched;
-}
-
-async function main() {
   const products = await prisma.product.findMany({
+    select: { slug: true, pairNumber: true, name: true },
     orderBy: { pairNumber: 'asc' },
   });
 
-  console.log(`\nScanning public/images/products/ for ${products.length} products...\n`);
+  console.log(`\nCopying photos for ${products.length} products...\n`);
 
   let updated = 0;
-  let skipped = 0;
 
-  for (const product of products) {
-    const images = getImagesForSlug(product.slug);
-
-    if (images.length === 0) {
-      console.log(`  · #${String(product.pairNumber ?? '?').padStart(2, '0')} ${product.name.padEnd(20)} — no photo yet, keeping placeholder`);
-      skipped++;
+  for (const { slug, pairNumber, name } of products) {
+    const src = path.join(PRODUCTS_DIR, slug);
+    if (!fs.existsSync(src)) {
+      console.log(`  · #${String(pairNumber ?? '?').padStart(2, '0')} ${name} — folder not found, skipping`);
       continue;
     }
 
-    await prisma.product.update({
-      where: { id: product.id },
-      data: { images },
-    });
+    const files = fs.readdirSync(src)
+      .filter(f => /\.(jpe?g|png|webp)$/i.test(f))
+      .sort();
 
-    const extras = images.length > 1 ? ` (+ ${images.length - 1} extra)` : '';
-    console.log(`  ✓ #${String(product.pairNumber ?? '?').padStart(2, '0')} ${product.name.padEnd(20)} → ${images[0]}${extras}`);
+    if (files.length === 0) {
+      console.log(`  · #${String(pairNumber ?? '?').padStart(2, '0')} ${name} — no images, skipping`);
+      continue;
+    }
+
+    const dest = path.join(PUBLIC_DIR, slug);
+    fs.mkdirSync(dest, { recursive: true });
+
+    const urls: string[] = [];
+    for (const file of files) {
+      fs.copyFileSync(path.join(src, file), path.join(dest, file));
+      urls.push(`/images/products/${slug}/${file}`);
+    }
+
+    await prisma.product.update({ where: { slug }, data: { images: urls } });
+    console.log(`  ✓ #${String(pairNumber ?? '?').padStart(2, '0')} ${name} — ${urls.length} image(s) copied`);
     updated++;
   }
 
-  console.log(`\n${updated} updated · ${skipped} still using placeholder\n`);
+  await pool.end();
+  console.log(`\nDone. ${updated} products updated.`);
+  console.log(`Images written to: public/images/products/`);
+  console.log(`Deploy with: vercel --prod`);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+run().catch(e => { console.error(e); process.exit(1); });

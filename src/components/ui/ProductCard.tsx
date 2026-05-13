@@ -109,10 +109,11 @@ export default function ProductCard({ product, totalPairs = 25 }: Props) {
               gone
             </span>
           ) : (
-            /* Mobile: always-visible add button */
+            /* Mobile: always-visible add button — 44px min touch target */
             <button
               className={`btn btn-sm fw-bold d-md-none${alreadyInCart ? ' btn-outline-light' : ' btn-accent'}`}
               onClick={handleAdd}
+              style={{ minWidth: 44, minHeight: 44 }}
             >
               {alreadyInCart ? '✓' : '+'}
             </button>

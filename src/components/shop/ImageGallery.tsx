@@ -139,19 +139,24 @@ export default function ImageGallery({ images, productName }: Props) {
             onClick={closeLightbox}
             style={{
               position: 'absolute',
-              top: 20,
-              right: 20,
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: 'rgba(255,255,255,0.6)',
+              top: 12,
+              right: 12,
+              minWidth: 44,
+              minHeight: 44,
+              background: 'rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              color: 'rgba(255,255,255,0.7)',
               fontFamily: 'monospace',
               fontSize: '0.8rem',
               padding: '0.4rem 0.8rem',
               cursor: 'pointer',
               zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            ✕ close
+            ✕
           </button>
 
           {/* Counter */}

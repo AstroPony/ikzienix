@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "echo '{\"systemMessage\": \"QUALITY GATE: Run /programming-excellence review before pushing. Only push if score >= 9/10.\"}'"
+          },
+          {
+            "type": "command",
+            "if": "Bash(vercel --prod*)",
+            "command": "echo '{\"systemMessage\": \"QUALITY GATE: Run /programming-excellence review before pushing. Only push if score >= 9/10.\"}'"
+          }
+        ]
+      }
+    ]
+  }
+}

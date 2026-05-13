@@ -39,6 +39,7 @@ export default async function AdminProductEditPage({ params }: Props) {
           stock: product.stock,
           category: product.category,
           isLimited: product.isLimited,
+          isVisible: product.isVisible,
           pairNumber: product.pairNumber,
           images: product.images,
         }} />

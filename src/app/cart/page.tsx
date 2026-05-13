@@ -61,17 +61,17 @@ export default function CartPage() {
                 {/* Quantity control */}
                 <div className="d-flex align-items-center gap-2">
                   <button
-                    className="btn btn-sm btn-outline-secondary px-2 py-0"
+                    style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: '1px solid #333', color: '#f5f5f5', cursor: 'pointer', fontSize: '1rem' }}
                     onClick={() => updateQuantity(product.id, quantity - 1)}
                     aria-label="Decrease quantity"
                   >
                     −
                   </button>
-                  <span className="font-monospace small" style={{ minWidth: 20, textAlign: 'center' }}>
+                  <span className="font-monospace small" style={{ minWidth: 24, textAlign: 'center' }}>
                     {quantity}
                   </span>
                   <button
-                    className="btn btn-sm btn-outline-secondary px-2 py-0"
+                    style={{ minWidth: 44, minHeight: 44, background: 'transparent', border: '1px solid #333', color: '#f5f5f5', cursor: 'pointer', fontSize: '1rem', opacity: quantity >= product.stock ? 0.3 : 1 }}
                     onClick={() => updateQuantity(product.id, quantity + 1)}
                     disabled={quantity >= product.stock}
                     aria-label="Increase quantity"
@@ -79,7 +79,7 @@ export default function CartPage() {
                     +
                   </button>
                   <button
-                    className="btn btn-sm btn-link text-secondary p-0 ms-2"
+                    style={{ minHeight: 44, padding: '0 0.75rem', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.72rem' }}
                     onClick={() => removeItem(product.id)}
                   >
                     Remove

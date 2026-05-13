@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminToken } from '@/lib/adminAuth';
 import { z } from 'zod';
+import { Prisma } from '@/generated/prisma/client';
 
 interface Props {
   params: { id: string };
@@ -14,7 +15,8 @@ const patchSchema = z.object({
   stock: z.number().int().min(0).max(100).optional(),
   category: z.string().max(100).nullable().optional(),
   isLimited: z.boolean().optional(),
-  images: z.array(z.string().url()).max(10).optional(),
+  isVisible: z.boolean().optional(),
+  images: z.array(z.string().min(1)).max(10).optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: Props) {
@@ -29,7 +31,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     return NextResponse.json({ error: 'Invalid data', details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { name, description, price, stock, category, isLimited, images } = parsed.data;
+  const { name, description, price, stock, category, isLimited, isVisible, images } = parsed.data;
 
   try {
     const product = await prisma.product.update({
@@ -41,16 +43,34 @@ export async function PATCH(req: NextRequest, { params }: Props) {
         ...(stock !== undefined && { stock }),
         ...(category !== undefined && { category }),
         ...(isLimited !== undefined && { isLimited }),
+        ...(isVisible !== undefined && { isVisible }),
         ...(images !== undefined && { images }),
       },
     });
     return NextResponse.json(product);
-  } catch (e: unknown) {
-    const code = (e as { code?: string }).code;
-    if (code === 'P2025') {
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
     console.error('[admin] Product update failed:', e);
     return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest, { params }: Props) {
+  const token = req.cookies.get('ikzienix-admin')?.value;
+  if (!token || !(await verifyAdminToken(token))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    await prisma.product.delete({ where: { id: params.id } });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+    console.error('[admin] Product delete failed:', e);
+    return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { formatPrice } from '@/lib/format';
+import { formatPrice, TOTAL_PAIRS } from '@/lib/format';
 import AddToCartButton from '@/components/shop/AddToCartButton';
 import ImageGallery from '@/components/shop/ImageGallery';
 import type { Metadata } from 'next';
@@ -30,7 +30,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 
 const BASE = 'https://www.ikzienix.nl';
-const TOTAL_PAIRS = 25;
 
 function StockIndicator({ stock, pairNumber }: { stock: number; pairNumber: number | null }) {
   if (stock === 0) {
@@ -161,7 +160,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="mt-auto">
               <AddToCartButton product={product} />
               {!isSoldOut && (
-                <Link href="/cart" className="btn btn-link w-100 text-secondary small mt-2 p-0">
+                <Link href="/cart" className="btn btn-link w-100 text-secondary small mt-2" style={{ minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   View cart
                 </Link>
               )}

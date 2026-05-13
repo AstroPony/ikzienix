@@ -17,6 +17,7 @@ model Product {
   description String
   category    String?
   isLimited   Boolean     @default(false)
+  isVisible   Boolean     @default(true)
   pairNumber  Int?        // beta drop pair number (1–25)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

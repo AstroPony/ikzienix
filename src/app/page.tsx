@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 async function getFeaturedProducts() {
   return prisma.product.findMany({
-    where: { stock: { gt: 0 } },
+    where: { stock: { gt: 0 }, isVisible: true },
     orderBy: { createdAt: 'desc' },
     take: 4,
   });

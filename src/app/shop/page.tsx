@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/ui/ProductCard';
+import { TOTAL_PAIRS } from '@/lib/format';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -9,10 +10,9 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-const TOTAL_PAIRS = 25;
-
 export default async function ShopPage() {
   const products = await prisma.product.findMany({
+    where: { isVisible: true },
     orderBy: [
       { pairNumber: 'asc' },
       { createdAt: 'asc' },

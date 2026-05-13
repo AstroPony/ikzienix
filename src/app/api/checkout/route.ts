@@ -83,7 +83,6 @@ export async function POST(req: Request) {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['ideal', 'card'],
       locale: 'nl',
       customer_email: shipping.email,
       line_items: items.map((i) => ({
@@ -94,6 +93,10 @@ export async function POST(req: Request) {
         },
         quantity: i.quantity,
       })),
+      payment_intent_data: {
+        // Overrides account name on customer's bank/card statement
+        statement_descriptor: 'IKZIENIX',
+      },
       metadata: { orderId: order.id },
       success_url: `${baseUrl}/checkout/success?orderId=${order.id}`,
       cancel_url: `${baseUrl}/checkout`,
@@ -106,11 +109,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ checkoutUrl: session.url });
   } catch (e) {
-    // If Stripe session creation failed after order was created, clean up
     if (order) {
       await prisma.order.delete({ where: { id: order.id } }).catch(() => null);
     }
-    console.error('[checkout] Failed to create Stripe session:', e);
-    return NextResponse.json({ error: 'Payment setup failed. Please try again.' }, { status: 500 });
+    console.error('[checkout] Failed:', e);
+    return NextResponse.json({ error: 'Checkout failed' }, { status: 500 });
   }
 }

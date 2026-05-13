@@ -13,6 +13,7 @@ interface Product {
   stock: number;
   category: string | null;
   isLimited: boolean;
+  isVisible: boolean;
   pairNumber: number | null;
   images: string[];
 }
@@ -31,9 +32,11 @@ export default function ProductEditor({ product }: Props) {
   const [stock, setStock] = useState(String(product.stock));
   const [category, setCategory] = useState(product.category ?? '');
   const [isLimited, setIsLimited] = useState(product.isLimited);
+  const [isVisible, setIsVisible] = useState(product.isVisible);
   const [images, setImages] = useState<string[]>(product.images);
 
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -70,6 +73,21 @@ export default function ProductEditor({ product }: Props) {
     setImages(next);
   };
 
+  const deleteProduct = async () => {
+    if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+    setDeleting(true);
+    setError('');
+    const res = await fetch(`/api/admin/products/${product.id}`, { method: 'DELETE' });
+    setDeleting(false);
+    if (res.ok) {
+      router.push('/admin/products');
+      router.refresh();
+    } else {
+      const json = await res.json();
+      setError(json.error ?? 'Delete failed');
+    }
+  };
+
   const save = async () => {
     setSaving(true);
     setError('');
@@ -78,7 +96,7 @@ export default function ProductEditor({ product }: Props) {
     const res = await fetch(`/api/admin/products/${product.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, description, price: parseFloat(price), stock: parseInt(stock), category: category || null, isLimited, images }),
+      body: JSON.stringify({ name, description, price: parseFloat(price), stock: parseInt(stock), category: category || null, isLimited, isVisible, images }),
     });
 
     setSaving(false);
@@ -93,7 +111,7 @@ export default function ProductEditor({ product }: Props) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2.5rem', alignItems: 'start' }}>
+    <div className="admin-editor-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2.5rem', alignItems: 'start' }}>
 
       {/* Left — fields */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -143,20 +161,33 @@ export default function ProductEditor({ product }: Props) {
           </select>
         </Field>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={isLimited}
-            onChange={e => setIsLimited(e.target.checked)}
-            style={{ width: 14, height: 14, accentColor: '#c8f135' }}
-          />
-          <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
-            Mark as limited
-          </span>
-        </label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={isLimited}
+              onChange={e => setIsLimited(e.target.checked)}
+              style={{ width: 14, height: 14, accentColor: '#c8f135' }}
+            />
+            <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
+              Mark as limited
+            </span>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={isVisible}
+              onChange={e => setIsVisible(e.target.checked)}
+              style={{ width: 14, height: 14, accentColor: '#c8f135' }}
+            />
+            <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: isVisible ? 'rgba(255,255,255,0.5)' : '#ff6b35' }}>
+              {isVisible ? 'Visible in shop' : 'Hidden from shop (test / draft)'}
+            </span>
+          </label>
+        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-          <button onClick={save} disabled={saving} style={saveBtn}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+          <button onClick={save} disabled={saving || deleting} style={saveBtn}>
             {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save changes'}
           </button>
           <a
@@ -166,6 +197,13 @@ export default function ProductEditor({ product }: Props) {
           >
             ↗ view on site
           </a>
+          <button
+            onClick={deleteProduct}
+            disabled={deleting || saving}
+            style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid rgba(255,107,107,0.3)', color: 'rgba(255,107,107,0.6)', fontFamily: 'monospace', fontSize: '0.7rem', padding: '0.4rem 0.75rem', cursor: 'pointer', letterSpacing: '0.04em' }}
+          >
+            {deleting ? 'Deleting…' : 'Delete product'}
+          </button>
         </div>
 
         {error && (
