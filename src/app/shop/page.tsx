@@ -4,8 +4,14 @@ import { TOTAL_PAIRS } from '@/lib/format';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Shop — ikzienix β',
-  description: '25 pairs. One of each. Shop the beta drop.',
+  title: 'Zonnebrillen Kopen — Alle Modellen | ikzienix',
+  description: 'Shop 25 unieke ongebrande zonnebrillen van ikzienix. Wayfarers, oversized, sporty, rond en statement stijlen. Prijzen vanaf €24,99. Gratis verzending in Nederland. Beperkte beta drop.',
+  alternates: { canonical: 'https://www.ikzienix.nl/shop' },
+  openGraph: {
+    title: 'Zonnebrillen Kopen — Alle Modellen | ikzienix',
+    description: '25 unieke zonnebrillen vanaf €24,99. Gratis verzending in Nederland. Beperkte beta drop uit Amsterdam.',
+    url: 'https://www.ikzienix.nl/shop',
+  },
 };
 
 export const dynamic = 'force-dynamic';

@@ -12,11 +12,25 @@ async function getFeaturedProducts() {
   });
 }
 
+const orgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'ikzienix',
+  url: 'https://www.ikzienix.nl',
+  logo: 'https://www.ikzienix.nl/images/ikzienix-pm-icon.png',
+  description: 'Dutch streetwear label uit Amsterdam. Betaalbare, ongebrande zonnebrillen vanaf €24,99. Gratis verzending in Nederland.',
+  foundingDate: '2025',
+  foundingLocation: { '@type': 'Place', name: 'Amsterdam, Nederland' },
+  areaServed: 'NL',
+  sameAs: ['https://www.instagram.com/ikzienix'],
+};
+
 export default async function HomePage() {
   const featured = await getFeaturedProducts();
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section
         className="d-flex flex-column justify-content-center position-relative"

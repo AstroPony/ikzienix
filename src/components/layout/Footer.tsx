@@ -25,10 +25,12 @@ export default function Footer() {
               Shop
             </p>
             <ul className="list-unstyled mb-0 d-flex flex-column gap-2">
-              <li><Link href="/shop" className="text-secondary small footer-link">The 25</Link></li>
-              <li><Link href="/shop" className="text-secondary small footer-link">Wayfarers</Link></li>
-              <li><Link href="/shop" className="text-secondary small footer-link">Oversized</Link></li>
-              <li><Link href="/shop" className="text-secondary small footer-link">Statement</Link></li>
+              <li><Link href="/shop" className="text-secondary small footer-link">Alle modellen</Link></li>
+              <li><Link href="/shop/wayfarer" className="text-secondary small footer-link">Wayfarer</Link></li>
+              <li><Link href="/shop/oversized" className="text-secondary small footer-link">Oversized</Link></li>
+              <li><Link href="/shop/round" className="text-secondary small footer-link">Rond</Link></li>
+              <li><Link href="/shop/sporty" className="text-secondary small footer-link">Sporty</Link></li>
+              <li><Link href="/shop/statement" className="text-secondary small footer-link">Statement</Link></li>
             </ul>
           </div>
 
@@ -37,7 +39,8 @@ export default function Footer() {
               Info
             </p>
             <ul className="list-unstyled mb-0 d-flex flex-column gap-2">
-              <li><Link href="/about" className="text-secondary small footer-link">About</Link></li>
+              <li><Link href="/about" className="text-secondary small footer-link">Over ikzienix</Link></li>
+              <li><Link href="/faq" className="text-secondary small footer-link">Veelgestelde vragen</Link></li>
               <li>
                 <a
                   href="https://www.instagram.com/ikzienix"

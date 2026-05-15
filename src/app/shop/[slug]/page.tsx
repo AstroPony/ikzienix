@@ -14,15 +14,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await prisma.product.findUnique({ where: { slug: params.slug } });
   if (!product) return {};
   const image = product.images[0];
+  const priceStr = `€${(product.price / 100).toFixed(2).replace('.', ',')}`;
+  const categoryLabel = product.category ? `${product.category} ` : '';
+  const metaDescription = `${product.name} — ${categoryLabel}zonnebril van ikzienix. ${product.description} Prijs: ${priceStr}. Ongebrand, vrije stijl. Gratis verzending in Nederland.`;
+  const ogTitle = `${product.name} Zonnebril | ikzienix — ${priceStr}`;
   return {
-    title: product.name,
-    description: product.description,
+    title: `${product.name} Zonnebril — ${priceStr}`,
+    description: metaDescription,
     alternates: { canonical: `https://www.ikzienix.nl/shop/${product.slug}` },
     openGraph: {
-      title: `${product.name} — ikzienix β`,
-      description: product.description,
+      title: ogTitle,
+      description: metaDescription,
       url: `https://www.ikzienix.nl/shop/${product.slug}`,
-      images: image ? [{ url: image, width: 600, height: 600, alt: product.name }] : [],
+      images: image ? [{ url: image, width: 600, height: 600, alt: `${product.name} zonnebril — ikzienix` }] : [],
     },
   };
 }

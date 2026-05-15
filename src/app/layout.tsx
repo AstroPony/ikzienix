@@ -19,38 +19,34 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.ikzienix.nl'),
   title: {
-    default: 'ikzienix β — ik zie niks',
-    template: '%s — ikzienix',
+    default: 'ikzienix — Affordable Unbranded Sunglasses | Amsterdam',
+    template: '%s | ikzienix',
   },
-  description: 'First drop. 25 pairs. Unbranded. Unfiltered. Dutch streetwear zonnebrillen in early access.',
-  keywords: ['ikzienix', 'zonnebril', 'sunglasses', 'streetwear', 'amsterdam', 'unbranded', 'limited edition', 'beta drop', 'ik zie niks', 'dutch fashion'],
+  description: 'ikzienix is een nieuw Amsterdams designer zonnebrillen merk. Betaalbare, ongebrande zonnebrillen vanaf €24,99 — 25 unieke modellen. Niche, vers, beperkte oplage. Gratis verzending in Nederland.',
+  keywords: [
+    'ikzienix', 'zonnebril', 'zonnebrillen', 'sunglasses', 'betaalbare zonnebrillen',
+    'goedkope zonnebrillen', 'affordable sunglasses', 'unbranded sunglasses',
+    'designer zonnebrillen', 'niche zonnebrillen', 'amsterdam zonnebrillen',
+    'amsterdam sunglasses', 'streetwear zonnebril', 'wayfarer zonnebril',
+    'oversized zonnebril', 'zonnebrillen kopen', 'dutch fashion', 'ik zie niks',
+    'nieuw zonnebrillen merk', 'limited edition zonnebrillen',
+  ],
   authors: [{ name: 'ikzienix', url: 'https://www.ikzienix.nl' }],
   creator: 'ikzienix',
   publisher: 'ikzienix',
-  alternates: {
-    canonical: 'https://www.ikzienix.nl',
-  },
+  alternates: { canonical: 'https://www.ikzienix.nl' },
   openGraph: {
     type: 'website',
     locale: 'nl_NL',
     url: 'https://www.ikzienix.nl',
     siteName: 'ikzienix',
-    title: 'ikzienix β — ik zie niks',
-    description: 'First drop. 25 pairs. Unbranded. Unfiltered.',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'ikzienix — ik zie niks. First drop.',
-      },
-    ],
+    title: 'ikzienix — Designer Zonnebrillen, Ungebrand & Niche | Amsterdam',
+    description: 'ikzienix is een Amsterdams designer zonnebrillen merk. 25 unieke ongebrande niche modellen — v1.0 lancering met logo volgt. Gratis verzending in Nederland.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ikzienix β — ik zie niks',
-    description: 'First drop. 25 pairs. Unbranded. Unfiltered.',
-    images: ['/og-image.png'],
+    title: 'ikzienix — Betaalbare Zonnebrillen vanaf €24,99',
+    description: '25 unieke ongebrande zonnebrillen. Gratis verzending in Nederland.',
   },
   robots: {
     index: true,
@@ -63,9 +59,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [
-      { url: '/images/ikzienix-pm-icon.png', type: 'image/png' },
-    ],
+    icon: [{ url: '/images/ikzienix-pm-icon.png', type: 'image/png' }],
     shortcut: '/images/ikzienix-pm-icon.png',
     apple: '/images/ikzienix-pm-icon.png',
   },
